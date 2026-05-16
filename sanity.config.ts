@@ -23,6 +23,7 @@ const structure: StructureResolver = (S) =>
           S.documentList()
             .title('All Bags')
             .filter('_type == "bag"')
+            .apiVersion('2024-01-01')
         ),
       S.divider(),
       S.listItem()
