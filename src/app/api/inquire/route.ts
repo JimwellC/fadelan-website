@@ -1,9 +1,18 @@
 import { Resend } from "resend";
 import { NextRequest, NextResponse } from "next/server";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(req: NextRequest) {
+  const resendApiKey = process.env.RESEND_API_KEY;
+
+  if (!resendApiKey) {
+    return NextResponse.json(
+      { error: "Missing RESEND_API_KEY" },
+      { status: 500 }
+    );
+  }
+
+  const resend = new Resend(resendApiKey);
+
   const body = await req.json();
 
   const { name, email, bag, message } = body as {
@@ -34,7 +43,10 @@ export async function POST(req: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ success: true });
