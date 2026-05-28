@@ -10,10 +10,11 @@ interface BagCardProps {
   bag: BagListItem
 }
 
-const availabilityColors: Record<string, string> = {
-  available: 'var(--color-bronze)',
-  reserved:  '#C4963A',
-  sold:      'var(--color-ink-light)',
+const availabilityBadge: Record<string, { bg: string; color: string }> = {
+  available: { bg: 'rgba(21,128,61,0.85)',    color: '#fff' },
+  reserved:  { bg: 'rgba(217,119,6,0.85)',    color: '#fff' },
+  on_hold:   { bg: 'rgba(234,88,12,0.85)',    color: '#fff' },
+  sold:      { bg: 'rgba(115,114,110,0.85)',  color: '#fff' },
 }
 
 export default function BagCard({ bag }: BagCardProps) {
@@ -21,23 +22,26 @@ export default function BagCard({ bag }: BagCardProps) {
     ? urlFor(bag.coverPhoto.asset).width(600).height(800).format('webp').quality(85).url()
     : null
 
-  const lqip = bag.coverPhoto?.asset?.metadata?.lqip ?? undefined
+  const lqip   = bag.coverPhoto?.asset?.metadata?.lqip ?? undefined
   const isSold = bag.availability === 'sold'
+  const badge  = availabilityBadge[bag.availability] ?? availabilityBadge.available
 
   return (
     <Link
       href={`/bag/${bag.slug.current}`}
       style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
     >
-      <article style={{ cursor: 'pointer' }}>
+      <article
+        style={{ cursor: 'pointer' }}
+        className="group"
+      >
 
         {/* ── Photo ── */}
         <div style={{
-          position:     'relative',
-          aspectRatio:  '3 / 4',
-          overflow:     'hidden',
+          position:        'relative',
+          aspectRatio:     '3 / 4',
+          overflow:        'hidden',
           backgroundColor: 'var(--color-cream-dark)',
-          marginBottom: '0.875rem',
         }}>
           {coverUrl ? (
             <Image
@@ -48,83 +52,106 @@ export default function BagCard({ bag }: BagCardProps) {
               style={{
                 objectFit:  'cover',
                 filter:     isSold ? 'grayscale(40%)' : 'none',
-                transition: 'transform 600ms cubic-bezier(0.4, 0, 0.2, 1)',
+                transition: 'transform 700ms cubic-bezier(0.4, 0, 0.2, 1)',
               }}
               placeholder={lqip ? 'blur' : 'empty'}
               blurDataURL={lqip}
-              onMouseEnter={e => {
-                if (!isSold) (e.currentTarget as HTMLImageElement).style.transform = 'scale(1.04)'
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLImageElement).style.transform = 'scale(1)'
-              }}
+              className={isSold ? '' : 'group-hover:scale-[1.04]'}
             />
           ) : (
             <div style={{
-              width:           '100%',
-              height:          '100%',
-              display:         'flex',
-              alignItems:      'center',
-              justifyContent:  'center',
-              color:           'var(--color-ink-light)',
-              fontFamily:      'var(--font-body)',
-              fontSize:        '0.7rem',
-              letterSpacing:   '0.1em',
-              textTransform:   'uppercase',
+              width:          '100%',
+              height:         '100%',
+              display:        'flex',
+              alignItems:     'center',
+              justifyContent: 'center',
+              color:          'var(--color-muted)',
+              fontFamily:     'var(--font-body)',
+              fontSize:       '0.65rem',
+              letterSpacing:  '0.12em',
+              textTransform:  'uppercase',
             }}>
               No photo
             </div>
           )}
 
-          {/* Availability badge */}
-          {bag.availability !== 'available' && (
+          {/* Availability badge — always visible */}
+          <div style={{
+            position:        'absolute',
+            top:             '0.75rem',
+            left:            '0.75rem',
+            backgroundColor: badge.bg,
+            color:           badge.color,
+            fontFamily:      'var(--font-body)',
+            fontSize:        '0.55rem',
+            fontWeight:      500,
+            letterSpacing:   '0.14em',
+            textTransform:   'uppercase',
+            padding:         '0.25rem 0.625rem',
+          }}>
+            {AVAILABILITY_LABELS[bag.availability] ?? bag.availability}
+          </div>
+
+          {/* Hover overlay — quick-view hint */}
+          {!isSold && (
             <div style={{
-              position:        'absolute',
-              top:             '0.75rem',
-              left:            '0.75rem',
-              backgroundColor: availabilityColors[bag.availability] ?? 'var(--color-ink)',
-              color:           'var(--color-cream)',
-              fontFamily:      'var(--font-body)',
-              fontSize:        '0.6rem',
-              fontWeight:      500,
-              letterSpacing:   '0.12em',
-              textTransform:   'uppercase',
-              padding:         '0.25rem 0.625rem',
-            }}>
-              {AVAILABILITY_LABELS[bag.availability] ?? bag.availability}
+              position:   'absolute',
+              inset:      0,
+              background: 'linear-gradient(to top, rgba(26,26,26,0.45) 0%, transparent 50%)',
+              opacity:    0,
+              transition: 'opacity 400ms ease',
+              display:    'flex',
+              alignItems: 'flex-end',
+              padding:    '1rem',
+            }}
+              className="group-hover:opacity-100"
+            >
+              <span style={{
+                fontFamily:    'var(--font-body)',
+                fontSize:      '0.6rem',
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                color:         'var(--color-cream)',
+              }}>
+                View details →
+              </span>
             </div>
           )}
         </div>
 
         {/* ── Info ── */}
-        <div style={{ paddingInline: '0.125rem' }}>
+        <div style={{
+          padding:         '0.875rem 0.75rem',
+          backgroundColor: 'var(--color-cream-dark)',
+          borderTop:       '1px solid rgba(26,26,26,0.06)',
+        }}>
 
           {/* Brand */}
           <p style={{
             fontFamily:    'var(--font-body)',
-            fontSize:      '0.6rem',
+            fontSize:      '0.55rem',
             fontWeight:    500,
-            letterSpacing: '0.15em',
+            letterSpacing: '0.18em',
             textTransform: 'uppercase',
             color:         'var(--color-bronze)',
-            marginBottom:  '0.25rem',
+            marginBottom:  '0.2rem',
           }}>
             {BRAND_LABELS[bag.brand] ?? bag.brand}
           </p>
 
           {/* Name */}
           <p style={{
-            fontFamily:    'var(--font-display)',
-            fontSize:      '1.05rem',
-            fontWeight:    400,
-            lineHeight:    1.3,
-            color:         'var(--color-ink)',
-            marginBottom:  '0.375rem',
+            fontFamily:   'var(--font-display)',
+            fontSize:     '1rem',
+            fontWeight:   400,
+            lineHeight:   1.25,
+            color:        'var(--color-ink)',
+            marginBottom: '0.5rem',
           }}>
             {bag.name}
           </p>
 
-          {/* Condition + Price row */}
+          {/* Condition + Price */}
           <div style={{
             display:        'flex',
             alignItems:     'center',
@@ -133,20 +160,20 @@ export default function BagCard({ bag }: BagCardProps) {
           }}>
             <p style={{
               fontFamily:    'var(--font-body)',
-              fontSize:      '0.65rem',
-              letterSpacing: '0.08em',
-              color:         'var(--color-ink-light)',
+              fontSize:      '0.6rem',
+              letterSpacing: '0.06em',
+              color:         'var(--color-muted)',
             }}>
               {CONDITION_LABELS[bag.condition] ?? bag.condition}
             </p>
             <p style={{
-              fontFamily:  'var(--font-display)',
-              fontSize:    '1rem',
-              fontWeight:  500,
-              color:       isSold ? 'var(--color-ink-light)' : 'var(--color-ink)',
-              whiteSpace:  'nowrap',
+              fontFamily: 'var(--font-display)',
+              fontSize:   '0.975rem',
+              fontWeight: 500,
+              color:      isSold ? 'var(--color-muted)' : 'var(--color-ink)',
+              whiteSpace: 'nowrap',
             }}>
-              ₱{bag.price.toLocaleString('en-PH')}
+              {isSold ? 'Sold' : `₱${bag.price.toLocaleString('en-PH')}`}
             </p>
           </div>
 

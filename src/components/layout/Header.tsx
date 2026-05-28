@@ -3,150 +3,236 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-const navLinks = [
-  { href: '/catalog',    label: 'Catalog'    },
-  { href: '/about',      label: 'About'      },
+const navLinksLeft = [
+  { href: '/catalog',    label: 'Catalog' },
   { href: '/how-to-buy', label: 'How to Buy' },
-  { href: '/contact',    label: 'Contact'    },
 ]
 
-export default function Header() {
-  const [menuOpen,   setMenuOpen]   = useState(false)
-  const [scrolled,   setScrolled]   = useState(false)
+const navLinksRight = [
+  { href: '/about',   label: 'About'   },
+  { href: '/contact', label: 'Contact' },
+]
 
-  // Add backdrop blur + border when scrolled
+const allNavLinks = [...navLinksLeft, ...navLinksRight]
+
+interface HeaderProps {
+  heroIsDark?: boolean
+}
+
+export default function Header({ heroIsDark = false }: HeaderProps) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
 
+  const getColors = () => ({
+    link:      scrolled ? 'var(--color-ink)'        : heroIsDark ? 'rgba(245,241,236,0.85)' : 'var(--color-ink)',
+    hover:     'var(--color-bronze)',
+    logo:      scrolled ? 'var(--color-ink)'        : heroIsDark ? 'var(--color-cream)'     : 'var(--color-ink)',
+    hamburger: scrolled ? 'var(--color-ink)'        : heroIsDark ? 'var(--color-cream)'     : 'var(--color-ink)',
+    diamond:   scrolled ? 'var(--color-bronze)'     : heroIsDark ? 'rgba(139,111,71,0.7)'   : 'var(--color-bronze)',
+  })
+
+  const navLinkStyle = (): React.CSSProperties => ({
+    fontFamily:     'var(--font-body)',
+    fontSize:       '0.6rem',
+    fontWeight:     400,
+    letterSpacing:  '0.2em',
+    textTransform:  'uppercase',
+    color:          getColors().link,
+    textDecoration: 'none',
+    transition:     'color 300ms ease',
+    whiteSpace:     'nowrap',
+  })
+
+  const diamond = (
+    <span style={{
+      color:      getColors().diamond,
+      fontSize:   '0.55rem',
+      opacity:    0.9,
+      flexShrink: 0,
+      lineHeight: 1,
+    }}>
+      ◆
+    </span>
+  )
+
   return (
     <>
-      <header
-        style={{
-          position:        'fixed',
-          top:             0,
-          left:            0,
-          right:           0,
-          zIndex:          50,
-          backgroundColor: scrolled ? 'rgba(245, 241, 236, 0.92)' : 'transparent',
-          backdropFilter:  scrolled ? 'blur(12px)' : 'none',
-          borderBottom:    scrolled ? '1px solid rgba(139, 111, 71, 0.15)' : '1px solid transparent',
-          transition:      'all 400ms cubic-bezier(0.4, 0, 0.2, 1)',
-        }}
-      >
-        <div className="container-site">
-          <div style={{
-            display:        'flex',
-            alignItems:     'center',
-            justifyContent: 'space-between',
-            height:         '4rem',
-          }}>
+      <header style={{
+        position:        'fixed',
+        top:             0,
+        left:            0,
+        right:           0,
+        zIndex:          50,
+        backgroundColor: scrolled ? 'rgba(245,241,236,0.94)' : 'rgba(0,0,0,0)',
+        backdropFilter:  scrolled ? 'blur(12px)' : 'none',
+        borderBottom:    scrolled ? '1px solid rgba(139,111,71,0.12)' : '1px solid transparent',
+        transition:      'all 400ms cubic-bezier(0.4,0,0.2,1)',
+        padding:         '0 2.5rem',
+      }}>
+        <div style={{
+          display:    'flex',
+          alignItems: 'center',
+          height:     '4.5rem',
+          position:   'relative',
+        }}>
 
-            {/* ── Mobile: Hamburger ── */}
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-              style={{
-                display:    'flex',
-                flexDirection: 'column',
-                gap:        '5px',
-                padding:    '8px',
-                background: 'none',
-                border:     'none',
-                cursor:     'pointer',
-                color:      'var(--color-ink)',
-              }}
-              className="lg:hidden"
-            >
-              <span style={{
-                display:         'block',
-                width:           '22px',
-                height:          '1px',
-                backgroundColor: 'var(--color-ink)',
-                transition:      'all 300ms ease',
-                transform:       menuOpen ? 'translateY(6px) rotate(45deg)' : 'none',
-              }} />
-              <span style={{
-                display:         'block',
-                width:           '22px',
-                height:          '1px',
-                backgroundColor: 'var(--color-ink)',
-                transition:      'all 300ms ease',
-                opacity:         menuOpen ? 0 : 1,
-              }} />
-              <span style={{
-                display:         'block',
-                width:           '22px',
-                height:          '1px',
-                backgroundColor: 'var(--color-ink)',
-                transition:      'all 300ms ease',
-                transform:       menuOpen ? 'translateY(-6px) rotate(-45deg)' : 'none',
-              }} />
-            </button>
+          {/* ── Mobile hamburger ── */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            className="hide-on-desktop"
+            style={{
+              position:      'absolute',
+              left:          0,
+              display:       'flex',
+              flexDirection: 'column',
+              gap:           '5px',
+              padding:       '8px',
+              background:    'none',
+              border:        'none',
+              cursor:        'pointer',
+            }}
+          >
+            <span style={{
+              display:         'block',
+              width:           '22px',
+              height:          '1px',
+              backgroundColor: getColors().hamburger,
+              transition:      'all 300ms ease',
+              transform:       menuOpen ? 'translateY(6px) rotate(45deg)' : 'none',
+            }} />
+            <span style={{
+              display:         'block',
+              width:           '22px',
+              height:          '1px',
+              backgroundColor: getColors().hamburger,
+              transition:      'all 300ms ease',
+              opacity:         menuOpen ? 0 : 1,
+            }} />
+            <span style={{
+              display:         'block',
+              width:           '22px',
+              height:          '1px',
+              backgroundColor: getColors().hamburger,
+              transition:      'all 300ms ease',
+              transform:       menuOpen ? 'translateY(-6px) rotate(-45deg)' : 'none',
+            }} />
+          </button>
 
-            {/* ── Wordmark — centered on mobile, left on desktop ── */}
+          {/* ── Desktop nav ── */}
+          <nav
+            className="hidden lg:flex"
+            style={{
+              alignItems: 'center',
+              width:      '100%',
+              position:   'relative',
+            }}
+          >
+            {/* Left links — takes up equal space */}
+            <div style={{
+              display:        'flex',
+              alignItems:     'center',
+              gap:            '1.75rem',
+              flex:           1,
+              justifyContent: 'flex-end',
+              paddingRight:   '2rem',
+            }}>
+              {navLinksLeft.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  style={navLinkStyle()}
+                  onMouseEnter={e => (e.currentTarget.style.color = getColors().hover)}
+                  onMouseLeave={e => (e.currentTarget.style.color = getColors().link)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              {diamond}
+            </div>
+
+            {/* Wordmark — no flex, just its natural width, centered by equal sides */}
             <Link
               href="/"
               style={{
-                fontFamily:    'var(--font-display)',
-                fontSize:      '1.5rem',
-                fontWeight:    300,
-                letterSpacing: '0.15em',
-                color:         'var(--color-ink)',
+                fontFamily:     'var(--font-hero)',
+                fontSize:       '1.1rem',
+                fontWeight:     400,
+                letterSpacing:  '0.22em',
+                textTransform:  'uppercase',
+                color:          getColors().logo,
                 textDecoration: 'none',
-                position:      'absolute',
-                left:          '50%',
-                transform:     'translateX(-50%)',
-                whiteSpace:    'nowrap',
+                whiteSpace:     'nowrap',
+                transition:     'color 400ms ease',
+                flexShrink:     0,
               }}
             >
               Fad Élan
             </Link>
 
-            {/* ── Desktop nav ── */}
-            <nav
-              className="hidden lg:flex"
-              style={{ gap: '2.5rem', marginLeft: 'auto' }}
-            >
-              {navLinks.map((link) => (
+            {/* Right links — equal space, mirror of left */}
+            <div style={{
+              display:        'flex',
+              alignItems:     'center',
+              gap:            '1.75rem',
+              flex:           1,
+              justifyContent: 'flex-start',
+              paddingLeft:    '2rem',
+            }}>
+              {diamond}
+              {navLinksRight.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  style={{
-                    fontFamily:    'var(--font-body)',
-                    fontSize:      '0.7rem',
-                    fontWeight:    400,
-                    letterSpacing: '0.15em',
-                    textTransform: 'uppercase',
-                    color:         'var(--color-ink)',
-                    textDecoration: 'none',
-                    transition:    'color 300ms ease',
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-bronze)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-ink)')}
+                  style={navLinkStyle()}
+                  onMouseEnter={e => (e.currentTarget.style.color = getColors().hover)}
+                  onMouseLeave={e => (e.currentTarget.style.color = getColors().link)}
                 >
                   {link.label}
                 </Link>
               ))}
-            </nav>
+            </div>
+          </nav>
 
-            {/* ── Spacer (balances hamburger on mobile) ── */}
-            <div style={{ width: '38px' }} className="lg:hidden" />
+          {/* ── Mobile wordmark ── */}
+          <Link
+            href="/"
+            className="lg:hidden"
+            style={{
+              fontFamily:     'var(--font-hero)',
+              fontSize:       '1rem',
+              fontWeight:     400,
+              letterSpacing:  '0.2em',
+              textTransform:  'uppercase',
+              color:          getColors().logo,
+              textDecoration: 'none',
+              position:       'absolute',
+              left:           '50%',
+              transform:      'translateX(-50%)',
+              whiteSpace:     'nowrap',
+              transition:     'color 400ms ease',
+            }}
+          >
+            Fad Élan
+          </Link>
 
-          </div>
         </div>
       </header>
 
       {/* ── Mobile menu overlay ── */}
       <div
+        className="lg:hidden"
         style={{
           position:        'fixed',
           inset:           0,
@@ -156,28 +242,39 @@ export default function Header() {
           flexDirection:   'column',
           alignItems:      'center',
           justifyContent:  'center',
-          gap:             '2.5rem',
           opacity:         menuOpen ? 1 : 0,
           pointerEvents:   menuOpen ? 'all' : 'none',
-          transition:      'opacity 400ms cubic-bezier(0.4, 0, 0.2, 1)',
+          transition:      'opacity 400ms cubic-bezier(0.4,0,0.2,1)',
         }}
-        className="lg:hidden"
       >
-        {navLinks.map((link, i) => (
+        <div style={{
+          position:        'absolute',
+          top:             0,
+          left:            '50%',
+          transform:       'translateX(-50%)',
+          width:           '1px',
+          height:          '4rem',
+          backgroundColor: 'var(--color-bronze)',
+          opacity:         menuOpen ? 0.25 : 0,
+          transition:      'opacity 600ms ease 200ms',
+        }} />
+
+        {allNavLinks.map((link, i) => (
           <Link
             key={link.href}
             href={link.href}
             onClick={() => setMenuOpen(false)}
             style={{
-              fontFamily:    'var(--font-display)',
-              fontSize:      '2.25rem',
-              fontWeight:    300,
-              letterSpacing: '0.05em',
-              color:         'var(--color-ink)',
+              fontFamily:     'var(--font-display)',
+              fontSize:       '2.5rem',
+              fontWeight:     300,
+              letterSpacing:  '0.04em',
+              color:          'var(--color-ink)',
               textDecoration: 'none',
-              opacity:       menuOpen ? 1 : 0,
-              transform:     menuOpen ? 'translateY(0)' : 'translateY(12px)',
-              transition:    `opacity 400ms ease ${i * 60}ms, transform 400ms ease ${i * 60}ms, color 200ms ease`,
+              padding:        '0.6rem 0',
+              opacity:        menuOpen ? 1 : 0,
+              transform:      menuOpen ? 'translateY(0)' : 'translateY(16px)',
+              transition:     `opacity 500ms ease ${i * 70}ms, transform 500ms cubic-bezier(0.4,0,0.2,1) ${i * 70}ms, color 200ms ease`,
             }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-bronze)')}
             onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-ink)')}
@@ -186,16 +283,16 @@ export default function Header() {
           </Link>
         ))}
 
-        {/* Subtle brand line at bottom of mobile menu */}
         <p style={{
           position:      'absolute',
           bottom:        '2rem',
           fontFamily:    'var(--font-body)',
-          fontSize:      '0.65rem',
-          letterSpacing: '0.2em',
+          fontSize:      '0.6rem',
+          letterSpacing: '0.22em',
           textTransform: 'uppercase',
           color:         'var(--color-bronze)',
-          opacity:       0.7,
+          opacity:       menuOpen ? 0.6 : 0,
+          transition:    'opacity 600ms ease 350ms',
         }}>
           Authentic Pre-loved Luxury
         </p>

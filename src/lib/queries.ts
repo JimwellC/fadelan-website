@@ -283,3 +283,22 @@ export const FILTER_OPTIONS_QUERY = /* groq */ `
     }
   }
 `
+
+// ═══════════════════════════════════════════════════════════════
+// HOW TO BUY — Bag dropdown (exclude sold)
+// ═══════════════════════════════════════════════════════════════
+export const ALL_BAGS_DROPDOWN_QUERY = /* groq */ `
+  *[_type == "bag" && availability != "sold"] | order(name asc) {
+    _id,
+    name,
+    "slug": slug.current,
+    availability
+  }
+`
+
+export type BagDropdownItem = {
+  _id:          string
+  name:         string
+  slug:         string
+  availability: BagAvailability
+}
