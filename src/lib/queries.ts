@@ -69,6 +69,16 @@ export interface BagDetail extends BagListItem {
 export interface SiteSettings {
   siteName:                   string
   tagline:                    string
+  heroImage?: {
+    asset: {
+      _id:      string
+      url:      string
+      metadata: {
+        dimensions: { width: number; height: number }
+        lqip:       string
+      }
+    }
+  }
   logo?:                      { _id: string; url: string }
   ogImage?:                   { _id: string; url: string; metadata: { dimensions: { width: number; height: number } } }
   messengerUrl?:              string
@@ -212,6 +222,16 @@ export const HOMEPAGE_QUERY = /* groq */ `
       heroHeadline,
       heroSubline,
       tagline,
+      "heroImage": heroImage {
+        asset-> {
+          _id,
+          url,
+          metadata {
+            dimensions { width, height },
+            lqip
+          }
+        }
+      },
       "featuredBags": featuredBags[]-> {
         ${BAG_LIST_FIELDS}
       }

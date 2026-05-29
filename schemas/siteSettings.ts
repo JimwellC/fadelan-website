@@ -208,6 +208,15 @@ export const siteSettingsSchema = defineType({
         'A quiet, curated collection of authenticated pre-loved luxury bags — sourced with care, photographed honestly, and offered with a promise.',
     }),
 
+    defineField({
+      name:        'heroImage',
+      title:       'Homepage Hero Image',
+      type:        'image',
+      group:       'homepage',
+      description: 'Dedicated hero image — NOT a bag photo. Upload a high-quality portrait or lifestyle shot. Recommended: 1200×1600px.',
+      options:     { hotspot: true },
+    }),
+
     // ── SHIPPING ─────────────────────────────────────────
     defineField({
       name:         'defaultShippingNote',

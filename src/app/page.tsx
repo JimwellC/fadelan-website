@@ -11,6 +11,13 @@ import { BRAND_LABELS } from '@/lib/sanity'
 interface HomepageData {
   settings: Pick<SiteSettings, 'heroHeadline' | 'heroSubline' | 'tagline'> & {
     featuredBags?: BagListItem[]
+    heroImage?: {
+      asset: {
+        _id:      string
+        url:      string
+        metadata: { dimensions: { width: number; height: number }; lqip: string }
+      }
+    }
   }
   fallbackBags: BagListItem[]
 }
@@ -64,10 +71,17 @@ export default async function HomePage() {
 
   const heroBag = bags.find(b => b.availability === 'available') ?? bags[0] ?? null
 
-
-    const heroCoverUrl = heroBag?.coverPhoto?.asset
+  // ✓ Use dedicated hero image from Site Settings — independent from bag catalog
+  const heroImageAsset = (data?.settings as any)?.heroImage?.asset
+  const heroCoverUrl = heroImageAsset
+    ? urlFor(heroImageAsset).width(900).height(1200).format('webp').quality(90).url()
+    : heroBag?.coverPhoto?.asset
       ? urlFor(heroBag.coverPhoto.asset).width(900).height(1200).format('webp').quality(90).url()
       : null
+
+  const heroBlur = heroImageAsset?.metadata?.lqip
+    ?? heroBag?.coverPhoto?.asset?.metadata?.lqip
+    ?? undefined
 
   const headlineLines = headline.includes('\n') ? headline.split('\n') : [headline]
 
@@ -349,7 +363,7 @@ export default async function HomePage() {
                       sizes="72vw"
                       style={{ objectFit: 'cover', objectPosition: 'center top' }}
                       placeholder={heroBag?.coverPhoto?.asset?.metadata?.lqip ? 'blur' : 'empty'}
-                      blurDataURL={heroBag?.coverPhoto?.asset?.metadata?.lqip ?? undefined}
+                      blurDataURL={heroBlur}
                     />
                   ) : (
                     <div style={{
@@ -460,7 +474,7 @@ export default async function HomePage() {
                     sizes="52vw"
                     style={{ objectFit: 'cover', objectPosition: 'center top' }}
                     placeholder={heroBag?.coverPhoto?.asset?.metadata?.lqip ? 'blur' : 'empty'}
-                    blurDataURL={heroBag?.coverPhoto?.asset?.metadata?.lqip ?? undefined}
+                    blurDataURL={heroBlur}
                   />
                 </div>
               ) : (
