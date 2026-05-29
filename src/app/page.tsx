@@ -217,28 +217,30 @@ export default async function HomePage() {
             }}>
 
               {/* Eyebrow */}
-              <div style={{
-                display:      'flex',
-                alignItems:   'center',
-                gap:          '0.75rem',
-                marginBottom: '1.75rem',
-              }}>
+              {!heroImageAsset && (
                 <div style={{
-                  width:           '1.5rem',
-                  height:          '1px',
-                  backgroundColor: 'var(--color-bronze)',
-                  opacity:         0.5,
-                }} />
-                <p style={{
-                  fontFamily:    'var(--font-body)',
-                  fontSize:      '0.55rem',
-                  letterSpacing: '0.24em',
-                  textTransform: 'uppercase',
-                  color:         'rgba(245,241,236,0.38)',
+                  display:      'flex',
+                  alignItems:   'center',
+                  gap:          '0.75rem',
+                  marginBottom: '1.75rem',
                 }}>
-                  New arrivals
-                </p>
-              </div>
+                  <div style={{
+                    width:           '1.5rem',
+                    height:          '1px',
+                    backgroundColor: 'var(--color-bronze)',
+                    opacity:         0.5,
+                  }} />
+                  <p style={{
+                    fontFamily:    'var(--font-body)',
+                    fontSize:      '0.55rem',
+                    letterSpacing: '0.24em',
+                    textTransform: 'uppercase',
+                    color:         'rgba(245,241,236,0.38)',
+                  }}>
+                    New arrivals
+                  </p>
+                </div>
+              )}  
 
               {/* Headline */}
               <h1 style={{
@@ -400,7 +402,7 @@ export default async function HomePage() {
                 }} />
 
                 {/* Floating bag name tag */}
-                {heroBag && (
+                {!heroImageAsset && heroBag && (
                   <div style={{
                     position:        'absolute',
                     left:            '0',
@@ -554,29 +556,31 @@ export default async function HomePage() {
               }}>
 
                 {/* Eyebrow */}
-                <div style={{
-                  display:      'flex',
-                  alignItems:   'center',
-                  gap:          '0.875rem',
-                  marginBottom: '2rem',
-                  marginLeft:   'clamp(320px, 50vw, 700px)',
-                }}>
+                {!heroImageAsset && (
                   <div style={{
-                    width:           '2rem',
-                    height:          '1px',
-                    backgroundColor: 'var(--color-bronze)',
-                    opacity:         0.5,
-                  }} />
-                  <p style={{
-                    fontFamily:    'var(--font-body)',
-                    fontSize:      '0.6rem',
-                    letterSpacing: '0.28em',
-                    textTransform: 'uppercase',
-                    color:         'rgba(245,241,236,0.4)',
+                    display:      'flex',
+                    alignItems:   'center',
+                    gap:          '0.875rem',
+                    marginBottom: '2rem',
+                    marginLeft:   'clamp(320px, 50vw, 700px)',
                   }}>
-                    New arrivals
-                  </p>
-                </div>
+                    <div style={{
+                      width:           '2rem',
+                      height:          '1px',
+                      backgroundColor: 'var(--color-bronze)',
+                      opacity:         0.5,
+                    }} />
+                    <p style={{
+                      fontFamily:    'var(--font-body)',
+                      fontSize:      '0.6rem',
+                      letterSpacing: '0.28em',
+                      textTransform: 'uppercase',
+                      color:         'rgba(245,241,236,0.4)',
+                    }}>
+                      New arrivals
+                    </p>
+                  </div>
+                )}
 
                 {/* Headline */}
                 <h1 style={{
@@ -632,7 +636,7 @@ export default async function HomePage() {
                   </Link>
 
                   {/* Floating bag info */}
-                  {heroBag && (
+                  {!heroImageAsset && heroBag && (
                     <div style={{
                       marginTop:       '2.5rem',
                       display:         'inline-flex',
