@@ -4,7 +4,6 @@ import { type NextRequest, NextResponse } from 'next/server'
 export async function POST(request: NextRequest) {
   const secret = request.nextUrl.searchParams.get('secret')
 
-  // Verify the secret token
   if (secret !== process.env.SANITY_REVALIDATE_SECRET) {
     return NextResponse.json(
       { message: 'Invalid secret' },
@@ -17,18 +16,21 @@ export async function POST(request: NextRequest) {
     const { _type, slug } = body
 
     if (_type === 'bag') {
-      // Revalidate the catalog page
       revalidatePath('/catalog')
-
-      // Revalidate the specific bag detail page if slug exists
+      revalidatePath('/')
       if (slug?.current) {
         revalidatePath(`/bag/${slug.current}`)
       }
     }
 
     if (_type === 'siteSettings') {
-      // Site settings affect every page
+      // Revalidate every page — site settings affect all of them
       revalidatePath('/', 'layout')
+      revalidatePath('/')
+      revalidatePath('/catalog')
+      revalidatePath('/about')
+      revalidatePath('/contact')
+      revalidatePath('/how-to-buy')
     }
 
     return NextResponse.json({ revalidated: true, now: Date.now() })
