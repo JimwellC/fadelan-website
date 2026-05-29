@@ -1,6 +1,6 @@
 export default function HowToBuyHero() {
   return (
-    <section className="relative overflow-hidden bg-[#1A1A1A] px-6 py-28 text-center">
+    <section className="relative overflow-hidden bg-[#1A1A1A]">
       {/* Warm glow */}
       <div
         className="pointer-events-none absolute inset-0"
@@ -9,12 +9,12 @@ export default function HowToBuyHero() {
         }}
       />
 
-      <div className="relative z-10">
+      <div className="relative z-10 mx-auto flex min-h-[65vh] w-full flex-col items-center justify-center px-6 py-12 text-center md:max-w-[70%] md:px-0">
         <p className="mb-5 text-[10px] uppercase tracking-[0.25em] text-[#8B6F47]">
           How to buy
         </p>
 
-        <h1 className="font-cormorant text-[clamp(2.5rem,6vw,3.75rem)] font-normal leading-[1.2] text-[#F5F1EC]">
+        <h1 className="font-cormorant text-[clamp(2rem,6vw,3.75rem)] font-normal leading-[1.2] text-[#F5F1EC]">
           Acquiring with confidence,
           <br />
           <em className="italic">one piece at a time</em>

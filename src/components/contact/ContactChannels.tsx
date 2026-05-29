@@ -49,7 +49,7 @@ export default function ContactChannels({
         Choose your channel
       </h2>
 
-      <div className="grid grid-cols-1 border border-[#D6CEBE] sm:grid-cols-2">
+      <div className="grid grid-cols-1 border border-[#D6CEBE] md:grid-cols-2">
         {channels.map((ch) => (
           <div
             key={ch.label}

@@ -48,7 +48,7 @@ export default function ContactInquiryForm({ bags }: ContactInquiryFormProps) {
 
       <form onSubmit={handleSubmit} className="border border-[#D6CEBE] bg-[#F5F1EC] p-8 md:p-10">
         {/* Name + Email */}
-        <div className="mb-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div className="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2">
           <div>
             <label className="mb-1.5 block text-[10px] uppercase tracking-[0.12em] text-[#8C8275]">
               Name

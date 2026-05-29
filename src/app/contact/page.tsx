@@ -8,8 +8,7 @@ import AboutCta from '@/components/about/AboutCta'
 
 export const metadata = {
   title: 'Contact — Fadelan',
-  description:
-    'Get in touch with Fadelan — ask about a bag, reserve a piece, or arrange an in-person viewing.',
+  description: 'Get in touch with Fadelan — ask about a bag, reserve a piece, or arrange an in-person viewing.',
 }
 
 export default async function ContactPage() {
@@ -23,7 +22,7 @@ export default async function ContactPage() {
       <ContactHero />
 
       <div className="bg-[#F5F1EC]">
-        <div className="mx-auto max-w-[70%]">
+        <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
           <ContactChannels
             instagramHandle={settings.instagramHandle}
             contactEmail={settings.contactEmail}
@@ -34,7 +33,7 @@ export default async function ContactPage() {
       </div>
 
       <div className="bg-[#EDE6DC]">
-        <div className="mx-auto max-w-[70%]">
+        <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
           <ContactInquiryForm bags={bags} />
         </div>
       </div>

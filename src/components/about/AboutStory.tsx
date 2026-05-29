@@ -6,7 +6,7 @@ interface AboutStoryProps {
 export default function AboutStory({ headline, body }: AboutStoryProps) {
   return (
     <section className="border-b border-t border-[#D6CEBE] bg-[#F5F1EC]">
-      <div className="grid md:grid-cols-[2fr_3fr]">
+      <div className="grid grid-cols-1 md:grid-cols-[2fr_3fr]">
 
         {/* Left — polaroid */}
         <div className="flex items-center justify-center border-b border-[#D6CEBE] px-8 py-20 md:border-b-0 md:border-r md:py-28">

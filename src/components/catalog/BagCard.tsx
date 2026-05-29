@@ -20,21 +20,20 @@ export default function BagCard({ bag }: BagCardProps) {
       href={`/catalog/${bag.slug.current}`}
       className="group block bg-[#F5F1EC] transition-transform duration-300 hover:-translate-y-0.5"
     >
-      {/* Image — natural height, no crop */}
-      <div className="relative overflow-hidden bg-[#EDE6DC] border border-[#D6CEBE]">
+      {/* Image — fixed aspect ratio for consistent card sizes */}
+      <div className="relative aspect-[4/5] w-full overflow-hidden border border-[#D6CEBE] bg-[#EDE6DC]">
         {bag.coverPhoto ? (
           <Image
             src={urlFor(bag.coverPhoto.asset).width(600).format('webp').url()}
             alt={bag.coverPhoto.alt ?? bag.name}
-            width={bag.coverPhoto.asset.metadata.dimensions.width}
-            height={bag.coverPhoto.asset.metadata.dimensions.height}
-            className="w-full transition-transform duration-700 group-hover:scale-[1.02]"
+            fill
+            className="object-contain transition-transform duration-700 group-hover:scale-[1.02]"
             placeholder="blur"
             blurDataURL={bag.coverPhoto.asset.metadata.lqip}
             sizes="(max-width: 768px) 50vw, 25vw"
           />
         ) : (
-          <div className="aspect-[4/5] w-full bg-[#D6CEBE]" />
+          <div className="h-full w-full bg-[#D6CEBE]" />
         )}
 
         {/* Availability badge */}

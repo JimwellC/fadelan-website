@@ -36,43 +36,48 @@ const STEPS: Step[] = [
 
 export default function ProcessSteps() {
   return (
-    <section className="py-14 bg-[#F5F1EC]">
-      <p className="font-sans text-[11px] tracking-[0.16em] uppercase text-[#8C8275] mb-7">
+    <section className="bg-[#F5F1EC] py-12 md:py-14">
+      <p className="mb-6 font-sans text-[11px] uppercase tracking-[0.16em] text-[#8C8275] md:mb-7">
         The Fadelan process
       </p>
-      <div className="flex flex-col">
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
         {STEPS.map((step, i) => (
           <div
             key={step.num}
-            className="group flex gap-7 py-8 border-b border-[#EDE6DC] last:border-b-0"
+            className="group relative border border-[#D6CEBE] bg-[#F5F1EC] p-5 transition-colors duration-300 hover:bg-[#EDE6DC] md:p-6"
           >
+            {/* Bronze corner accent */}
+            <span className="absolute left-0 top-0 h-px w-5 bg-[#8B6F47] opacity-50" />
+            <span className="absolute left-0 top-0 h-5 w-px bg-[#8B6F47] opacity-50" />
+
             {/* Icon */}
-            <div className="w-10 h-10 rounded-full bg-[#EDE6DC] group-hover:bg-[#8B6F47] flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors duration-300">
+            <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#EDE6DC] transition-colors duration-300 group-hover:bg-[#8B6F47]">
               <step.Icon
-                size={17}
-                className="text-[#8B6F47] group-hover:text-[#F5F1EC] transition-colors duration-300"
+                size={16}
+                className="text-[#8B6F47] transition-colors duration-300 group-hover:text-[#F5F1EC]"
               />
             </div>
 
-            {/* Content */}
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-1.5">
-                <span className="font-sans text-[10px] tracking-[0.16em] uppercase text-[#8C8275]">
-                  Step {i + 1}
-                </span>
-              </div>
-              <h3 className="font-cormorant text-[24px] font-medium text-[#1A1A1A] mb-2 leading-snug">
-                {step.title}
-              </h3>
-              <p className="text-sm text-[#8C8275] leading-relaxed max-w-xl">
-                {step.desc}
-              </p>
-            </div>
+            {/* Step label */}
+            <p className="mb-1.5 font-sans text-[10px] uppercase tracking-[0.16em] text-[#8C8275]">
+              Step {i + 1}
+            </p>
 
-            {/* Step number */}
-            <span className="font-cormorant text-[48px] font-normal text-[#EDE6DC] group-hover:text-[#d6cfc5] leading-none min-w-[56px] text-right self-center transition-colors duration-300">
+            {/* Title */}
+            <h3 className="mb-2 font-cormorant text-[1.3rem] font-medium leading-snug text-[#1A1A1A]">
+              {step.title}
+            </h3>
+
+            {/* Body */}
+            <p className="text-[12.5px] leading-relaxed text-[#8C8275]">
+              {step.desc}
+            </p>
+
+            {/* Ghost number */}
+            <p className="mt-4 font-cormorant text-[2.5rem] font-normal leading-none text-[#EDE6DC] transition-colors duration-300 group-hover:text-[#d6cfc5]">
               {step.num}
-            </span>
+            </p>
           </div>
         ))}
       </div>

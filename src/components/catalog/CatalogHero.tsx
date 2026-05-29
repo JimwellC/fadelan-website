@@ -8,8 +8,8 @@ export default function CatalogHero() {
             'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(139,111,71,0.07) 0%, transparent 100%)',
         }}
       />
-      <div className="relative mx-auto w-full px-6 py-16 text-center md:max-w-[70%] md:px-0 md:py-20">
-        <p className="mb-4 text-[10px] uppercase tracking-[0.25em] text-[#8B6F47]">
+      <div className="relative mx-auto flex min-h-[65vh] w-full flex-col items-center justify-center px-6 py-12 text-center md:max-w-[70%] md:px-0">
+        <p className="mb-5 text-[10px] uppercase tracking-[0.25em] text-[#8B6F47]">
           The collection
         </p>
         <h1 className="font-['Cormorant_Garamond'] text-[clamp(2rem,6vw,3.75rem)] font-normal leading-[1.2] text-[#F5F1EC]">

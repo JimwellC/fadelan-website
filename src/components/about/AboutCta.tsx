@@ -7,10 +7,10 @@ interface AboutCtaProps {
 
 export default function AboutCta({ headline, body }: AboutCtaProps) {
   return (
-    <section className="bg-[#EDE6DC] px-10 py-16">
-      <div className="mx-auto max-w-[70%]">
+    <section className="bg-[#EDE6DC] px-4 py-10 md:px-10 md:py-16">
+      <div className="mx-auto w-full md:max-w-[70%]">
         <div
-          className="relative overflow-hidden rounded-2xl px-14 py-12"
+          className="relative overflow-hidden rounded-2xl px-6 py-8 md:px-14 md:py-12"
           style={{ background: '#2C2420' }}
         >
           {/* Warm glow left */}
@@ -46,13 +46,14 @@ export default function AboutCta({ headline, body }: AboutCtaProps) {
             />
           </div>
 
-          <div className="relative z-10 flex items-center justify-between gap-10">
-            {/* Left — text */}
+          {/* Mobile: stacked. Desktop: side by side */}
+          <div className="relative z-10 flex flex-col gap-8 md:flex-row md:items-center md:justify-between md:gap-10">
+            {/* Copy */}
             <div>
               <p className="mb-3 font-sans text-[11px] uppercase tracking-[0.18em] text-[#8C8275]">
                 The collection
               </p>
-              <h2 className="mb-3 font-['Cormorant_Garamond'] text-[32px] font-normal leading-tight text-[#F5F1EC]">
+              <h2 className="mb-3 font-['Cormorant_Garamond'] text-[clamp(1.5rem,4vw,2rem)] font-normal leading-tight text-[#F5F1EC]">
                 {headline}
               </h2>
               <p className="max-w-md text-sm leading-relaxed text-[#A89880]">
@@ -60,11 +61,11 @@ export default function AboutCta({ headline, body }: AboutCtaProps) {
               </p>
             </div>
 
-            {/* Right — buttons */}
-            <div className="flex shrink-0 flex-col gap-2.5">
+            {/* Buttons — full width on mobile, fixed width on desktop */}
+            <div className="flex w-full flex-col gap-2.5 md:w-auto md:shrink-0">
               <Link
                 href="/catalog"
-                className="inline-flex items-center gap-3 whitespace-nowrap border border-[#8B6F47] px-8 py-3.5 font-sans text-[11px] uppercase tracking-[0.16em] text-[#EDE6DC] transition-colors duration-300 hover:bg-[#8B6F47] hover:text-[#F5F1EC]"
+                className="flex items-center justify-center whitespace-nowrap border border-[#8B6F47] px-8 py-3.5 font-sans text-[11px] uppercase tracking-[0.16em] text-[#EDE6DC] transition-colors duration-300 hover:bg-[#8B6F47] hover:text-[#F5F1EC]"
               >
                 Browse the catalog
               </Link>

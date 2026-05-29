@@ -29,31 +29,30 @@ export default function FaqAccordion() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <section className="px-10 py-14">
-      <h2 className="font-[Cormorant_Garamond] text-[28px] font-normal text-[#1A1A1A] mb-7">
+    <section className="px-4 py-10 md:px-10 md:py-14">
+      <h2 className="mb-7 font-[Cormorant_Garamond] text-[clamp(1.5rem,4vw,1.75rem)] font-normal text-[#1A1A1A]">
         Common questions
       </h2>
       <div>
         {FAQS.map((faq, i) => (
-          <div
-            key={i}
-            className="border-b border-[#EDE6DC] first:border-t"
-          >
+          <div key={i} className="border-b border-[#EDE6DC] first:border-t">
             <button
               onClick={() => setOpen(open === i ? null : i)}
-              className="w-full flex justify-between items-center gap-3 py-5 text-left"
+              className="flex w-full items-center justify-between gap-3 py-5 text-left"
             >
-              <span className="font-[Cormorant_Garamond] text-lg font-medium text-[#1A1A1A]">
+              <span className="font-[Cormorant_Garamond] text-base font-medium text-[#1A1A1A] md:text-lg">
                 {faq.q}
               </span>
               <span
-                className={`text-[#8B6F47] transition-transform duration-200 ${open === i ? "rotate-180" : ""}`}
+                className={`flex-shrink-0 text-[#8B6F47] transition-transform duration-200 ${
+                  open === i ? "rotate-180" : ""
+                }`}
               >
                 ▾
               </span>
             </button>
             {open === i && (
-              <p className="text-sm text-[#8C8275] leading-relaxed pb-5">
+              <p className="pb-5 text-sm leading-relaxed text-[#8C8275]">
                 {faq.a}
               </p>
             )}
