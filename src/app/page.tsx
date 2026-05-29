@@ -504,30 +504,6 @@ export default async function HomePage() {
                 </div>
               )}
 
-              {/* Second bag — bottom center-left */}
-              {bags[1]?.coverPhoto?.asset && (
-                <div style={{
-                  position:    'absolute',
-                  left:        'clamp(280px, 36vw, 500px)',
-                  bottom:      '8%',
-                  width:       'clamp(100px, 12vw, 180px)',
-                  aspectRatio: '3 / 4',
-                  overflow:    'hidden',
-                  border:      '1px solid rgba(139,111,71,0.25)',
-                  zIndex:      3,
-                  opacity:     0.75,
-                  boxShadow:   '0 8px 32px rgba(0,0,0,0.4)',
-                }}>
-                  <Image
-                    src={urlFor(bags[1].coverPhoto.asset).width(300).height(400).format('webp').quality(80).url()}
-                    alt={bags[1].coverPhoto?.alt ?? bags[1].name}
-                    fill
-                    sizes="12vw"
-                    style={{ objectFit: 'cover', objectPosition: 'center top' }}
-                  />
-                </div>
-              )}
-
               {/* Bottom gradient */}
               <div style={{
                 position:      'absolute',

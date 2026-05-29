@@ -74,7 +74,7 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
         left:            0,
         right:           0,
         zIndex:          50,
-        backgroundColor: scrolled ? 'rgba(245,241,236,0.94)' : 'rgba(0,0,0,0)',
+        backgroundColor: scrolled ? 'rgba(245,241,236,0.94)' : heroIsDark ? 'rgba(0,0,0,0)' : 'rgba(245,241,236,0.94)',
         backdropFilter:  scrolled ? 'blur(12px)' : 'none',
         borderBottom:    scrolled ? '1px solid rgba(139,111,71,0.12)' : '1px solid transparent',
         transition:      'all 400ms cubic-bezier(0.4,0,0.2,1)',

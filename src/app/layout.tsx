@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import './globals.css'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -18,36 +19,24 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const headersList = await headers()
+  const pathname    = headersList.get('x-pathname') ?? ''
+  const isAdmin     = pathname.startsWith('/admin')
+
   return (
     <html lang="en">
       <body>
-        <Header heroIsDark={true} />
+        {!isAdmin && <Header heroIsDark={true} />}
         <main>
           {children}
         </main>
-        <Footer />
+        {!isAdmin && <Footer />}
       </body>
     </html>
   )
 }
-
-import { Cormorant_Garamond, Inter } from "next/font/google";
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-cormorant",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
-
-// Apply to <html>:
-// className={`${cormorant.variable} ${inter.variable}`}
