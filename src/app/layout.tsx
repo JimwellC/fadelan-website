@@ -6,18 +6,34 @@ import Footer from '@/components/layout/Footer'
 
 export const metadata: Metadata = {
   title: {
-    default:  'Fad Élan — Authentic Pre-loved Luxury Bags',
+    default:  'Fad Élan — Authentic Pre-Loved Luxury Bags Philippines',
     template: '%s — Fad Élan',
   },
   description:
-    'A curated collection of authenticated pre-loved luxury bags. Sourced with care, photographed honestly, shipped nationwide and internationally from the Philippines.',
+    'Shop authentic pre-loved luxury bags at Fad Élan. Hermès, Chanel, Louis Vuitton, and more. Ships nationwide. Local meetups in Pampanga.',
   keywords: ['luxury bags', 'pre-loved', 'authentic', 'Philippines', 'Chanel', 'Louis Vuitton', 'Hermès'],
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? 'https://fadelan-website.vercel.app'
+  ),
   openGraph: {
-    siteName: 'Fad Élan',
-    locale:   'en_PH',
-    type:     'website',
+    type:        'website',
+    siteName:    'Fad Élan',
+    title:       'Fad Élan — Authentic Pre-Loved Luxury Bags Philippines',
+    description: 'Shop authentic pre-loved luxury bags at Fad Élan. Hermès, Chanel, Louis Vuitton, and more. Ships nationwide. Local meetups in Pampanga.',
+    locale:      'en_PH',
+    url:         process.env.NEXT_PUBLIC_SITE_URL ?? 'https://fadelan-website.vercel.app',
+  },
+  twitter: {
+    card:        'summary_large_image',
+    title:       'Fad Élan — Authentic Pre-Loved Luxury Bags Philippines',
+    description: 'Shop authentic pre-loved luxury bags at Fad Élan. Ships nationwide.',
+  },
+  robots: {
+    index:  true,
+    follow: true,
   },
 }
+
 
 export default async function RootLayout({
   children,
