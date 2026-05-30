@@ -24,8 +24,17 @@ function DiamondCheck({ checked, onChange }: { checked: boolean; onChange: () =>
   return (
     <span
       onClick={onChange}
-      className={`flex h-[10px] w-[10px] flex-shrink-0 rotate-45 cursor-pointer border transition-colors ${
-        checked ? 'border-[#1A1A1A] bg-[#1A1A1A]' : 'border-[#D6CEBE]'
+      role="checkbox"
+      aria-checked={checked}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onChange()
+        }
+      }}
+      className={`flex h-[10px] w-[10px] flex-shrink-0 rotate-45 cursor-pointer border transition-colors duration-400 ease-luxury ${
+        checked ? 'border-ink bg-ink' : 'border-bronze/30 hover:border-bronze'
       }`}
     />
   )
@@ -41,13 +50,16 @@ function FilterSection({
   const [open, setOpen] = useState(true)
 
   return (
-    <div className="border-b border-[#D6CEBE] last:border-b-0">
+    <div className="border-b border-bronze/20 last:border-b-0">
       <button
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
         className="flex w-full items-center justify-between px-[18px] py-3"
       >
-        <span className="text-[11px] uppercase tracking-[0.14em] text-[#8C8275]">{label}</span>
-        <span className={`text-[11px] text-[#C8BFB2] transition-transform ${open ? 'rotate-180' : ''}`}>
+        <span className="font-body text-[11px] uppercase tracking-[0.14em] text-muted">
+          {label}
+        </span>
+        <span className={`text-[11px] text-bronze/40 transition-transform duration-400 ease-luxury ${open ? 'rotate-180' : ''}`}>
           ▾
         </span>
       </button>
@@ -70,9 +82,9 @@ function CheckOption({
   return (
     <label className="flex cursor-pointer items-center gap-2 py-1.5">
       <DiamondCheck checked={checked} onChange={onChange} />
-      <span className="text-[11px] text-[#8C8275]">{label}</span>
+      <span className="font-body text-[11px] text-muted">{label}</span>
       {count !== undefined && (
-        <span className="ml-auto text-[10px] text-[#C8BFB2]">{count}</span>
+        <span className="ml-auto font-body text-[10px] text-bronze/40">{count}</span>
       )}
     </label>
   )
@@ -96,20 +108,25 @@ export default function CatalogFilters({
   }
 
   return (
-    <div className="border border-[#D6CEBE] bg-[#F5F1EC]">
+    <div className="border border-bronze/20 bg-ivory">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#D6CEBE] bg-[#EDE6DC] px-[18px] py-3.5">
-        <p className="text-[10px] uppercase tracking-[0.18em] font-medium text-[#1A1A1A]">Refine</p>
-        <button onClick={onClear} className="text-[10px] text-[#8B6F47] hover:underline">
+      <div className="flex items-center justify-between border-b border-bronze/20 bg-cream-dark px-[18px] py-3.5">
+        <p className="font-body text-[10px] font-medium uppercase tracking-[0.18em] text-ink">
+          Refine
+        </p>
+        <button
+          onClick={onClear}
+          className="font-body text-[10px] text-bronze transition-colors duration-400 ease-luxury hover:text-bronze-dark hover:underline"
+        >
           Clear
         </button>
       </div>
 
       <FilterSection label="Availability">
-        {(['available', 'reserved', 'sold'] as const).map((v) => (
+        {(['available', 'reserved', 'on_hold', 'sold'] as const).map((v) => (
           <CheckOption
             key={v}
-            label={v.charAt(0).toUpperCase() + v.slice(1)}
+            label={v === 'on_hold' ? 'On hold' : v.charAt(0).toUpperCase() + v.slice(1)}
             checked={active.availability.includes(v)}
             onChange={() => toggle('availability', v)}
           />
@@ -145,15 +162,15 @@ export default function CatalogFilters({
             placeholder="Min"
             value={active.minPrice}
             onChange={(e) => onChange({ ...active, minPrice: e.target.value })}
-            className="w-[64px] border border-[#D6CEBE] bg-transparent px-2 py-1.5 text-[11px] text-[#1A1A1A] outline-none focus:border-[#8B6F47]"
+            className="w-[64px] border border-bronze/20 bg-transparent px-2 py-1.5 font-body text-[11px] text-ink outline-none transition-colors duration-400 ease-luxury focus:border-bronze"
           />
-          <span className="text-[11px] text-[#C8BFB2]">—</span>
+          <span className="text-[11px] text-bronze/40">—</span>
           <input
             type="number"
             placeholder="Max"
             value={active.maxPrice}
             onChange={(e) => onChange({ ...active, maxPrice: e.target.value })}
-            className="w-[64px] border border-[#D6CEBE] bg-transparent px-2 py-1.5 text-[11px] text-[#1A1A1A] outline-none focus:border-[#8B6F47]"
+            className="w-[64px] border border-bronze/20 bg-transparent px-2 py-1.5 font-body text-[11px] text-ink outline-none transition-colors duration-400 ease-luxury focus:border-bronze"
           />
         </div>
       </FilterSection>

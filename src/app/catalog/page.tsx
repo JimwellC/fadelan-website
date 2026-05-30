@@ -17,7 +17,7 @@ export default async function CatalogPage() {
   ])
 
   return (
-    <main className="min-h-screen bg-[#F5F1EC]">
+    <main className="min-h-screen bg-ivory">
       <CatalogHero />
       <CatalogClient bags={bags} filterOptions={filterOptions} />
     </main>
