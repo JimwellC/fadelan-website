@@ -1,0 +1,149 @@
+/* ══════════════════════════════════════════════
+   ADMIN PANEL — Responsive Layout
+   Imported in src/app/(admin)/layout.tsx only
+   ══════════════════════════════════════════════ */
+
+/* ── Shell ── */
+.admin-shell {
+  min-height:       100svh;
+  background-color: #FFFFFF;
+  display:          flex;
+}
+
+/* ── Sidebar ── */
+.admin-sidebar {
+  width:            240px;
+  flex-shrink:      0;
+  background-color: #1A1A1A;
+  display:          flex;
+  flex-direction:   column;
+  position:         fixed;
+  top:              0;
+  left:             0;
+  bottom:           0;
+  z-index:          30;
+  transform:        translateX(-100%);
+  transition:       transform 300ms ease;
+}
+.admin-sidebar.is-open {
+  transform: translateX(0);
+}
+
+/* ── Overlay ── */
+.admin-overlay {
+  display:          none;
+  position:         fixed;
+  inset:            0;
+  background-color: rgba(0,0,0,0.5);
+  z-index:          20;
+}
+.admin-overlay.is-open {
+  display: block;
+}
+
+/* ── Top bar (mobile only) ── */
+.admin-topbar {
+  display:          flex;
+  align-items:      center;
+  justify-content:  space-between;
+  padding:          1rem 1.25rem;
+  background-color: #1A1A1A;
+  border-bottom:    1px solid rgba(245,241,236,0.08);
+  position:         sticky;
+  top:              0;
+  z-index:          10;
+}
+
+/* ── Main wrapper ── */
+.admin-main-wrapper {
+  flex:           1;
+  display:        flex;
+  flex-direction: column;
+  min-width:      0;
+}
+
+/* ── Main content ── */
+.admin-content {
+  flex:    1;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  background-color: #FFFFFF;
+}
+
+/* ── Close button (mobile only) ── */
+.admin-close-btn {
+  display: block;
+}
+
+/* ── Form grid — 1 col mobile, 2 col desktop ── */
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+.admin-form-full {
+  grid-column: 1 / -1;
+}
+
+/* ── Stat cards — 2 col always ── */
+.admin-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+/* ── Hero section ── */
+.hero-section {
+  min-height: auto;
+}
+
+/* ── Bag form grid ── */
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+.admin-form-full {
+  grid-column: 1 / -1;
+}
+@media (min-width: 640px) {
+  .admin-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.admin-slug-preview {
+  padding:          0.5rem 0.75rem;
+  background-color: #FFFFFF;        /* ← white to match inputs */
+  border:           1px solid rgba(139,111,71,0.25);
+  font-family:      'Courier New', monospace;
+  font-size:        0.7rem;
+  color:            #8B6F47;
+  word-break:       break-all;
+  margin-top:       0.25rem;
+}
+/* ══ DESKTOP (1024px+) ══ */
+@media (min-width: 1024px) {
+  .admin-sidebar {
+    transform: translateX(0);
+    position:  fixed;
+  }
+  .admin-close-btn {
+    display: none;
+  }
+  .admin-topbar {
+    display: none;
+  }
+  .admin-main-wrapper {
+    margin-left: 240px;
+  }
+  .admin-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .admin-stat-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .hero-section {
+    min-height: 100svh;
+  }
+}

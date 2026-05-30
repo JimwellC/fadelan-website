@@ -23,6 +23,19 @@ export function urlFor(source: SanityImageSource) {
   return builder.image(source)
 }
 
+export function bagImageUrl(source: SanityImageSource, options?: {
+  width?:  number
+  height?: number
+}) {
+  const w = options?.width ?? 900
+  return builder
+    .image(source)
+    .width(w)
+    .auto('format')
+    .quality(90)
+    .url()
+}
+
 export async function sanityFetch<T>(
   query:   string,
   params:  Record<string, unknown> = {},

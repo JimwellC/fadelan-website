@@ -24,15 +24,19 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const settings = await writeClient.fetch(`
-    *[_type == "siteSettings"][0] {
-      heroHeadline, heroSubline, tagline,
-      messengerUrl, instagramHandle, viberNumber,
-      locationDescription,
-      messengerInquiryTemplate,
-      instagramInquiryTemplate,
-      viberInquiryTemplate
-    }
-  `)
+  *[_type == "siteSettings"][0] {
+    siteName, tagline,
+    heroHeadline, heroSubline,
+    messengerUrl, facebookPageUrl,
+    instagramHandle, viberNumber,
+    contactEmail, locationDescription,
+    messengerInquiryTemplate,
+    instagramInquiryTemplate,
+    viberInquiryTemplate,
+    defaultShippingNote,
+    paymentMethods
+  }
+`)
 
   return NextResponse.json(settings)
 }

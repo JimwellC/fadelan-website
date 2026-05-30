@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { sanityFetch, urlFor } from '@/lib/sanity'
+import { sanityFetch, urlFor, bagImageUrl } from '@/lib/sanity'
 import { HOMEPAGE_QUERY } from '@/lib/queries'
 import type { BagListItem, SiteSettings } from '@/lib/queries'
 import BagCard from '@/components/ui/BigCard'
@@ -74,10 +74,10 @@ export default async function HomePage() {
   // ✓ Use dedicated hero image from Site Settings — independent from bag catalog
   const heroImageAsset = (data?.settings as any)?.heroImage?.asset
   const heroCoverUrl = heroImageAsset
-    ? urlFor(heroImageAsset).width(900).height(1200).format('webp').quality(90).url()
-    : heroBag?.coverPhoto?.asset
-      ? urlFor(heroBag.coverPhoto.asset).width(900).height(1200).format('webp').quality(90).url()
-      : null
+  ? bagImageUrl(heroImageAsset)
+  : heroBag?.coverPhoto?.asset
+    ? bagImageUrl(heroBag.coverPhoto.asset)
+    : null
 
   const heroBlur = heroImageAsset?.metadata?.lqip
     ?? heroBag?.coverPhoto?.asset?.metadata?.lqip
@@ -210,232 +210,149 @@ export default async function HomePage() {
               display:       'flex',
               flexDirection: 'column',
               minHeight:     '100svh',
-              paddingTop:    '5.5rem',
-              paddingLeft:   '1.5rem',
-              paddingRight:  '1.5rem',
-              paddingBottom: '4rem',
             }}>
 
-              {/* Eyebrow */}
-              {!heroImageAsset && (
-                <div style={{
-                  display:      'flex',
-                  alignItems:   'center',
-                  gap:          '0.75rem',
-                  marginBottom: '1.75rem',
-                }}>
+              {/* Bag image — full width, flush top, behind text */}
+              {heroCoverUrl && (
+                <div style={{ position: 'relative' }}>
+                  <img
+                    src={heroCoverUrl}
+                    alt={heroBag?.name ?? 'Featured bag'}
+                    style={{
+                      width:   '100%',
+                      height:  'auto',
+                      display: 'block',
+                    }}
+                  />
+                  {/* Dark gradient over image bottom */}
                   <div style={{
-                    width:           '1.5rem',
-                    height:          '1px',
-                    backgroundColor: 'var(--color-bronze)',
-                    opacity:         0.5,
+                    position:   'absolute',
+                    bottom:     0,
+                    left:       0,
+                    right:      0,
+                    height:     '60%',
+                    background: 'linear-gradient(to top, #1C1714 0%, transparent 100%)',
+                    pointerEvents: 'none',
                   }} />
-                  <p style={{
-                    fontFamily:    'var(--font-body)',
-                    fontSize:      '0.55rem',
-                    letterSpacing: '0.24em',
-                    textTransform: 'uppercase',
-                    color:         'rgba(245,241,236,0.38)',
-                  }}>
-                    New arrivals
-                  </p>
                 </div>
-              )}  
+              )}
 
-              {/* Headline */}
-              <h1 style={{
-                fontFamily:    'var(--font-display)',
-                fontWeight:    300,
-                lineHeight:    0.95,
-                letterSpacing: '-0.01em',
-                margin:        0,
-                marginBottom:  '1.5rem',
-              }}>
-                <span style={{
-                  display:  'block',
-                  fontSize: 'clamp(3rem, 13vw, 4.5rem)',
-                  color:    'var(--color-bronze)',
-                }}>
-                  Curated
-                </span>
-                <span style={{
-                  display:  'block',
-                  fontSize: 'clamp(3rem, 13vw, 4.5rem)',
-                  color:    'var(--color-bronze)',
-                }}>
-                  pre-loved
-                </span>
-                <span style={{
-                  display:   'block',
-                  fontSize:  'clamp(3rem, 13vw, 4.5rem)',
-                  fontStyle: 'italic',
-                  color:     'rgba(245,241,236,0.88)',
-                }}>
-                  luxury.
-                </span>
-              </h1>
-
-              {/* Subline */}
-              <p style={{
-                fontFamily:   'var(--font-body)',
-                fontSize:     '0.8rem',
-                lineHeight:   1.8,
-                color:        'rgba(245,241,236,0.5)',
-                marginBottom: '2rem',
-                maxWidth:     '280px',
-              }}>
-                {subline}
-              </p>
-
-              {/* CTA */}
-              <Link href="/catalog" className="btn-hero" style={{ alignSelf: 'flex-start' }}>
-                Shop Collection
-              </Link>
-
-              {/* Layered image composition */}
+              {/* Text content — sits below image, overlapping via negative margin */}
               <div style={{
-                marginTop:    '3rem',
+                padding:      '0 1.5rem 4rem',
+                marginTop:    heroCoverUrl ? '-4rem' : '6rem',
                 position:     'relative',
-                flex:         1,
-                minHeight:    '72vw',
-                width:        'calc(100% + 1.5rem)',
-                marginRight:  '-1.5rem',
-                marginBottom: '-4rem',
+                zIndex:       2,
               }}>
 
-                {/* Background accent card */}
-                <div style={{
-                  position:     'absolute',
-                  right:        '0',
-                  bottom:       '0',
-                  width:        '58vw',
-                  maxWidth:     '270px',
-                  height:       '60vw',
-                  maxHeight:    '280px',
-                  border:       '1px solid rgba(139,111,71,0.15)',
-                  borderRadius: '4px',
-                  background:   'rgba(139,111,71,0.03)',
-                }} />
-
-                {/* Second bag — small, top left */}
-                {bags[1]?.coverPhoto?.asset && (
+                {/* Eyebrow */}
+                {!heroImageAsset && (
                   <div style={{
-                    position:     'absolute',
-                    left:         '0',
-                    top:          '0',
-                    width:        '26vw',
-                    maxWidth:     '110px',
-                    aspectRatio:  '3 / 4',
-                    overflow:     'hidden',
-                    borderRadius: '2px',
-                    border:       '1px solid rgba(139,111,71,0.2)',
-                    zIndex:       1,
-                    opacity:      0.65,
+                    display:      'flex',
+                    alignItems:   'center',
+                    gap:          '0.75rem',
+                    marginBottom: '1.25rem',
                   }}>
-                    <Image
-                      src={urlFor(bags[1].coverPhoto.asset).width(300).height(400).format('webp').quality(80).url()}
-                      alt={bags[1].coverPhoto?.alt ?? bags[1].name}
-                      fill
-                      sizes="26vw"
-                      style={{ objectFit: 'cover', objectPosition: 'center top' }}
-                    />
+                    <div style={{
+                      width:           '1.5rem',
+                      height:          '1px',
+                      backgroundColor: 'var(--color-bronze)',
+                      opacity:         0.5,
+                    }} />
+                    <p style={{
+                      fontFamily:    'var(--font-body)',
+                      fontSize:      '0.55rem',
+                      letterSpacing: '0.24em',
+                      textTransform: 'uppercase',
+                      color:         'rgba(245,241,236,0.38)',
+                    }}>
+                      New arrivals
+                    </p>
                   </div>
                 )}
 
-                {/* Main image — flush right, full bottom */}
-                <div style={{
-                  position:            'absolute',
-                  right:               '0',
-                  bottom:              '0',
-                  top:                 '0',
-                  width:               '72vw',
-                  maxWidth:            '320px',
-                  borderTopLeftRadius: 'clamp(40px, 8vw, 80px)',
-                  overflow:            'hidden',
-                  border:              '1px solid rgba(139,111,71,0.4)',
-                  zIndex:              2,
-                  boxShadow:           '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(139,111,71,0.1)',
+                {/* Headline */}
+                <h1 style={{
+                  fontFamily:    'var(--font-display)',
+                  fontWeight:    300,
+                  lineHeight:    0.95,
+                  letterSpacing: '-0.01em',
+                  margin:        0,
+                  marginBottom:  '1.25rem',
                 }}>
-                  {heroCoverUrl ? (
-                    <Image
-                      src={heroCoverUrl}
-                      alt={heroBag?.coverPhoto?.alt ?? heroBag?.name ?? 'Featured bag'}
-                      fill
-                      priority
-                      sizes="72vw"
-                      style={{ objectFit: 'cover', objectPosition: 'center top' }}
-                      placeholder={heroBag?.coverPhoto?.asset?.metadata?.lqip ? 'blur' : 'empty'}
-                      blurDataURL={heroBlur}
-                    />
-                  ) : (
-                    <div style={{
-                      width:          '100%',
-                      height:         '100%',
-                      display:        'flex',
-                      alignItems:     'center',
-                      justifyContent: 'center',
-                      background:     'linear-gradient(160deg, #2a2318 0%, #1a1510 100%)',
-                    }}>
-                      <svg width="40" height="54" viewBox="0 0 120 160" fill="none" opacity={0.25}>
-                        <path d="M28 56 Q28 20 60 20 Q92 20 92 56 L100 136 Q101 146 90 146 L30 146 Q19 146 20 136Z" stroke="#8B6F47" strokeWidth="1.5" fill="none"/>
-                        <path d="M40 56 Q40 10 60 10 Q80 10 80 56" stroke="#8B6F47" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-                        <rect x="50" y="90" width="20" height="14" rx="2" stroke="#8B6F47" strokeWidth="1" fill="none"/>
-                        <circle cx="60" cy="97" r="4" stroke="#8B6F47" strokeWidth="1" fill="none"/>
-                      </svg>
-                    </div>
-                  )}
-                </div>
+                  <span style={{
+                    display:  'block',
+                    fontSize: 'clamp(3rem, 13vw, 4.5rem)',
+                    color:    'var(--color-bronze)',
+                  }}>
+                    Curated
+                  </span>
+                  <span style={{
+                    display:  'block',
+                    fontSize: 'clamp(3rem, 13vw, 4.5rem)',
+                    color:    'var(--color-bronze)',
+                  }}>
+                    pre-loved
+                  </span>
+                  <span style={{
+                    display:   'block',
+                    fontSize:  'clamp(3rem, 13vw, 4.5rem)',
+                    fontStyle: 'italic',
+                    color:     'rgba(245,241,236,0.88)',
+                  }}>
+                    luxury.
+                  </span>
+                </h1>
 
-                {/* Bronze glow behind main image */}
-                <div style={{
-                  position:      'absolute',
-                  right:         '0',
-                  bottom:        '0',
-                  width:         '58vw',
-                  maxWidth:      '260px',
-                  height:        '40%',
-                  borderRadius:  '50%',
-                  background:    'radial-gradient(circle, rgba(139,111,71,0.2) 0%, transparent 70%)',
-                  zIndex:        1,
-                  filter:        'blur(12px)',
-                  pointerEvents: 'none',
-                }} />
+                {/* Subline */}
+                <p style={{
+                  fontFamily:   'var(--font-body)',
+                  fontSize:     '0.8rem',
+                  lineHeight:   1.8,
+                  color:        'rgba(245,241,236,0.5)',
+                  marginBottom: '2rem',
+                  maxWidth:     '280px',
+                }}>
+                  {subline}
+                </p>
 
-                {/* Floating bag name tag */}
+                {/* CTA */}
+                <Link href="/catalog" className="btn-hero" style={{ alignSelf: 'flex-start' }}>
+                  Shop Collection
+                </Link>
+
+                {/* Bag name tag */}
                 {!heroImageAsset && heroBag && (
                   <div style={{
-                    position:        'absolute',
-                    left:            '0',
-                    bottom:          '0.5rem',
-                    zIndex:          3,
-                    backgroundColor: 'rgba(28,23,20,0.88)',
+                    marginTop:       '2rem',
+                    display:         'inline-flex',
+                    alignItems:      'center',
+                    gap:             '0.75rem',
+                    backgroundColor: 'rgba(28,23,20,0.7)',
                     backdropFilter:  'blur(8px)',
                     border:          '1px solid rgba(139,111,71,0.2)',
                     padding:         '0.5rem 0.875rem',
-                    maxWidth:        '160px',
                   }}>
-                    <p style={{
+                    <span style={{
                       fontFamily:    'var(--font-body)',
                       fontSize:      '0.5rem',
+                      fontWeight:    500,
                       letterSpacing: '0.16em',
                       textTransform: 'uppercase',
                       color:         'var(--color-bronze)',
-                      marginBottom:  '0.2rem',
                     }}>
                       {BRAND_LABELS[heroBag.brand] ?? heroBag.brand}
-                    </p>
-                    <p style={{
-                      fontFamily:   'var(--font-display)',
-                      fontSize:     '0.75rem',
-                      fontWeight:   300,
-                      color:        'var(--color-cream)',
-                      letterSpacing:'0.02em',
-                      whiteSpace:   'nowrap',
-                      overflow:     'hidden',
-                      textOverflow: 'ellipsis',
+                    </span>
+                    <span style={{ color: 'rgba(245,241,236,0.15)', fontSize: '0.7rem' }}>/</span>
+                    <span style={{
+                      fontFamily:    'var(--font-display)',
+                      fontSize:      '0.75rem',
+                      fontWeight:    300,
+                      color:         'rgba(245,241,236,0.5)',
+                      letterSpacing: '0.02em',
                     }}>
                       {heroBag.name}
-                    </p>
+                    </span>
                   </div>
                 )}
 
@@ -474,7 +391,7 @@ export default async function HomePage() {
                     fill
                     priority
                     sizes="52vw"
-                    style={{ objectFit: 'cover', objectPosition: 'center top' }}
+                    style={{ objectFit: 'contain', objectPosition: 'center bottom' }}
                     placeholder={heroBag?.coverPhoto?.asset?.metadata?.lqip ? 'blur' : 'empty'}
                     blurDataURL={heroBlur}
                   />
@@ -595,8 +512,11 @@ export default async function HomePage() {
 
                 {/* Subline + CTA */}
                 <div style={{
-                  marginLeft: 'clamp(320px, 50vw, 700px)',
-                  maxWidth:   '380px',
+                  marginLeft:    'clamp(320px, 50vw, 700px)',
+                  maxWidth:      '380px',
+                  display:       'flex',
+                  flexDirection: 'column',
+                  alignItems:    'flex-start',
                 }}>
                   <p style={{
                     fontFamily:   'var(--font-body)',
@@ -648,23 +568,6 @@ export default async function HomePage() {
                 </div>
 
               </div>
-
-              {/* Counter */}
-              {bags.length > 0 && (
-                <p style={{
-                  position:      'absolute',
-                  top:           'clamp(1.5rem, 3vw, 2rem)',
-                  right:         'clamp(3rem, 6vw, 5rem)',
-                  fontFamily:    'var(--font-display)',
-                  fontSize:      '0.7rem',
-                  fontStyle:     'italic',
-                  color:         'rgba(245,241,236,0.25)',
-                  letterSpacing: '0.1em',
-                  zIndex:        3,
-                }}>
-                  01 / {String(bags.length).padStart(2, '0')}
-                </p>
-              )}
 
               {/* Sparkle */}
               <div style={{
@@ -817,29 +720,6 @@ export default async function HomePage() {
                 Fadelan — Pre-loved Luxury
               </p>
 
-              {/* Thumbnail — desktop only */}
-              {bags[1]?.coverPhoto?.asset && (
-                <div
-                  className="hidden lg:block"
-                  style={{
-                    width:       'clamp(80px, 10vw, 130px)',
-                    aspectRatio: '3 / 4',
-                    overflow:    'hidden',
-                    border:      '1px solid rgba(26,26,26,0.08)',
-                    position:    'relative',
-                    flexShrink:  0,
-                  }}
-                >
-                  <Image
-                    src={urlFor(bags[1].coverPhoto.asset).width(300).height(400).format('webp').quality(80).url()}
-                    alt={bags[1].coverPhoto?.alt ?? bags[1].name}
-                    fill
-                    sizes="130px"
-                    style={{ objectFit: 'cover', objectPosition: 'center top' }}
-                  />
-                </div>
-              )}
-
               <div>
                 <p style={{
                   fontFamily:    'var(--font-body)',
@@ -916,32 +796,33 @@ export default async function HomePage() {
             </div>
 
             {/* Center — large product image */}
-            <div style={{
-              position:   'relative',
-              aspectRatio:'3 / 4',
-              overflow:   'hidden',
-              maxHeight:  'clamp(320px, 80vw, 700px)',
-              margin:     '0 auto',
-              width:      '100%',
-              maxWidth:   '480px',
-            }}>
+            <div
+              className="hidden lg:block"
+              style={{
+                margin:   '0 auto',
+                width:    '100%',
+                maxWidth: '480px',
+                overflow: 'hidden',
+              }}>
               {heroCoverUrl ? (
-                <Image
+                <img
                   src={heroCoverUrl}
                   alt={heroBag?.name ?? 'Featured bag'}
-                  fill
-                  sizes="(max-width: 1024px) 90vw, 45vw"
-                  style={{ objectFit: 'cover', objectPosition: 'center top' }}
+                  style={{
+                    width:   '100%',
+                    height:  'auto',
+                    display: 'block',
+                  }}
                 />
               ) : (
                 <div style={{
-                  width:          '100%',
-                  height:         '100%',
-                  backgroundColor:'var(--color-cream-dark)',
-                  display:        'flex',
-                  alignItems:     'center',
-                  justifyContent: 'center',
-                }}>
+                    width:           '100%',
+                    aspectRatio:     '4 / 5',
+                    backgroundColor: 'var(--color-cream-dark)',
+                    display:         'flex',
+                    alignItems:      'center',
+                    justifyContent:  'center',
+                  }}>
                   <svg width="80" height="110" viewBox="0 0 120 160" fill="none" opacity={0.2}>
                     <path d="M28 56 Q28 20 60 20 Q92 20 92 56 L100 136 Q101 146 90 146 L30 146 Q19 146 20 136Z" stroke="#8B6F47" strokeWidth="1.5" fill="none"/>
                     <path d="M40 56 Q40 10 60 10 Q80 10 80 56" stroke="#8B6F47" strokeWidth="1.5" fill="none" strokeLinecap="round"/>

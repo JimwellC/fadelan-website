@@ -67,10 +67,7 @@ export default async function DashboardPage() {
         </h1>
       </div>
 
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '1rem', marginBottom: '2.5rem',
-      }}>
+      <div className="admin-stat-grid">
         {statCards.map((stat) => (
           <div key={stat.label} style={{
             backgroundColor: '#FFFFFF',
