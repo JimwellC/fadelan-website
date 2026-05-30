@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import type { BagListItem, FilterOptions } from '@/lib/queries'
-import { BRAND_LABELS } from '@/lib/sanity'
+import { BRAND_LABELS, CONDITION_LABELS } from '@/lib/sanity'
 import CatalogFilters from './CatalogFilters'
 import BagCard from './BagCard'
 
@@ -247,30 +247,196 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
   return (
     <div className="border-t border-bronze/20">
 
-      {/* Mobile filter drawer */}
-      {mobileFiltersOpen && (
-        <div className="fixed inset-0 z-50 flex md:hidden">
-          <div className="absolute inset-0 bg-ink/40" onClick={() => setMobileFiltersOpen(false)} />
-          <div className="relative ml-auto h-full w-[85%] max-w-[320px] overflow-y-auto bg-ivory">
-            <div className="flex items-center justify-between border-b border-bronze/20 bg-cream-dark px-5 py-4">
-              <p className="font-body text-[11px] font-medium uppercase tracking-[0.18em] text-ink">Filters</p>
-              <button
-                onClick={() => setMobileFiltersOpen(false)}
-                aria-label="Close filters"
-                className="text-[18px] text-muted transition-colors duration-400 ease-luxury hover:text-ink"
-              >×</button>
-            </div>
-            <div className="p-4">
-              <CatalogFilters
-                filters={filterOptions}
-                active={active}
-                onChange={updateActive}
-                onClear={() => { updateActive(DEFAULT_FILTERS); setMobileFiltersOpen(false) }}
-              />
-            </div>
+      {/* ── Mobile bottom sheet filter ── */}
+      <div className="md:hidden">
+
+        {/* Backdrop */}
+        <div
+          className={`fixed inset-0 z-40 bg-ink/50 transition-opacity duration-400 ease-luxury ${
+            mobileFiltersOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
+          onClick={() => setMobileFiltersOpen(false)}
+          aria-hidden
+        />
+
+        {/* Sheet */}
+        <div
+          className={`fixed bottom-0 left-0 right-0 z-50 flex max-h-[88vh] flex-col bg-ivory transition-transform duration-400 ease-luxury ${
+            mobileFiltersOpen ? 'translate-y-0' : 'translate-y-full'
+          }`}
+        >
+          {/* Drag handle */}
+          <div className="flex flex-shrink-0 justify-center pb-2 pt-3">
+            <div className="h-1 w-10 rounded-full bg-bronze/30" />
           </div>
+
+          {/* Header */}
+          <div className="flex flex-shrink-0 items-center justify-between border-b border-bronze/20 px-5 py-3.5">
+            <p className="font-body text-[11px] font-medium uppercase tracking-[0.18em] text-ink">
+              Refine
+            </p>
+            <button
+              onClick={() => updateActive(DEFAULT_FILTERS)}
+              className="font-body text-[10px] text-bronze transition-colors duration-400 ease-luxury hover:text-bronze-dark"
+            >
+              Clear all
+            </button>
+          </div>
+
+          {/* Scrollable filter content */}
+          <div className="flex-1 overflow-y-auto overscroll-contain">
+
+            {/* Availability */}
+            <div className="border-b border-bronze/20 px-5 py-4">
+              <p className="mb-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted">
+                Availability
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {(['available', 'reserved', 'on_hold', 'sold'] as const).map((v) => {
+                  const label = v === 'on_hold' ? 'On hold' : v.charAt(0).toUpperCase() + v.slice(1)
+                  const checked = active.availability.includes(v)
+                  return (
+                    <button
+                      key={v}
+                      onClick={() => {
+                        const next = checked
+                          ? active.availability.filter((x) => x !== v)
+                          : [...active.availability, v]
+                        updateActive({ ...active, availability: next })
+                      }}
+                      className={`px-3.5 py-2 font-body text-[11px] tracking-[0.1em] border transition-colors duration-400 ease-luxury ${
+                        checked ? 'border-ink bg-ink text-ivory' : 'border-bronze/30 text-muted'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Brand */}
+            {filterOptions.brands.length > 0 && (
+              <div className="border-b border-bronze/20 px-5 py-4">
+                <p className="mb-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted">Brand</p>
+                <div className="flex flex-wrap gap-2">
+                  {filterOptions.brands.map((brand) => {
+                    const checked = active.brands.includes(brand)
+                    return (
+                      <button
+                        key={brand}
+                        onClick={() => {
+                          const next = checked
+                            ? active.brands.filter((x) => x !== brand)
+                            : [...active.brands, brand]
+                          updateActive({ ...active, brands: next })
+                        }}
+                        className={`px-3.5 py-2 font-body text-[11px] tracking-[0.1em] border transition-colors duration-400 ease-luxury ${
+                          checked ? 'border-ink bg-ink text-ivory' : 'border-bronze/30 text-muted'
+                        }`}
+                      >
+                        {BRAND_LABELS[brand] ?? brand}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Condition */}
+            {filterOptions.conditions.length > 0 && (
+              <div className="border-b border-bronze/20 px-5 py-4">
+                <p className="mb-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted">Condition</p>
+                <div className="flex flex-wrap gap-2">
+                  {filterOptions.conditions.map((cond) => {
+                    const checked = active.conditions.includes(cond)
+                    return (
+                      <button
+                        key={cond}
+                        onClick={() => {
+                          const next = checked
+                            ? active.conditions.filter((x) => x !== cond)
+                            : [...active.conditions, cond]
+                          updateActive({ ...active, conditions: next })
+                        }}
+                        className={`px-3.5 py-2 font-body text-[11px] tracking-[0.1em] border transition-colors duration-400 ease-luxury ${
+                          checked ? 'border-ink bg-ink text-ivory' : 'border-bronze/30 text-muted'
+                        }`}
+                      >
+                        {CONDITION_LABELS[cond] ?? cond}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Price range */}
+            <div className="border-b border-bronze/20 px-5 py-4">
+              <p className="mb-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted">
+                Price range
+              </p>
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={active.minPrice}
+                  onChange={(e) => updateActive({ ...active, minPrice: e.target.value })}
+                  className="w-full border border-bronze/20 bg-transparent px-3 py-2.5 font-body text-[13px] text-ink outline-none focus:border-bronze"
+                />
+                <span className="flex-shrink-0 font-body text-[12px] text-bronze/40">—</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={active.maxPrice}
+                  onChange={(e) => updateActive({ ...active, maxPrice: e.target.value })}
+                  className="w-full border border-bronze/20 bg-transparent px-3 py-2.5 font-body text-[13px] text-ink outline-none focus:border-bronze"
+                />
+              </div>
+            </div>
+
+            {/* Size */}
+            {filterOptions.sizes.length > 0 && (
+              <div className="px-5 py-4">
+                <p className="mb-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted">Size</p>
+                <div className="flex flex-wrap gap-2">
+                  {filterOptions.sizes.map((size) => {
+                    const checked = active.sizes.includes(size)
+                    return (
+                      <button
+                        key={size}
+                        onClick={() => {
+                          const next = checked
+                            ? active.sizes.filter((x) => x !== size)
+                            : [...active.sizes, size]
+                          updateActive({ ...active, sizes: next })
+                        }}
+                        className={`px-3.5 py-2 font-body text-[11px] tracking-[0.1em] border transition-colors duration-400 ease-luxury ${
+                          checked ? 'border-ink bg-ink text-ivory' : 'border-bronze/30 text-muted'
+                        }`}
+                      >
+                        {size.charAt(0).toUpperCase() + size.slice(1)}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+          </div>
+
+          {/* Sticky CTA */}
+          <div className="flex-shrink-0 border-t border-bronze/20 bg-ivory p-4">
+            <button
+              onClick={() => setMobileFiltersOpen(false)}
+              className="w-full bg-ink py-3.5 font-body text-[11px] font-medium uppercase tracking-[0.22em] text-ivory transition-colors duration-400 ease-luxury active:bg-bronze"
+            >
+              View {filtered.length} {filtered.length === 1 ? 'piece' : 'pieces'}
+            </button>
+          </div>
+
         </div>
-      )}
+      </div>
 
       {/* ── Toolbar ── */}
       <div id="catalog-toolbar" className="border-b border-bronze/20 px-4 py-3 md:px-[10%]">
