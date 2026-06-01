@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 const navLinksLeft = [
   { href: '/catalog',    label: 'Catalog' },
@@ -20,8 +21,9 @@ interface HeaderProps {
 }
 
 export default function Header({ heroIsDark = false }: HeaderProps) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const [menuOpen, setMenuOpen]   = useState(false)
+  const [scrolled, setScrolled]   = useState(false)
+  const pathname                  = usePathname()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -34,6 +36,10 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
 
+  // A link is active if the pathname starts with its href (covers nested routes)
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname.startsWith(href)
+
   const getColors = () => ({
     link:      scrolled ? 'var(--color-ink)'        : heroIsDark ? 'rgba(245,241,236,0.85)' : 'var(--color-ink)',
     hover:     'var(--color-bronze)',
@@ -42,16 +48,18 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
     diamond:   scrolled ? 'var(--color-bronze)'     : heroIsDark ? 'rgba(139,111,71,0.7)'   : 'var(--color-bronze)',
   })
 
-  const navLinkStyle = (): React.CSSProperties => ({
+  const navLinkStyle = (href: string): React.CSSProperties => ({
     fontFamily:     'var(--font-body)',
     fontSize:       '0.6rem',
     fontWeight:     400,
     letterSpacing:  '0.2em',
     textTransform:  'uppercase',
-    color:          getColors().link,
+    color:          isActive(href) ? 'var(--color-bronze)' : getColors().link,
     textDecoration: 'none',
     transition:     'color 300ms ease',
     whiteSpace:     'nowrap',
+    position:       'relative',
+    paddingBottom:  '2px',
   })
 
   const diamond = (
@@ -68,6 +76,20 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
 
   return (
     <>
+      {/* Active link underline style */}
+      <style>{`
+        .nav-link-active::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background-color: var(--color-bronze);
+          opacity: 0.6;
+        }
+      `}</style>
+
       <header style={{
         position:        'fixed',
         top:             0,
@@ -87,7 +109,7 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
           position:   'relative',
         }}>
 
-          {/* ── Mobile hamburger ── */}
+          {/* Mobile hamburger */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
@@ -130,16 +152,12 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
             }} />
           </button>
 
-          {/* ── Desktop nav ── */}
+          {/* Desktop nav */}
           <nav
             className="hidden lg:flex"
-            style={{
-              alignItems: 'center',
-              width:      '100%',
-              position:   'relative',
-            }}
+            style={{ alignItems: 'center', width: '100%', position: 'relative' }}
           >
-            {/* Left links — takes up equal space */}
+            {/* Left links */}
             <div style={{
               display:        'flex',
               alignItems:     'center',
@@ -152,9 +170,16 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  style={navLinkStyle()}
-                  onMouseEnter={e => (e.currentTarget.style.color = getColors().hover)}
-                  onMouseLeave={e => (e.currentTarget.style.color = getColors().link)}
+                  style={navLinkStyle(link.href)}
+                  className={isActive(link.href) ? 'nav-link-active' : ''}
+                  onMouseEnter={e => {
+                    if (!isActive(link.href))
+                      e.currentTarget.style.color = getColors().hover
+                  }}
+                  onMouseLeave={e => {
+                    if (!isActive(link.href))
+                      e.currentTarget.style.color = getColors().link
+                  }}
                 >
                   {link.label}
                 </Link>
@@ -162,7 +187,7 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
               {diamond}
             </div>
 
-            {/* Wordmark — no flex, just its natural width, centered by equal sides */}
+            {/* Wordmark */}
             <Link
               href="/"
               style={{
@@ -181,7 +206,7 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
               Fad Élan
             </Link>
 
-            {/* Right links — equal space, mirror of left */}
+            {/* Right links */}
             <div style={{
               display:        'flex',
               alignItems:     'center',
@@ -195,9 +220,16 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  style={navLinkStyle()}
-                  onMouseEnter={e => (e.currentTarget.style.color = getColors().hover)}
-                  onMouseLeave={e => (e.currentTarget.style.color = getColors().link)}
+                  style={navLinkStyle(link.href)}
+                  className={isActive(link.href) ? 'nav-link-active' : ''}
+                  onMouseEnter={e => {
+                    if (!isActive(link.href))
+                      e.currentTarget.style.color = getColors().hover
+                  }}
+                  onMouseLeave={e => {
+                    if (!isActive(link.href))
+                      e.currentTarget.style.color = getColors().link
+                  }}
                 >
                   {link.label}
                 </Link>
@@ -205,7 +237,7 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
             </div>
           </nav>
 
-          {/* ── Mobile wordmark ── */}
+          {/* Mobile wordmark */}
           <Link
             href="/"
             className="lg:hidden"
@@ -230,7 +262,7 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
         </div>
       </header>
 
-      {/* ── Mobile menu overlay ── */}
+      {/* Mobile menu overlay */}
       <div
         className="lg:hidden"
         style={{
@@ -269,7 +301,7 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
               fontSize:       '2.5rem',
               fontWeight:     300,
               letterSpacing:  '0.04em',
-              color:          'var(--color-ink)',
+              color:          isActive(link.href) ? 'var(--color-bronze)' : 'var(--color-ink)',
               textDecoration: 'none',
               padding:        '0.6rem 0',
               opacity:        menuOpen ? 1 : 0,
@@ -277,7 +309,7 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
               transition:     `opacity 500ms ease ${i * 70}ms, transform 500ms cubic-bezier(0.4,0,0.2,1) ${i * 70}ms, color 200ms ease`,
             }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-bronze)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-ink)')}
+            onMouseLeave={e => (e.currentTarget.style.color = isActive(link.href) ? 'var(--color-bronze)' : 'var(--color-ink)')}
           >
             {link.label}
           </Link>

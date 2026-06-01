@@ -13,7 +13,7 @@ import { PortableText } from '@portabletext/react'
 import ProductGallery from '@/components/product/ProductGallery'
 import ProductInquiry from '@/components/product/ProductInquiry'
 import ProductSuggestions from '@/components/product/ProductSuggestions'
-import AboutCta from '@/components/about/AboutCta'
+import CtaBanner from '@/components/how-to-buy/CtaBanner'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -26,19 +26,49 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params
+  if (!slug) return {}
   const bag = await sanityFetch<BagDetail>(BAG_DETAIL_QUERY, { slug })
   if (!bag) return {}
   return {
     title: bag.seoTitle ?? `${bag.name} — Fadelan`,
-    description: bag.seoDescription ?? `${BRAND_LABELS[bag.brand] ?? bag.brand} ${bag.name} — pre-loved luxury bag available at Fadelan.`,
+    description:
+      bag.seoDescription ??
+      `${BRAND_LABELS[bag.brand] ?? bag.brand} ${bag.name} — pre-loved luxury bag available at Fadelan.`,
   }
 }
 
 const availabilityStyles: Record<string, string> = {
   available: 'bg-[#F5F1EC] text-green-700',
   reserved:  'bg-[#F5F1EC] text-amber-500',
+  on_hold:   'bg-[#F5F1EC] text-orange-500',
   sold:      'bg-[#F5F1EC] text-neutral-500',
 }
+
+const HARDWARE_LABELS: Record<string, string> = {
+  gold:         'Gold',
+  silver:       'Silver',
+  ruthenium:    'Ruthenium',
+  palladium:    'Palladium',
+  brushed_gold: 'Brushed Gold',
+  aged_gold:    'Aged Gold',
+  mixed:        'Mixed',
+}
+
+const SIZE_LABELS: Record<string, string> = {
+  mini:     'Mini',
+  small:    'Small',
+  medium:   'Medium',
+  large:    'Large',
+  xl:       'XL',
+  one_size: 'One Size',
+}
+
+const formatIncludes = (items: string[] | undefined) =>
+  items
+    ?.map((item) =>
+      item.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+    )
+    .join(', ')
 
 export default async function BagDetailPage({ params }: PageProps) {
   const { slug } = await params
@@ -55,150 +85,172 @@ export default async function BagDetailPage({ params }: PageProps) {
     .sort((a, b) => (a.brand === bag.brand ? -1 : b.brand === bag.brand ? 1 : 0))
     .slice(0, 3)
 
-  const specs: { label: string; value: string | undefined }[] = [
-    { label: 'Condition', value: CONDITION_LABELS[bag.condition] ?? bag.condition },
-    { label: 'Size',      value: bag.size },
-    { label: 'Material',  value: bag.material },
-    { label: 'Hardware',  value: bag.hardware },
-    { label: 'Year',      value: bag.year },
-    { label: 'Includes',  value: bag.includes?.join(', ') },
-  ].filter((s) => s.value)
-
   const details: { label: string; value: string | undefined }[] = [
-    { label: 'Material',     value: bag.material },
-    { label: 'Dimensions',   value: bag.dimensions },
-    { label: 'Hardware',     value: bag.hardware },
-    { label: 'Authenticity', value: bag.authenticityNote ?? 'Verified by Fadelan' },
-    { label: 'Shipping',     value: bag.shippingNote ?? settings.defaultShippingNote },
-    { label: 'Condition',    value: CONDITION_LABELS[bag.condition] },
+    { label: 'Material',   value: bag.material },
+    { label: 'Hardware',   value: bag.hardware ? (HARDWARE_LABELS[bag.hardware] ?? bag.hardware) : undefined },
+    { label: 'Condition',  value: bag.condition ? (CONDITION_LABELS[bag.condition] ?? bag.condition) : undefined },
+    { label: 'Size',       value: bag.size ? (SIZE_LABELS[bag.size] ?? bag.size) : undefined },
+    { label: 'Year',       value: bag.year },
+    { label: 'Dimensions', value: bag.dimensions },
+    { label: 'Includes',   value: formatIncludes(bag.includes) },
+    { label: 'Shipping',   value: bag.shippingNote ?? settings.defaultShippingNote },
   ].filter((d) => d.value)
 
   return (
     <main className="min-h-screen bg-[#F5F1EC]">
 
-      {/* Dark brown top band — sits behind nav if nav is transparent/sticky */}
-      <div className="relative h-20 w-full bg-[#2C2118]">
+      {/* Dark top band — h-14 mobile / h-20 desktop */}
+      <div className="relative h-14 w-full bg-[#2C2118] md:h-20">
         <div
           className="pointer-events-none absolute inset-0"
           style={{
-            background: 'radial-gradient(ellipse 60% 100% at 50% 50%, rgba(139,111,71,0.2) 0%, transparent 70%)',
+            background:
+              'radial-gradient(ellipse 60% 100% at 50% 50%, rgba(139,111,71,0.2) 0%, transparent 70%)',
           }}
         />
       </div>
 
-
-
       {/* Breadcrumb */}
-      <div className="relative z-10 bg-[#F5F1EC] px-6 py-5 md:px-10">
-        <nav className="flex items-center gap-2 text-[11px]">
-          <Link href="/catalog" className="text-[#8C8275] hover:text-[#1A1A1A] transition-colors">Catalog</Link>
+      <div className="bg-[#F5F1EC] px-4 py-4 md:px-10 md:py-5">
+        <nav className="flex items-center gap-1.5 text-[10px] md:text-[11px]">
+          <Link href="/catalog" className="text-[#8C8275] transition-colors hover:text-[#1A1A1A]">
+            Catalog
+          </Link>
           <span className="text-[#C8BFB2]">›</span>
-          <span className="text-[#8C8275]">{BRAND_LABELS[bag.brand] ?? bag.brand}</span>
-          <span className="text-[#C8BFB2]">›</span>
-          <span className="text-[#1A1A1A] font-medium">{bag.name}</span>
+          <span className="hidden text-[#8C8275] sm:inline">
+            {BRAND_LABELS[bag.brand] ?? bag.brand}
+          </span>
+          <span className="hidden text-[#C8BFB2] sm:inline">›</span>
+          <span className="max-w-[180px] truncate font-medium text-[#1A1A1A] sm:max-w-none">
+            {bag.name}
+          </span>
         </nav>
       </div>
 
-      {/* Main product section */}
-      <div className="relative w-full py-10 md:py-14">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-0">
+      {/* Main product section
+          min-h subtracts: top band (3.5rem mobile / 5rem desktop) + breadcrumb (~2.5rem)
+          so the section fills the remaining viewport and Piece Details stays below fold */}
+      <div className="w-full min-h-[calc(100vh-4rem)] flex flex-col">
+        <div className="grid grid-cols-1 md:grid-cols-2 flex-1 md:items-start">
 
-          {/* LEFT — Gallery */}
+          {/* LEFT — Gallery — sticky on desktop so it fills the height */}
           <div>
-            <ProductGallery photos={bag.photos} name={bag.name} />
+            <ProductGallery photos={bag.photos ?? []} name={bag.name} />
           </div>
 
           {/* RIGHT — Details */}
-          <div className="px-6 pt-8 md:px-14 md:pt-12">
+          <div className="flex flex-col justify-start px-4 py-8 md:px-14 md:pt-12 md:pb-16">
+
             {/* Brand */}
-            <p className="mb-3 text-[10px] uppercase tracking-[0.22em] text-[#8B6F47]">
+            <p className="mb-2 text-[9px] uppercase tracking-[0.22em] text-[#8B6F47] md:mb-3 md:text-[10px]">
               {BRAND_LABELS[bag.brand] ?? bag.brand}
             </p>
 
             {/* Name */}
-            <h1 className="mb-3 font-['Cormorant_Garamond'] text-[clamp(1.8rem,4vw,3rem)] font-normal leading-[1.05] text-[#1A1A1A]">
+            <h1 className="mb-2 font-['Cormorant_Garamond'] text-[2rem] font-normal leading-[1.05] text-[#1A1A1A] md:mb-3 md:text-[clamp(1.8rem,3vw,3rem)]">
               {bag.name}
             </h1>
 
-            {/* Material + color subtitle */}
-            {(bag.material || bag.color) && (
-              <p className="mb-6 font-['Cormorant_Garamond'] text-[1.05rem] italic text-[#8C8275]">
-                {[bag.material, bag.hardware].filter(Boolean).join(' · ')}
+            {/* Subtitle */}
+            {(bag.material || bag.hardware) && (
+              <p className="mb-4 font-['Cormorant_Garamond'] text-[1rem] italic text-[#8C8275] md:mb-5 md:text-[1.05rem]">
+                {[
+                  bag.material,
+                  bag.hardware ? (HARDWARE_LABELS[bag.hardware] ?? bag.hardware) : undefined,
+                ].filter(Boolean).join(' · ')}
               </p>
             )}
 
             {/* Price + availability */}
-            <div className="mb-8 flex items-center gap-4">
-              <p className="font-['Cormorant_Garamond'] text-[2.2rem] text-[#2C2118]">
+            <div className="mb-5 flex items-center gap-3 md:mb-8">
+              <p className="font-['Cormorant_Garamond'] text-[1.8rem] text-[#2C2118] md:text-[2.2rem]">
                 ₱ {bag.price.toLocaleString('en-PH')}
               </p>
-              <span className={`px-2 py-0.5 text-[9px] uppercase tracking-[0.1em] ${availabilityStyles[bag.availability] ?? 'bg-[#F5F1EC] text-neutral-500'} border border-[#8B6F47]`}>
+              <span
+                className={`px-2 py-0.5 text-[8px] uppercase tracking-[0.1em] border border-[#8B6F47] md:text-[9px] ${
+                  availabilityStyles[bag.availability] ?? 'bg-[#F5F1EC] text-neutral-500'
+                }`}
+              >
                 {AVAILABILITY_LABELS[bag.availability] ?? bag.availability}
               </span>
             </div>
 
-            <div className="mb-6 h-px bg-[#D6CEBE]" />
-
-            {/* Specs grid */}
-            {specs.length > 0 && (
-              <div className="mb-6 grid grid-cols-2 gap-x-6 gap-y-0">
-                {specs.map((spec) => (
-                  <div key={spec.label} className="border-b border-[#D6CEBE] py-4">
-                    <p className="mb-1 text-[9px] uppercase tracking-[0.16em] text-[#8B6F47]">{spec.label}</p>
-                    <p className="font-['Cormorant_Garamond'] text-[1.05rem] text-[#1A1A1A]">{spec.value}</p>
-                  </div>
-                ))}
+            {/* Description */}
+            {bag.description && (
+              <div className="mb-5 font-['Cormorant_Garamond'] text-[1rem] leading-[1.8] text-[#8C8275] md:mb-6 md:text-[1.05rem]">
+                <PortableText value={bag.description} />
               </div>
             )}
 
-            {/* Inquiry card */}
-            <div className="mb-6 border border-[#D6CEBE] bg-[#EDE6DC] p-7">
-              <h3 className="mb-2 font-['Cormorant_Garamond'] text-[1.4rem] font-normal text-[#1A1A1A]">
+            {/* Divider */}
+            <div className="mb-5 h-px bg-[#D6CEBE] md:mb-6" />
+
+            {/* Inquiry card — hidden on mobile, shown on desktop */}
+            <div className="hidden md:block mb-5 border border-[#D6CEBE] bg-[#EDE6DC] p-5 md:mb-6 md:p-7">
+              <h3 className="mb-1.5 font-['Cormorant_Garamond'] text-[1.2rem] font-normal text-[#1A1A1A] md:mb-2 md:text-[1.4rem]">
                 Inquire to Reserve
               </h3>
-              <p className="mb-6 text-[13px] leading-[1.8] text-[#8C8275]">
-                Send us a message — we'll confirm availability and walk you through next steps. Most inquiries replied to within an hour.
+              <p className="mb-4 text-[12px] leading-[1.8] text-[#8C8275] md:mb-6 md:text-[13px]">
+                Send us a message — we'll confirm availability and walk you
+                through next steps. Most inquiries replied to within an hour.
               </p>
               <ProductInquiry bagName={bag.name} price={bag.price} settings={settings} />
             </div>
 
-            <p className="text-[11px] leading-[1.6] text-[#8C8275]">
+            <p className="hidden md:block text-[10px] leading-[1.6] text-[#8C8275] md:text-[11px]">
               One of a kind. Confirm availability before committing.
             </p>
           </div>
         </div>
       </div>
 
-
-
       {/* Piece details band */}
       {details.length > 0 && (
-        <section className="bg-[#2C2118] px-6 py-12 md:px-10">
-          <div className="mx-auto w-full md:max-w-[90%]">
-            <div className="mb-8 flex items-center gap-4">
-              <h2 className="whitespace-nowrap font-['Cormorant_Garamond'] text-[1.3rem] font-normal text-[#F5F1EC]">
-                Piece details
-              </h2>
-              <div className="h-px flex-1 bg-[rgba(245,241,236,0.15)]" />
-            </div>
-            <div className="grid grid-cols-2 gap-px bg-[rgba(245,241,236,0.08)] md:grid-cols-3">
-              {details.map((d) => (
-                <div key={d.label} className="relative bg-[#2C2118] px-5 py-5">
-                  <p className="mb-1 text-[9px] uppercase tracking-[0.14em] text-[#8B6F47]">{d.label}</p>
-                  <p className="font-['Cormorant_Garamond'] text-[1.05rem] text-[rgba(245,241,236,0.85)]">{d.value}</p>
-                </div>
-              ))}
-            </div>
+        <section className="w-full bg-[#EDE6DC] flex flex-col md:flex-row">
 
-            {/* Authenticity note */}
-            {bag.authenticityNote && (
-              <div className="mt-8 border-l-2 border-[#8B6F47] pl-5">
-                <p className="text-[12.5px] italic leading-[1.8] text-[rgba(245,241,236,0.5)]">
-                  {bag.authenticityNote}
+          {/* Left */}
+          <div className="w-full md:w-2/5 flex flex-col justify-center px-6 py-10 border-b border-[rgba(139,111,71,0.18)] md:border-b-0 md:border-r md:px-10 md:py-14">
+            <p className="font-['Cormorant_Garamond'] text-[2rem] font-light leading-[1.05] text-[#2C2118] md:text-[2.6rem]">
+              Piece Details
+            </p>
+            <div className="mt-4 h-px w-10 bg-[#8B6F47] md:mt-5" />
+            <p className="mt-4 font-['Cormorant_Garamond'] text-[12px] italic text-[#8C8275] md:mt-5 md:text-[13px]">
+              {bag.authenticityNote ?? 'Verified by Fadelan'}
+            </p>
+          </div>
+
+          {/* Right — spec tiles */}
+          <div className="w-full md:w-3/5 grid grid-cols-2 gap-px bg-[rgba(139,111,71,0.12)] md:grid-cols-3">
+            {details.map((d) => (
+              <div
+                key={d.label}
+                className="bg-[#EDE6DC] px-5 py-6 transition-colors duration-200 hover:bg-[#E8DFD3] md:px-6"
+              >
+                <p className="mb-2 text-[8px] uppercase tracking-[0.18em] text-[#8B6F47] md:text-[9px]">
+                  {d.label}
+                </p>
+                <p className="font-['Cormorant_Garamond'] text-[1.05rem] font-light text-[#2C2118] md:text-[1.15rem]">
+                  {d.value}
                 </p>
               </div>
-            )}
+            ))}
           </div>
+
+          {/* Mobile-only inquiry — shown below spec tiles on mobile */}
+          <div className="md:hidden px-6 py-8 border-t border-[rgba(139,111,71,0.18)]">
+            <h3 className="mb-1.5 font-['Cormorant_Garamond'] text-[1.2rem] font-normal text-[#1A1A1A]">
+              Inquire to Reserve
+            </h3>
+            <p className="mb-4 text-[12px] leading-[1.8] text-[#8C8275]">
+              Send us a message — we'll confirm availability and walk you
+              through next steps. Most inquiries replied to within an hour.
+            </p>
+            <ProductInquiry bagName={bag.name} price={bag.price} settings={settings} />
+            <p className="mt-4 text-[10px] leading-[1.6] text-[#8C8275]">
+              One of a kind. Confirm availability before committing.
+            </p>
+          </div>
+
         </section>
       )}
 
@@ -206,10 +258,8 @@ export default async function BagDetailPage({ params }: PageProps) {
       <ProductSuggestions bags={suggestions} />
 
       {/* CTA */}
-      <AboutCta
-        headline="Explore more pieces"
-        body="Every bag in our catalog is one of a kind — curated, verified, and waiting for its next chapter."
-      />
+      <CtaBanner />
+
     </main>
   )
 }

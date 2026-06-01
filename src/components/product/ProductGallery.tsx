@@ -17,27 +17,37 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
   if (!photos.length) {
     return (
       <div
-        className="relative aspect-[4/5] w-full bg-[#EDE6DC]"
-        style={{ borderRadius: '0 120px 0 0', border: '1px solid #D6CEBE' }}
+        className="relative w-full bg-[#EDE6DC]"
+        style={{
+          aspectRatio: '4/5',
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: '80px',
+          borderBottomRightRadius: 0,
+          borderBottomLeftRadius: 0,
+          border: '1px solid #D6CEBE',
+        }}
       />
     )
   }
 
   return (
-    <div className={`flex gap-3 ${hasMultiple ? 'flex-col md:flex-row' : ''}`}>
+    <div className={`flex gap-2 md:gap-3 ${hasMultiple ? 'flex-col md:flex-row' : ''}`}>
 
       {/* Main image */}
       <div className={`relative ${hasMultiple ? 'flex-1' : 'w-full'}`}>
-        {/* Decorative offset bronze border */}
+        {/* Decorative offset bronze border — hidden on mobile */}
         <div
-          className="pointer-events-none absolute"
+          className="pointer-events-none absolute hidden md:block"
           style={{
             top: '14px',
             right: '-14px',
             bottom: '-14px',
             left: '0',
             border: '1px solid rgba(139,111,71,0.28)',
-            borderRadius: '0 134px 0 0',
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: '134px',
+            borderBottomRightRadius: 0,
+            borderBottomLeftRadius: 0,
             zIndex: 0,
           }}
         />
@@ -46,7 +56,10 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
           style={{
             aspectRatio: '4/5',
             maxHeight: '80vh',
-            borderRadius: '0 120px 0 0',
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 'clamp(40px, 8vw, 120px)',
+            borderBottomRightRadius: 0,
+            borderBottomLeftRadius: 0,
             border: '1px solid #D6CEBE',
           }}
         >
@@ -63,19 +76,25 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
         </div>
       </div>
 
-      {/* Thumbnail strip — right on desktop, bottom on mobile */}
+      {/* Thumbnail strip — bottom on mobile, right on desktop */}
       {hasMultiple && (
-        <div className="flex flex-row gap-2 overflow-x-auto md:flex-col md:overflow-x-visible md:overflow-y-auto">
+        <div className="flex flex-row gap-1.5 overflow-x-auto pb-1 md:flex-col md:overflow-x-visible md:overflow-y-auto md:pb-0">
           {photos.map((photo, i) => (
             <button
               key={photo._key}
               onClick={() => setActive(i)}
-              className={`relative h-16 w-16 flex-shrink-0 overflow-hidden border transition-all duration-200 md:h-[72px] md:w-[72px] ${
+              aria-label={`View photo ${i + 1}`}
+              className={`relative h-14 w-14 flex-shrink-0 overflow-hidden border transition-all duration-200 md:h-[72px] md:w-[72px] ${
                 active === i
-                  ? 'border-[#8B6F47]'
-                  : 'border-[#D6CEBE] opacity-55 hover:opacity-100 hover:border-[#8B6F47]'
+                  ? 'border-[#8B6F47] opacity-100'
+                  : 'border-[#D6CEBE] opacity-55 hover:border-[#8B6F47] hover:opacity-100'
               }`}
-              style={{ borderRadius: '0 10px 0 0' }}
+              style={{
+                borderTopLeftRadius: 0,
+                borderTopRightRadius: '10px',
+                borderBottomRightRadius: 0,
+                borderBottomLeftRadius: 0,
+              }}
             >
               <Image
                 src={urlFor(photo.asset).width(160).format('webp').url()}

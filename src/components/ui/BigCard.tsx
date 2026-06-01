@@ -28,7 +28,7 @@ export default function BagCard({ bag }: BagCardProps) {
 
   return (
     <Link
-      href={`/bag/${bag.slug.current}`}
+      href={`/catalog/${bag.slug.current}`}
       style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
     >
       <article
