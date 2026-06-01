@@ -1,8 +1,13 @@
+'use client'
+
+import React from 'react'
+
 interface ContactChannelsProps {
   instagramHandle?: string
   messengerUrl?: string
   viberNumber?: string
   locationDescription?: string
+  contactEmail?: string
 }
 
 interface ChannelCard {
@@ -38,11 +43,18 @@ const IconLocation = () => (
   </svg>
 )
 
+const IconEmail = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
+  </svg>
+)
+
 export default function ContactChannels({
   instagramHandle,
   messengerUrl,
   viberNumber,
   locationDescription,
+  contactEmail,
 }: ContactChannelsProps) {
   const channels: ChannelCard[] = [
     {
@@ -58,7 +70,7 @@ export default function ContactChannels({
       label: 'Messenger',
       value: 'Fad Élan Deluxe Bags',
       sub:   'We reply within the hour',
-      href:  messengerUrl ?? `https://www.m.me/Fadelandeluxe`,
+      href:  messengerUrl ?? 'https://www.m.me/Fadelandeluxe',
       icon:  <IconMessenger />,
     },
     {
@@ -69,6 +81,13 @@ export default function ContactChannels({
         ? `viber://chat?number=${viberNumber.replace(/\s+/g, '')}`
         : null,
       icon:  <IconViber />,
+    },
+    {
+      label: 'Email',
+      value: contactEmail ?? 'hello@fadelan.com',
+      sub:   'For formal inquiries and quotations',
+      href:  contactEmail ? `mailto:${contactEmail}` : null,
+      icon:  <IconEmail />,
     },
     {
       label: 'Meetup',
@@ -94,11 +113,9 @@ export default function ContactChannels({
         {channels.map((ch) => {
           const inner = (
             <div className="group relative border border-[#D6CEBE] p-8 transition-colors duration-200 hover:bg-[#EDE6DC]">
-              {/* Bronze corner accent */}
               <span className="absolute left-0 top-0 h-px w-6 bg-[#8B6F47] opacity-50" />
               <span className="absolute left-0 top-0 h-6 w-px bg-[#8B6F47] opacity-50" />
 
-              {/* Icon + label row */}
               <div className="mb-4 flex items-center gap-3">
                 <span className="text-[#8B6F47] opacity-70 transition-opacity duration-200 group-hover:opacity-100">
                   {ch.icon}
@@ -116,7 +133,6 @@ export default function ContactChannels({
               </p>
               <div className="mt-5 h-px w-6 bg-[rgba(139,111,71,0.3)]" />
 
-              {/* Arrow — shows on hover */}
               {ch.href && (
                 <span className="absolute bottom-6 right-6 text-[10px] tracking-[0.1em] text-[#8B6F47] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                   ↗
@@ -129,7 +145,7 @@ export default function ContactChannels({
             <a
               key={ch.label}
               href={ch.href}
-              target={ch.href.startsWith('viber') ? '_self' : '_blank'}
+              target={ch.href.startsWith('viber') || ch.href.startsWith('mailto') ? '_self' : '_blank'}
               rel="noopener noreferrer"
               className="block"
             >
