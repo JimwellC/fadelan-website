@@ -25,7 +25,6 @@ export default async function ContactPage() {
         <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
           <ContactChannels
             instagramHandle={settings.instagramHandle}
-            contactEmail={settings.contactEmail}
             viberNumber={settings.viberNumber}
             locationDescription={settings.locationDescription}
           />
