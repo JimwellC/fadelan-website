@@ -1,4 +1,5 @@
 import { Search, MessageCircle, ShieldCheck, Package, LucideIcon } from "lucide-react";
+import ScrollReveal from "../ui/ScrollReveal";
 
 type Step = {
   num: string;
@@ -37,49 +38,59 @@ const STEPS: Step[] = [
 export default function ProcessSteps() {
   return (
     <section className="bg-[#F5F1EC] py-12 md:py-14">
-      <p className="mb-6 font-sans text-[11px] uppercase tracking-[0.16em] text-[#8C8275] md:mb-7">
-        The Fadelan process
-      </p>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
+      <ScrollReveal delay={0}>
+        <p className="mb-6 font-sans text-[11px] uppercase tracking-[0.16em] text-[#8C8275] md:mb-7">
+          The Fadelan process
+        </p>
+      </ScrollReveal>
+
+      {/* IMPORTANT: stretch grid items */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4 items-stretch">
+
         {STEPS.map((step, i) => (
-          <div
-            key={step.num}
-            className="group relative border border-[#D6CEBE] bg-[#F5F1EC] p-5 transition-colors duration-300 hover:bg-[#EDE6DC] md:p-6"
-          >
-            {/* Bronze corner accent */}
-            <span className="absolute left-0 top-0 h-px w-5 bg-[#8B6F47] opacity-50" />
-            <span className="absolute left-0 top-0 h-5 w-px bg-[#8B6F47] opacity-50" />
+          <ScrollReveal key={step.num} delay={120 + i * 90}>
+            
+            {/* IMPORTANT: full height wrapper */}
+            <div className="group relative h-full border border-[#D6CEBE] bg-[#F5F1EC] p-5 transition-colors duration-300 hover:bg-[#EDE6DC] md:p-6 flex flex-col">
 
-            {/* Icon */}
-            <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#EDE6DC] transition-colors duration-300 group-hover:bg-[#8B6F47]">
-              <step.Icon
-                size={16}
-                className="text-[#8B6F47] transition-colors duration-300 group-hover:text-[#F5F1EC]"
-              />
+              {/* Bronze corner accent */}
+              <span className="absolute left-0 top-0 h-px w-5 bg-[#8B6F47] opacity-50" />
+              <span className="absolute left-0 top-0 h-5 w-px bg-[#8B6F47] opacity-50" />
+
+              {/* Icon */}
+              <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#EDE6DC] transition-colors duration-300 group-hover:bg-[#8B6F47]">
+                <step.Icon
+                  size={16}
+                  className="text-[#8B6F47] transition-colors duration-300 group-hover:text-[#F5F1EC]"
+                />
+              </div>
+
+              {/* Step label */}
+              <p className="mb-1.5 font-sans text-[10px] uppercase tracking-[0.16em] text-[#8C8275]">
+                Step {i + 1}
+              </p>
+
+              {/* Title */}
+              <h3 className="mb-2 font-cormorant text-[1.3rem] font-medium leading-snug text-[#1A1A1A]">
+                {step.title}
+              </h3>
+
+              {/* Body — grows to fill space */}
+              <p className="text-[12.5px] leading-relaxed text-[#8C8275] flex-1">
+                {step.desc}
+              </p>
+
+              {/* Ghost number pinned bottom */}
+              <p className="mt-4 font-cormorant text-[2.5rem] font-normal leading-none text-[#EDE6DC] transition-colors duration-300 group-hover:text-[#d6cfc5]">
+                {step.num}
+              </p>
+
             </div>
 
-            {/* Step label */}
-            <p className="mb-1.5 font-sans text-[10px] uppercase tracking-[0.16em] text-[#8C8275]">
-              Step {i + 1}
-            </p>
-
-            {/* Title */}
-            <h3 className="mb-2 font-cormorant text-[1.3rem] font-medium leading-snug text-[#1A1A1A]">
-              {step.title}
-            </h3>
-
-            {/* Body */}
-            <p className="text-[12.5px] leading-relaxed text-[#8C8275]">
-              {step.desc}
-            </p>
-
-            {/* Ghost number */}
-            <p className="mt-4 font-cormorant text-[2.5rem] font-normal leading-none text-[#EDE6DC] transition-colors duration-300 group-hover:text-[#d6cfc5]">
-              {step.num}
-            </p>
-          </div>
+          </ScrollReveal>
         ))}
+
       </div>
     </section>
   );

@@ -5,6 +5,7 @@ import ProcessSteps from "@/components/how-to-buy/ProcessSteps";
 import LayawayTerms from "@/components/how-to-buy/LayawayTerms";
 import FaqAccordion from "@/components/how-to-buy/FaqAccordion";
 import CtaBanner from "@/components/how-to-buy/CtaBanner";
+import ScrollReveal from "@/components/ui/ScrollReveal";
 
 export const metadata = {
   title: "How to Buy | Fadelan",
@@ -18,15 +19,27 @@ export default async function HowToBuyPage() {
   return (
     <main className="bg-[#F5F1EC] min-h-screen">
       <HowToBuyHero />
+      <ScrollReveal>
       <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
         <ProcessSteps />
-        <hr className="border-t border-[#EDE6DC]" />
+          <hr className="border-t border-[#EDE6DC]" />
       </div>
-      <LayawayTerms />
+      </ScrollReveal>
+
+      <ScrollReveal>
+        <LayawayTerms />
+      </ScrollReveal>
+      
+      <ScrollReveal delay={100}>
       <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
         <FaqAccordion />
       </div>
-      <CtaBanner />
+      </ScrollReveal>
+      
+      <ScrollReveal delay={50}>
+        <CtaBanner />
+      </ScrollReveal>
+      
     </main>
   );
 }

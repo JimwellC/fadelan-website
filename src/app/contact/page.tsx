@@ -5,6 +5,7 @@ import ContactHero from '@/components/contact/ContactHero'
 import ContactChannels from '@/components/contact/ContactChannels'
 import ContactInquiryForm from '@/components/contact/ContactInquiryForm'
 import AboutCta from '@/components/about/AboutCta'
+import ScrollReveal from '@/components/ui/ScrollReveal'
 
 export const metadata = {
   title: 'Contact — Fadelan',
@@ -21,26 +22,32 @@ export default async function ContactPage() {
     <main className="min-h-screen bg-[#F5F1EC]">
       <ContactHero />
 
-      <div className="bg-[#F5F1EC]">
-        <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
-          <ContactChannels
-            instagramHandle={settings.instagramHandle}
-            viberNumber={settings.viberNumber}
-            locationDescription={settings.locationDescription}
-          />
+      <ScrollReveal>
+        <div className="bg-[#F5F1EC]">
+          <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
+            <ContactChannels
+              instagramHandle={settings.instagramHandle}
+              viberNumber={settings.viberNumber}
+              locationDescription={settings.locationDescription}
+            />
+          </div>
         </div>
-      </div>
+      </ScrollReveal>
 
-      <div className="bg-[#EDE6DC]">
-        <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
-          <ContactInquiryForm bags={bags} />
+      <ScrollReveal delay={100}>
+        <div className="bg-[#EDE6DC]">
+          <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
+            <ContactInquiryForm bags={bags} />
+          </div>
         </div>
-      </div>
+      </ScrollReveal>
 
-      <AboutCta
-        headline="Ready to find your next piece?"
-        body="Browse our current selection of authenticated pre-loved luxury bags — each one curated, verified, and one of a kind."
-      />
+      <ScrollReveal delay={50}>
+        <AboutCta
+          headline="Ready to find your next piece?"
+          body="Browse our current selection of authenticated pre-loved luxury bags — each one curated, verified, and one of a kind."
+        />
+      </ScrollReveal>
     </main>
   )
 }

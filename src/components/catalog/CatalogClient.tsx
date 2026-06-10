@@ -412,13 +412,29 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
                 <>
                   <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-0.5 lg:grid-cols-4">
                     {displayed.map((bag) => {
-                      const isExiting  = exitingIds.has(bag._id)
+                      const isExiting = exitingIds.has(bag._id)
                       const isEntering = enteringIds.has(bag._id)
-                      const enterIndex = isEntering ? (enterIndexMap.get(bag._id) ?? 0) : 0
+
+                      const enterIndex = enterIndexMap.get(bag._id) ?? 0
+
                       return (
-                        <div key={bag._id}
-                          style={{ animationDelay: isExiting ? '0ms' : isEntering ? `${enterIndex * 40}ms` : '0ms' }}
-                          className={`h-full ${isExiting ? 'animate-bag-exit pointer-events-none' : isEntering ? 'animate-bag-enter' : ''}`}>
+                        <div
+                          key={bag._id}
+                          style={{
+                            animationDelay: isExiting
+                              ? '0ms'
+                              : isEntering
+                                ? `${enterIndex * 60}ms`
+                                : '0ms',
+                          }}
+                          className={`h-full ${
+                            isExiting
+                              ? 'animate-bag-exit pointer-events-none'
+                              : isEntering
+                                ? 'animate-bag-enter'
+                                : ''
+                          }`}
+                        >
                           <BagCard bag={bag} />
                         </div>
                       )

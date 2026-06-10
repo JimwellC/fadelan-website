@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { buildInquiryUrls } from '@/lib/sanity'
 import type { SiteSettings } from '@/lib/queries'
+import ScrollReveal from '@/components/ui/ScrollReveal'
 
 interface ProductInquiryProps {
   bagName:  string
@@ -28,37 +29,42 @@ export default function ProductInquiry({ bagName, price, settings }: ProductInqu
   if (!channels.length) return null
 
   return (
-    <div className="flex flex-col gap-2">
+    <ScrollReveal>
+      <div className="flex flex-col gap-2">
 
-      {/* Messaging channels */}
-      <div className="flex flex-col gap-2 sm:flex-row">
-        {channels.map((c) => (
-          <a
-            key={c.label}
-            href={c.href!}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex flex-1 items-center justify-center gap-2 border border-[#D6CEBE] bg-[#F5F1EC] px-3 py-3 text-[10px] uppercase tracking-[0.14em] text-[#1A1A1A] transition-colors hover:border-[#8B6F47] hover:text-[#8B6F47] md:px-4 md:py-3.5"
+        {/* Messaging channels */}
+        <div className="flex flex-col gap-2 sm:flex-row">
+          {channels.map((c) => (
+            <ScrollReveal key={c.label}>
+              <a
+                href={c.href!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-1 items-center justify-center gap-2 border border-[#D6CEBE] bg-[#F5F1EC] px-3 py-3 text-[10px] uppercase tracking-[0.14em] text-[#1A1A1A] transition-colors hover:border-[#8B6F47] hover:text-[#8B6F47] md:px-4 md:py-3.5"
+              >
+                <svg className="h-[13px] w-[13px] flex-shrink-0 md:h-[14px] md:w-[14px]" viewBox="0 0 24 24" fill="currentColor">
+                  <path d={ICONS[c.iconKey]} />
+                </svg>
+                {c.label}
+              </a>
+            </ScrollReveal>
+          ))}
+        </div>
+
+        {/* Contact form */}
+        <ScrollReveal>
+          <Link
+            href="/contact"
+            className="flex w-full items-center justify-center gap-2 bg-[#8B6F47] px-4 py-3 text-[10px] uppercase tracking-[0.14em] text-[#F5F1EC] transition-colors hover:bg-[#7a6040] md:py-3.5"
           >
-            <svg className="h-[13px] w-[13px] flex-shrink-0 md:h-[14px] md:w-[14px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-              <path d={ICONS[c.iconKey]} />
+            <svg className="h-[13px] w-[13px] flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
             </svg>
-            {c.label}
-          </a>
-        ))}
+            Contact form
+          </Link>
+        </ScrollReveal>
+
       </div>
-
-      {/* Contact form */}
-      <Link
-        href="/contact"
-        className="flex w-full items-center justify-center gap-2 bg-[#8B6F47] px-4 py-3 text-[10px] uppercase tracking-[0.14em] text-[#F5F1EC] transition-colors hover:bg-[#7a6040] md:py-3.5"
-      >
-        <svg className="h-[13px] w-[13px] flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
-        </svg>
-        Contact form
-      </Link>
-
-    </div>
+    </ScrollReveal>
   )
 }

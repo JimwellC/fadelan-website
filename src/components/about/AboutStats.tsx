@@ -1,3 +1,5 @@
+import ScrollReveal from "../ui/ScrollReveal"
+
 interface Stat {
   value: string
   label: string
@@ -22,40 +24,56 @@ export default function AboutStats({ stats }: AboutStatsProps) {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse 60% 80% at 50% 50%, rgba(139,111,71,0.12) 0%, transparent 70%)',
+            "radial-gradient(ellipse 60% 80% at 50% 50%, rgba(139,111,71,0.12) 0%, transparent 70%)",
         }}
       />
 
       <div className="relative mx-auto w-full md:max-w-[70%]">
-        {/* Header row */}
-        <div className="mb-8 flex items-center gap-4 md:mb-10">
-          <p className="shrink-0 text-[10px] uppercase tracking-[0.22em] text-[rgba(245,241,236,0.4)]">
-            By the numbers
-          </p>
-          <div className="h-px flex-1 bg-[rgba(245,241,236,0.1)]" />
-        </div>
+        {/* Header */}
+        <ScrollReveal>
+          <div className="mb-8 flex items-center gap-4 md:mb-10">
+            <p className="shrink-0 text-[10px] uppercase tracking-[0.22em] text-[rgba(245,241,236,0.4)]">
+              By the numbers
+            </p>
+            <div className="h-px flex-1 bg-[rgba(245,241,236,0.1)]" />
+          </div>
+        </ScrollReveal>
 
-        {/* Grid — 2 col mobile, 4 col desktop */}
-        <div className="grid grid-cols-2 md:grid-cols-4">
-          {stats.map((stat) => (
-            <div
+        {/* Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 items-stretch gap-4">
+          {stats.map((stat, index) => (
+            <ScrollReveal
               key={stat.label}
-              className="relative border border-[rgba(245,241,236,0.08)] p-4 md:p-7"
+              delay={index * 140}
+              className="h-full w-full flex"
             >
-              {/* Bronze corner accent */}
-              <span className="absolute left-0 top-0 h-px w-5 bg-[rgba(139,111,71,0.5)]" />
-              <span className="absolute left-0 top-0 h-5 w-px bg-[rgba(139,111,71,0.5)]" />
+              <div className="h-full w-full flex">
+                <div className="relative flex h-full w-full flex-col border border-[rgba(245,241,236,0.08)] p-4 md:p-7">
 
-              <p className="font-['Cormorant_Garamond'] text-[clamp(2rem,6vw,3.5rem)] font-light leading-none tracking-[-0.01em] text-[#F5F1EC]">
-                {stat.value}
-              </p>
-              <p className="mt-2 text-[9px] uppercase tracking-[0.14em] text-[rgba(245,241,236,0.5)] md:mt-2.5 md:text-[10px]">
-                {stat.label}
-              </p>
-              <p className="mt-1.5 text-[11px] leading-[1.7] text-[rgba(245,241,236,0.35)] md:mt-2 md:text-xs">
-                {stat.description}
-              </p>
-            </div>
+                  {/* Bronze corner accent */}
+                  <span className="absolute left-0 top-0 h-px w-5 bg-[rgba(139,111,71,0.5)]" />
+                  <span className="absolute left-0 top-0 h-5 w-px bg-[rgba(139,111,71,0.5)]" />
+
+                  {/* Value */}
+                  <p className="font-['Cormorant_Garamond'] text-[clamp(2rem,6vw,3.5rem)] font-light leading-none tracking-[-0.01em] text-[#F5F1EC]">
+                    {stat.value}
+                  </p>
+
+                  {/* Label */}
+                  <p className="mt-2 text-[9px] uppercase tracking-[0.14em] text-[rgba(245,241,236,0.5)] md:mt-2.5 md:text-[10px]">
+                    {stat.label}
+                  </p>
+
+                  {/* Description pinned bottom */}
+                  <div className="mt-auto pt-3">
+                    <p className="text-[11px] leading-[1.7] text-[rgba(245,241,236,0.35)] md:text-xs">
+                      {stat.description}
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+            </ScrollReveal>
           ))}
         </div>
       </div>

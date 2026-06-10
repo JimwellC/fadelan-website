@@ -14,7 +14,7 @@ import AboutStory from '@/components/about/AboutStory'
 import AboutStats from '@/components/about/AboutStats'
 import AboutPromises from '@/components/about/AboutPromises'
 import AboutCta from '@/components/about/AboutCta'
-
+import ScrollReveal from '@/components/ui/ScrollReveal'
 const STATIC_DATA = {
   heroIntro:
     'Fadelan was born from a belief that exceptional bags deserve a second life — and that the women who carry them deserve complete confidence in every piece.',
@@ -55,20 +55,28 @@ export default function AboutPage() {
       {/* <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
         <AboutQuote quote={data.quote} attribution={data.quoteAttribution} />
       </div> */}
-
+      <ScrollReveal>
       <div className="mx-auto w-full px-0 md:max-w-[70%]">
         <AboutStory headline={data.storyHeadline} body={data.storyBody} />
       </div>
+      </ScrollReveal>
 
-      <AboutStats stats={data.stats} />
+      <ScrollReveal>
+        <AboutStats stats={data.stats} />
+      </ScrollReveal>
+      
 
+      <ScrollReveal delay={100}>
       <div className="bg-[#EDE6DC]">
         <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
           <AboutPromises promises={data.promises} />
         </div>
       </div>
-
+      </ScrollReveal>
+      
+      <ScrollReveal delay={50}>
       <AboutCta headline={data.ctaHeadline} body={data.ctaBody} />
+      </ScrollReveal>
     </main>
   )
 }
