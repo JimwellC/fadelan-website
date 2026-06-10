@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import './globals.css'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import PageTransition from '@/components/layout/PageTransition'
 
 export const metadata: Metadata = {
   title: {
@@ -34,7 +35,6 @@ export const metadata: Metadata = {
   },
 }
 
-
 export default async function RootLayout({
   children,
 }: {
@@ -48,9 +48,11 @@ export default async function RootLayout({
     <html lang="en">
       <body>
         {!isAdmin && <Header heroIsDark={true} />}
-        <main>
-          {children}
-        </main>
+        <PageTransition>
+          <main>
+            {children}
+          </main>
+        </PageTransition>
         {!isAdmin && <Footer />}
       </body>
     </html>

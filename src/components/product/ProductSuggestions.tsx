@@ -1,8 +1,11 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { urlFor } from '@/lib/sanity'
 import { BRAND_LABELS, CONDITION_LABELS } from '@/lib/sanity'
 import type { BagListItem } from '@/lib/queries'
+import WishlistCardButton from '@/components/product/WishlistCardButton'
 
 interface ProductSuggestionsProps {
   bags: BagListItem[]
@@ -29,13 +32,13 @@ export default function ProductSuggestions({ bags }: ProductSuggestionsProps) {
         </p>
       </div>
 
-      {/* Cards — 2 col mobile, 3 col desktop, constrained width on desktop */}
+      {/* Cards */}
       <div className="grid grid-cols-2 gap-3 md:mx-auto md:max-w-[60%] md:grid-cols-3">
         {bags.map((bag) => (
           <Link
             key={bag._id}
             href={`/catalog/${bag.slug.current}`}
-            className="group block border border-[#D6CEBE] bg-[#EDE6DC]"
+            className="group relative block border border-[#D6CEBE] bg-[#EDE6DC]"
           >
             {/* Image */}
             <div className="relative aspect-square overflow-hidden bg-[#E2DAD0]">
@@ -52,6 +55,9 @@ export default function ProductSuggestions({ bags }: ProductSuggestionsProps) {
               ) : (
                 <div className="h-full w-full" />
               )}
+
+              {/* Wishlist button */}
+              <WishlistCardButton slug={bag.slug.current} name={bag.name} />
             </div>
 
             {/* Info */}

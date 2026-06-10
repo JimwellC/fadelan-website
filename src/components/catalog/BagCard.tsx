@@ -1,7 +1,11 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
-import { urlFor, CONDITION_LABELS, BRAND_LABELS } from '@/lib/sanity'
+import { urlFor } from '@/lib/sanity'
+import { CONDITION_LABELS, BRAND_LABELS } from '@/lib/sanity'
 import type { BagListItem } from '@/lib/queries'
+import WishlistCardButton from '@/components/product/WishlistCardButton'
 
 interface BagCardProps {
   bag: BagListItem
@@ -40,11 +44,9 @@ export default function BagCard({ bag }: BagCardProps) {
           <div className="absolute inset-0 bg-muted/10" />
         )}
 
-        {/* Reserved / On hold — subtle text only */}
+        {/* Reserved / On hold label */}
         {indicator && !isSold && (
-          <span
-            className={`absolute left-3 top-3 font-body text-[10px] font-medium uppercase tracking-[0.18em] ${indicator.className}`}
-          >
+          <span className={`absolute left-3 top-3 font-body text-[10px] font-medium uppercase tracking-[0.18em] ${indicator.className}`}>
             {indicator.label}
           </span>
         )}
@@ -57,6 +59,9 @@ export default function BagCard({ bag }: BagCardProps) {
             </span>
           </div>
         )}
+
+        {/* Wishlist button */}
+        <WishlistCardButton slug={bag.slug.current} name={bag.name} />
       </div>
 
       {/* Info block */}
@@ -72,7 +77,6 @@ export default function BagCard({ bag }: BagCardProps) {
           {bag.name}
         </p>
 
-        {/* Spacer — pins price row to card bottom */}
         <div className="flex-1" />
 
         {/* Condition + Price */}

@@ -5,8 +5,8 @@ import { buildInquiryUrls } from '@/lib/sanity'
 import type { SiteSettings } from '@/lib/queries'
 
 interface ProductInquiryProps {
-  bagName: string
-  price: number
+  bagName:  string
+  price:    number
   settings: SiteSettings
 }
 
@@ -40,12 +40,7 @@ export default function ProductInquiry({ bagName, price, settings }: ProductInqu
             rel="noopener noreferrer"
             className="flex flex-1 items-center justify-center gap-2 border border-[#D6CEBE] bg-[#F5F1EC] px-3 py-3 text-[10px] uppercase tracking-[0.14em] text-[#1A1A1A] transition-colors hover:border-[#8B6F47] hover:text-[#8B6F47] md:px-4 md:py-3.5"
           >
-            <svg
-              className="h-[13px] w-[13px] flex-shrink-0 md:h-[14px] md:w-[14px]"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-            >
+            <svg className="h-[13px] w-[13px] flex-shrink-0 md:h-[14px] md:w-[14px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <path d={ICONS[c.iconKey]} />
             </svg>
             {c.label}
@@ -53,26 +48,15 @@ export default function ProductInquiry({ bagName, price, settings }: ProductInqu
         ))}
       </div>
 
-      {/* Contact form link */}
+      {/* Contact form */}
       <Link
         href="/contact"
         className="flex w-full items-center justify-center gap-2 bg-[#8B6F47] px-4 py-3 text-[10px] uppercase tracking-[0.14em] text-[#F5F1EC] transition-colors hover:bg-[#7a6040] md:py-3.5"
       >
-        <svg
-          className="h-[13px] w-[13px] flex-shrink-0 md:h-[14px] md:w-[14px]"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
-          />
+        <svg className="h-[13px] w-[13px] flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
         </svg>
-        Send us a message via contact form
+        Contact form
       </Link>
 
     </div>

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { sanityFetch } from '@/lib/sanity'
+import { sanityFetch, urlFor } from '@/lib/sanity'
 import { CONDITION_LABELS, AVAILABILITY_LABELS, BRAND_LABELS } from '@/lib/sanity'
 import {
   BAG_DETAIL_QUERY,
@@ -12,7 +12,10 @@ import type { BagDetail, SiteSettings, BagListItem } from '@/lib/queries'
 import { PortableText } from '@portabletext/react'
 import ProductGallery from '@/components/product/ProductGallery'
 import ProductInquiry from '@/components/product/ProductInquiry'
+import LayawaySection from '@/components/product/LayawaySection'
 import ProductSuggestions from '@/components/product/ProductSuggestions'
+import ShareButton from '@/components/product/ShareButton'
+import WishlistButton from '@/components/product/WishlistButton'
 import CtaBanner from '@/components/how-to-buy/CtaBanner'
 
 interface PageProps {
@@ -99,7 +102,7 @@ export default async function BagDetailPage({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-[#F5F1EC]">
 
-      {/* Dark top band — h-14 mobile / h-20 desktop */}
+      {/* Dark top band */}
       <div className="relative h-20 w-full bg-[#2C2118]">
         <div
           className="pointer-events-none absolute inset-0"
@@ -127,13 +130,11 @@ export default async function BagDetailPage({ params }: PageProps) {
         </nav>
       </div>
 
-      {/* Main product section
-          min-h subtracts: top band (3.5rem mobile / 5rem desktop) + breadcrumb (~2.5rem)
-          so the section fills the remaining viewport and Piece Details stays below fold */}
+      {/* Main product section */}
       <div className="w-full min-h-[calc(100vh-4rem)] flex flex-col">
         <div className="grid grid-cols-1 md:grid-cols-2 flex-1 md:items-start">
 
-          {/* LEFT — Gallery — sticky on desktop so it fills the height */}
+          {/* LEFT — Gallery */}
           <div>
             <ProductGallery photos={bag.photos ?? []} name={bag.name} />
           </div>
@@ -182,11 +183,21 @@ export default async function BagDetailPage({ params }: PageProps) {
               </div>
             )}
 
+            {/* Share + Wishlist */}
+            <div className="mb-5 flex items-center gap-2 md:mb-6">
+              <ShareButton
+                name={bag.name}
+                brand={BRAND_LABELS[bag.brand] ?? bag.brand}
+                price={bag.price}
+              />
+              <WishlistButton slug={slug} name={bag.name} />
+            </div>
+
             {/* Divider */}
             <div className="mb-5 h-px bg-[#D6CEBE] md:mb-6" />
 
-            {/* Inquiry card — hidden on mobile, shown on desktop */}
-            <div className="hidden md:block mb-5 border border-[#D6CEBE] bg-[#EDE6DC] p-5 md:mb-6 md:p-7">
+            {/* Inquiry card — desktop only */}
+            <div className="hidden md:block border border-[#D6CEBE] bg-[#EDE6DC] p-5 md:p-7" style={{ borderBottom: 'none' }}>
               <h3 className="mb-1.5 font-['Cormorant_Garamond'] text-[1.2rem] font-normal text-[#1A1A1A] md:mb-2 md:text-[1.4rem]">
                 Inquire to Reserve
               </h3>
@@ -196,6 +207,9 @@ export default async function BagDetailPage({ params }: PageProps) {
               </p>
               <ProductInquiry bagName={bag.name} price={bag.price} settings={settings} />
             </div>
+
+            {/* Layaway — separate box, desktop only, bags ₱40,000+ */}
+            <LayawaySection bagName={bag.name} price={bag.price} settings={settings} />
 
             <p className="hidden md:block text-[10px] leading-[1.6] text-[#8C8275] md:text-[11px]">
               One of a kind. Confirm availability before committing.
@@ -236,7 +250,7 @@ export default async function BagDetailPage({ params }: PageProps) {
             ))}
           </div>
 
-          {/* Mobile-only inquiry — shown below spec tiles on mobile */}
+          {/* Mobile-only inquiry */}
           <div className="md:hidden px-6 py-8 border-t border-[rgba(139,111,71,0.18)]">
             <h3 className="mb-1.5 font-['Cormorant_Garamond'] text-[1.2rem] font-normal text-[#1A1A1A]">
               Inquire to Reserve

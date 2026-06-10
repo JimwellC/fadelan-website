@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { FilterOptions } from '@/lib/queries'
 import { CONDITION_LABELS, BRAND_LABELS } from '@/lib/sanity'
+import { useWishlist } from '@/hooks/useWishlist'
 
 interface ActiveFilters {
   availability: string[]
@@ -11,6 +12,7 @@ interface ActiveFilters {
   sizes: string[]
   minPrice: string
   maxPrice: string
+  savedOnly: boolean
 }
 
 interface CatalogFiltersProps {
@@ -96,6 +98,8 @@ export default function CatalogFilters({
   onChange,
   onClear,
 }: CatalogFiltersProps) {
+  const { items: savedSlugs, mounted } = useWishlist()
+
   function toggle(
     key: keyof Pick<ActiveFilters, 'availability' | 'brands' | 'conditions' | 'sizes'>,
     value: string
@@ -121,6 +125,37 @@ export default function CatalogFilters({
           Clear
         </button>
       </div>
+
+      {/* Saved — only shown when user has saved items */}
+      {mounted && (
+        <div className="border-b border-bronze/20 px-[18px] py-3">
+          <button
+            onClick={() => onChange({ ...active, savedOnly: !active.savedOnly })}
+            className={`flex w-full items-center gap-2.5 py-1.5 transition-colors duration-200 ${
+              active.savedOnly ? 'text-[#8B6F47]' : 'text-muted hover:text-[#8B6F47]'
+            }`}
+          >
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill={active.savedOnly ? 'currentColor' : 'none'}
+              stroke="currentColor"
+              strokeWidth="1.8"
+              className="flex-shrink-0"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+            </svg>
+            <span className="font-body text-[11px] uppercase tracking-[0.14em]">
+              Saved
+            </span>
+            <span className={`ml-auto flex h-4 w-4 items-center justify-center font-body text-[9px] ${
+              active.savedOnly ? 'bg-[#8B6F47] text-[#F5F1EC]' : 'bg-bronze/10 text-bronze'
+            }`}>
+              {savedSlugs.length}
+            </span>          </button>
+        </div>
+      )}
 
       <FilterSection label="Availability">
         {(['available', 'reserved', 'on_hold', 'sold'] as const).map((v) => (

@@ -2,25 +2,26 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { urlFor, bagImageUrl } from '@/lib/sanity'
+import { bagImageUrl } from '@/lib/sanity'
 import { BRAND_LABELS, CONDITION_LABELS, AVAILABILITY_LABELS } from '@/lib/sanity'
 import type { BagListItem } from '@/lib/queries'
+import WishlistCardButton from '@/components/product/WishlistCardButton'
 
 interface BagCardProps {
   bag: BagListItem
 }
 
 const availabilityBadge: Record<string, { bg: string; color: string }> = {
-  available: { bg: 'rgba(21,128,61,0.85)',    color: '#fff' },
-  reserved:  { bg: 'rgba(217,119,6,0.85)',    color: '#fff' },
-  on_hold:   { bg: 'rgba(234,88,12,0.85)',    color: '#fff' },
-  sold:      { bg: 'rgba(115,114,110,0.85)',  color: '#fff' },
+  available: { bg: 'rgba(21,128,61,0.85)',   color: '#fff' },
+  reserved:  { bg: 'rgba(217,119,6,0.85)',   color: '#fff' },
+  on_hold:   { bg: 'rgba(234,88,12,0.85)',   color: '#fff' },
+  sold:      { bg: 'rgba(115,114,110,0.85)', color: '#fff' },
 }
 
 export default function BagCard({ bag }: BagCardProps) {
   const coverUrl = bag.coverPhoto?.asset
-  ? bagImageUrl(bag.coverPhoto.asset, { width: 600, height: 750 })
-  : null
+    ? bagImageUrl(bag.coverPhoto.asset, { width: 600, height: 750 })
+    : null
 
   const lqip   = bag.coverPhoto?.asset?.metadata?.lqip ?? undefined
   const isSold = bag.availability === 'sold'
@@ -31,12 +32,9 @@ export default function BagCard({ bag }: BagCardProps) {
       href={`/catalog/${bag.slug.current}`}
       style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
     >
-      <article
-        style={{ cursor: 'pointer' }}
-        className="group"
-      >
+      <article style={{ cursor: 'pointer' }} className="group">
 
-        {/* ── Photo ── */}
+        {/* Photo */}
         <div style={{
           position:        'relative',
           aspectRatio:     '4 / 5',
@@ -61,26 +59,30 @@ export default function BagCard({ bag }: BagCardProps) {
                 className={isSold ? '' : 'group-hover:scale-[1.04]'}
               />
 
-                {/* Availability badge */}
-                <div style={{
-                  position:        'absolute',
-                  top:             '0.75rem',
-                  left:            '0.75rem',
-                  backgroundColor: badge.bg,
-                  color:           badge.color,
-                  fontFamily:      'var(--font-body)',
-                  fontSize:        '0.55rem',
-                  fontWeight:      500,
-                  letterSpacing:   '0.14em',
-                  textTransform:   'uppercase',
-                  padding:         '0.25rem 0.625rem',
-                }}>
-                  {AVAILABILITY_LABELS[bag.availability] ?? bag.availability}
-                </div>
+              {/* Availability badge */}
+              <div style={{
+                position:        'absolute',
+                top:             '0.75rem',
+                left:            '0.75rem',
+                backgroundColor: badge.bg,
+                color:           badge.color,
+                fontFamily:      'var(--font-body)',
+                fontSize:        '0.55rem',
+                fontWeight:      500,
+                letterSpacing:   '0.14em',
+                textTransform:   'uppercase',
+                padding:         '0.25rem 0.625rem',
+              }}>
+                {AVAILABILITY_LABELS[bag.availability] ?? bag.availability}
+              </div>
 
-                {/* Hover overlay */}
-                {!isSold && (
-                  <div style={{
+              {/* Wishlist button */}
+              <WishlistCardButton slug={bag.slug.current} name={bag.name} />
+
+              {/* Hover overlay */}
+              {!isSold && (
+                <div
+                  style={{
                     position:   'absolute',
                     inset:      0,
                     background: 'linear-gradient(to top, rgba(26,26,26,0.45) 0%, transparent 50%)',
@@ -90,46 +92,44 @@ export default function BagCard({ bag }: BagCardProps) {
                     alignItems: 'flex-end',
                     padding:    '1rem',
                   }}
-                    className="group-hover:opacity-100"
-                  >
-                    <span style={{
-                      fontFamily:    'var(--font-body)',
-                      fontSize:      '0.6rem',
-                      letterSpacing: '0.16em',
-                      textTransform: 'uppercase',
-                      color:         'var(--color-cream)',
-                    }}>
-                      View details →
-                    </span>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div style={{
-                width:          '100%',
-                aspectRatio:    '4 / 5',
-                display:        'flex',
-                alignItems:     'center',
-                justifyContent: 'center',
-                color:          'var(--color-muted)',
-                fontFamily:     'var(--font-body)',
-                fontSize:       '0.65rem',
-                letterSpacing:  '0.12em',
-                textTransform:  'uppercase',
-              }}>
-                No photo
-              </div>
-            )}
-          </div>
+                  className="group-hover:opacity-100"
+                >
+                  <span style={{
+                    fontFamily:    'var(--font-body)',
+                    fontSize:      '0.6rem',
+                    letterSpacing: '0.16em',
+                    textTransform: 'uppercase',
+                    color:         'var(--color-cream)',
+                  }}>
+                    View details →
+                  </span>
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{
+              width:          '100%',
+              aspectRatio:    '4 / 5',
+              display:        'flex',
+              alignItems:     'center',
+              justifyContent: 'center',
+              color:          'var(--color-muted)',
+              fontFamily:     'var(--font-body)',
+              fontSize:       '0.65rem',
+              letterSpacing:  '0.12em',
+              textTransform:  'uppercase',
+            }}>
+              No photo
+            </div>
+          )}
+        </div>
 
-        {/* ── Info ── */}
+        {/* Info */}
         <div style={{
           padding:         '0.875rem 0.75rem',
           backgroundColor: 'var(--color-cream-dark)',
           borderTop:       '1px solid rgba(26,26,26,0.06)',
         }}>
-
-          {/* Brand */}
           <p style={{
             fontFamily:    'var(--font-body)',
             fontSize:      '0.55rem',
@@ -141,8 +141,6 @@ export default function BagCard({ bag }: BagCardProps) {
           }}>
             {BRAND_LABELS[bag.brand] ?? bag.brand}
           </p>
-
-          {/* Name */}
           <p style={{
             fontFamily:   'var(--font-display)',
             fontSize:     '1rem',
@@ -153,8 +151,6 @@ export default function BagCard({ bag }: BagCardProps) {
           }}>
             {bag.name}
           </p>
-
-          {/* Condition + Price */}
           <div style={{
             display:        'flex',
             alignItems:     'center',
@@ -179,8 +175,8 @@ export default function BagCard({ bag }: BagCardProps) {
               {isSold ? 'Sold' : `₱${bag.price.toLocaleString('en-PH')}`}
             </p>
           </div>
-
         </div>
+
       </article>
     </Link>
   )
