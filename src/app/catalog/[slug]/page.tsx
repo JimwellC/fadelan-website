@@ -100,7 +100,7 @@ export default async function BagDetailPage({ params }: PageProps) {
     <main className="min-h-screen bg-[#F5F1EC]">
 
       {/* Dark top band — h-14 mobile / h-20 desktop */}
-      <div className="relative h-14 w-full bg-[#2C2118] md:h-20">
+      <div className="relative h-20 w-full bg-[#2C2118]">
         <div
           className="pointer-events-none absolute inset-0"
           style={{

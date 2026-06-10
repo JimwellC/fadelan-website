@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { urlFor } from '@/lib/sanity'
 import type { BagPhoto } from '@/lib/queries'
@@ -12,8 +12,15 @@ interface ProductGalleryProps {
 
 export default function ProductGallery({ photos, name }: ProductGalleryProps) {
   const [active, setActive] = useState(0)
+  const [isDesktop, setIsDesktop] = useState(false)
   const hasMultiple = photos.length > 1
 
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
   if (!photos.length) {
     return (
       <div
@@ -21,7 +28,7 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
         style={{
           aspectRatio: '4/5',
           borderTopLeftRadius: 0,
-          borderTopRightRadius: '80px',
+          borderTopRightRadius: isDesktop ? '80px' : 0,
           borderBottomRightRadius: 0,
           borderBottomLeftRadius: 0,
           border: '1px solid #D6CEBE',
@@ -55,9 +62,9 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
           className="relative z-10 w-full overflow-hidden bg-[#EDE6DC]"
           style={{
             aspectRatio: '4/5',
-            maxHeight: '80vh',
+            maxHeight: isDesktop ? '80vh' : '65vh',            
             borderTopLeftRadius: 0,
-            borderTopRightRadius: 'clamp(40px, 8vw, 120px)',
+            borderTopRightRadius: isDesktop ? 'clamp(40px, 8vw, 120px)' : 0,
             borderBottomRightRadius: 0,
             borderBottomLeftRadius: 0,
             border: '1px solid #D6CEBE',

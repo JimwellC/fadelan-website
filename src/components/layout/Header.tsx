@@ -26,9 +26,23 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
   const pathname                  = usePathname()
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
+    let timer: ReturnType<typeof setTimeout>
+
+    const onScroll = () => {
+      if (window.scrollY > 20) {
+        clearTimeout(timer)
+        setScrolled(true)
+      } else {
+        // Delay before going back to un-scrolled — prevents flash on fast upward scroll
+        timer = setTimeout(() => setScrolled(false), 150)
+      }
+    }
+
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      clearTimeout(timer)
+    }
   }, [])
 
   useEffect(() => {
@@ -44,7 +58,10 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
     link:      scrolled ? 'var(--color-ink)'        : heroIsDark ? 'rgba(245,241,236,0.85)' : 'var(--color-ink)',
     hover:     'var(--color-bronze)',
     logo:      scrolled ? 'var(--color-ink)'        : heroIsDark ? 'var(--color-cream)'     : 'var(--color-ink)',
-    hamburger: scrolled ? 'var(--color-ink)'        : heroIsDark ? 'var(--color-cream)'     : 'var(--color-ink)',
+    hamburger: menuOpen  ? 'var(--color-ink)'
+              : scrolled  ? 'var(--color-ink)'
+              : heroIsDark ? 'var(--color-cream)'
+              : 'var(--color-ink)',
     diamond:   scrolled ? 'var(--color-bronze)'     : heroIsDark ? 'rgba(139,111,71,0.7)'   : 'var(--color-bronze)',
   })
 
