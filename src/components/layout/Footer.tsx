@@ -292,14 +292,31 @@ export default function Footer() {
           }}>
             © {year} Fad Élan. All rights reserved.
           </p>
-          <p style={{
-            fontFamily:    'var(--font-body)',
-            fontSize:      '0.6rem',
-            letterSpacing: '0.1em',
-            color:         'rgba(245,241,236,0.15)',
-          }}>
-            Authentic pre-loved luxury
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <p style={{
+              fontFamily:    'var(--font-body)',
+              fontSize:      '0.6rem',
+              letterSpacing: '0.1em',
+              color:         'rgba(245,241,236,0.15)',
+            }}>
+              Authentic pre-loved luxury
+            </p>
+            <Link
+              href="/admin"
+              style={{
+                fontFamily:     'var(--font-body)',
+                fontSize:       '0.55rem',
+                letterSpacing:  '0.1em',
+                color:          'rgba(245,241,236,0.1)',
+                textDecoration: 'none',
+                transition:     'color 300ms ease',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'rgba(245,241,236,0.3)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(245,241,236,0.1)')}
+            >
+              Admin
+            </Link>
+          </div>
         </div>
 
       </div>
