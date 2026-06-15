@@ -79,6 +79,15 @@ export const siteSettingsSchema = defineType({
       options:     { hotspot: true },
     }),
 
+    defineField({
+      name:        'ownerPhoto',
+      title:       'Founder / Owner Photo',
+      type:        'image',
+      group:       'brand',
+      description: 'Shown in the About page polaroid frame. Square crop recommended.',
+      options:     { hotspot: true },
+    }),
+
     // ── CONTACT & SOCIAL ─────────────────────────────────
     defineField({
       name:        'messengerUrl',

@@ -1,11 +1,13 @@
+import Image from 'next/image'
 import ScrollReveal from "../ui/ScrollReveal"
 
 interface AboutStoryProps {
-  headline: string
-  body: string
+  headline:      string
+  body:          string
+  ownerPhotoUrl?: string
 }
 
-export default function AboutStory({ headline, body }: AboutStoryProps) {
+export default function AboutStory({ headline, body, ownerPhotoUrl }: AboutStoryProps) {
   const paragraphs = body.split("\n\n")
 
   return (
@@ -15,7 +17,6 @@ export default function AboutStory({ headline, body }: AboutStoryProps) {
         {/* Left — polaroid */}
         <ScrollReveal>
           <div className="flex items-center justify-center border-b border-[#D6CEBE] px-8 py-20 md:border-b-0 md:border-r md:py-28">
-
             <div
               className="relative flex items-center justify-center"
               style={{ width: "72%", aspectRatio: "1/1" }}
@@ -58,12 +59,23 @@ export default function AboutStory({ headline, body }: AboutStoryProps) {
                     "0 8px 32px rgba(26,26,26,0.12), 0 2px 8px rgba(26,26,26,0.06)",
                 }}
               >
-                <div className="flex aspect-square w-full items-center justify-center bg-[#C8BFB2]">
-                  <span className="text-[10px] uppercase tracking-[0.1em] text-[#8C8275]">
-                    Founder photo
-                  </span>
+                <div className="relative aspect-square w-full overflow-hidden bg-[#C8BFB2]">
+                  {ownerPhotoUrl ? (
+                    <Image
+                      src={ownerPhotoUrl}
+                      alt="Fadelan founder"
+                      fill
+                      style={{ objectFit: 'cover', objectPosition: 'center top' }}
+                      sizes="(max-width: 768px) 60vw, 30vw"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <span className="text-[10px] uppercase tracking-[0.1em] text-[#8C8275]">
+                        Founder photo
+                      </span>
+                    </div>
+                  )}
                 </div>
-
                 <p className="mt-2 text-center font-['Cormorant_Garamond'] text-[12px] italic tracking-[0.04em] text-[#8C8275]">
                   est. 2023
                 </p>
@@ -72,7 +84,7 @@ export default function AboutStory({ headline, body }: AboutStoryProps) {
           </div>
         </ScrollReveal>
 
-        {/* Right — copy */}
+        {/* Right — copy (unchanged) */}
         <div className="flex items-center px-14 py-20 md:py-28">
           <div>
             <ScrollReveal delay={0}>
@@ -80,23 +92,18 @@ export default function AboutStory({ headline, body }: AboutStoryProps) {
                 The beginning
               </p>
             </ScrollReveal>
-
             <ScrollReveal delay={120}>
               <h2 className="mb-5 font-['Cormorant_Garamond'] text-[2rem] font-normal leading-[1.2] text-[#1A1A1A]">
                 {headline}
               </h2>
             </ScrollReveal>
-
             <div className="space-y-4">
               {paragraphs.map((paragraph, i) => (
                 <ScrollReveal key={i} delay={200 + i * 140}>
-                  <p className="text-sm leading-[1.85] text-[#8C8275]">
-                    {paragraph}
-                  </p>
+                  <p className="text-sm leading-[1.85] text-[#8C8275]">{paragraph}</p>
                 </ScrollReveal>
               ))}
             </div>
-
             <ScrollReveal delay={200 + paragraphs.length * 140}>
               <div className="mt-8 h-px w-8 bg-[#8B6F47]" />
             </ScrollReveal>

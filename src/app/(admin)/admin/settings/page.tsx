@@ -176,6 +176,7 @@ export default function SettingsPage() {
             { label: 'Logo',                desc: 'Used in the header and social share previews'       },
             { label: 'Favicon',             desc: 'The small icon shown in browser tabs'               },
             { label: 'Social Share Image',  desc: 'Shown when someone shares the site on Facebook'     },
+            { label: 'Founder / Owner Photo', desc: 'Shown in the About page polaroid frame — square crop recommended' },
           ].map(item => (
             <a
               key={item.label}

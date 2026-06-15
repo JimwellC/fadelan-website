@@ -95,6 +95,13 @@ export interface SiteSettings {
   heroSubline:                string
   defaultShippingNote:        string
   paymentMethods?:            string[]
+  ownerPhoto?: {
+    asset: {
+      _id:      string
+      url:      string
+      metadata: { dimensions: { width: number; height: number }; lqip: string }
+    }
+  }
 }
 
 // ✓ priceRange values are nullable — they're null when catalog is empty
@@ -269,7 +276,9 @@ export const SITE_SETTINGS_QUERY = /* groq */ `
     paymentMethods,
     "featuredBags": featuredBags[]-> {
       ${BAG_LIST_FIELDS}
-    }
+    },
+    "ownerPhoto": ownerPhoto { asset-> { _id, url, metadata { dimensions, lqip } } },
+
   }
 `
 
