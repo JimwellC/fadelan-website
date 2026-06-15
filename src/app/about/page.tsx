@@ -42,8 +42,8 @@ export default async function AboutPage() {
     { revalidate: 3600 }
   )
 
-  const ownerPhotoUrl = settings?.ownerPhoto?.asset
-    ? bagImageUrl(settings.ownerPhoto.asset, { width: 600 })
+  const ownerPhotoUrl = settings?.ownerPhoto
+    ? bagImageUrl(settings.ownerPhoto, { width: 600 })
     : undefined
 
   const data = STATIC_DATA

@@ -96,11 +96,9 @@ export interface SiteSettings {
   defaultShippingNote:        string
   paymentMethods?:            string[]
   ownerPhoto?: {
-    asset: {
-      _id:      string
-      url:      string
-      metadata: { dimensions: { width: number; height: number }; lqip: string }
-    }
+    _id:      string
+    url:      string
+    metadata: { dimensions: { width: number; height: number }; lqip: string }
   }
 }
 
@@ -277,7 +275,7 @@ export const SITE_SETTINGS_QUERY = /* groq */ `
     "featuredBags": featuredBags[]-> {
       ${BAG_LIST_FIELDS}
     },
-    "ownerPhoto": ownerPhoto { asset-> { _id, url, metadata { dimensions, lqip } } },
+    "ownerPhoto": ownerPhoto.asset-> { _id, url, metadata { dimensions, lqip } },
 
   }
 `
