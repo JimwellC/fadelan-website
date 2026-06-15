@@ -1,9 +1,7 @@
 import type { Metadata } from 'next'
-import { headers } from 'next/headers'
 import './globals.css'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
 import PageTransition from '@/components/layout/PageTransition'
+import PublicShell from '@/components/layout/PublicShell'
 
 export const metadata: Metadata = {
   title: {
@@ -35,25 +33,21 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const headersList = await headers()
-  const pathname    = headersList.get('x-pathname') ?? ''
-  const isAdmin     = pathname.startsWith('/admin') || pathname.startsWith('/studio')
-
   return (
     <html lang="en">
       <body>
-        {!isAdmin && <Header heroIsDark={true} />}
-        <PageTransition>
-          <main>
-            {children}
-          </main>
-        </PageTransition>
-        {!isAdmin && <Footer />}
+        <PublicShell>
+          <PageTransition>
+            <main>
+              {children}
+            </main>
+          </PageTransition>
+        </PublicShell>
       </body>
     </html>
   )

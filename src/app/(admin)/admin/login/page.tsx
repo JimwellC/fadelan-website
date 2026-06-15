@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -71,6 +72,21 @@ export default function AdminLoginPage() {
           }}>
             Content Manager
           </p>
+          <Link href="/" style={{
+            display:       'inline-block',
+            marginTop:     '0.75rem',
+            fontFamily:    'Inter, system-ui, sans-serif',
+            fontSize:      '0.6rem',
+            letterSpacing: '0.12em',
+            color:         'rgba(26,26,26,0.35)',
+            textDecoration: 'none',
+            transition:    'color 200ms ease',
+          }}
+            onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.color = '#8B6F47'}
+            onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(26,26,26,0.35)'}
+          >
+            ← Back to site
+          </Link>
         </div>
 
         {/* Card */}
