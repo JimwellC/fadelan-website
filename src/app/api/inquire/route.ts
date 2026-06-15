@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { error } = await resend.emails.send({
-    from: "Fadelan Inquiry <noreply@yourdomain.com>",
+    from: 'Fadelan Inquiry <onboarding@resend.dev>',
     to: process.env.RESEND_TO_EMAIL!,
     replyTo: email,
     subject: `New inquiry${bag ? ` — ${bag}` : ""} from ${name}`,

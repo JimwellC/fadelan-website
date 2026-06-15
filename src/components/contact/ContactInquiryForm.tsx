@@ -15,9 +15,30 @@ export default function ContactInquiryForm({ bags }: ContactInquiryFormProps) {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 800))
-    setSubmitted(true)
-    setLoading(false)
+
+    const formData = new FormData(e.currentTarget)
+    const selectedBagId = formData.get('bag') as string
+    const selectedBag = bags.find(b => b._id === selectedBagId)
+
+    try {
+      const res = await fetch('/api/inquire', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name:    formData.get('name'),
+          email:   formData.get('email'),
+          bag:     selectedBag?.name ?? formData.get('bag') ?? '',
+          message: formData.get('message'),
+        }),
+      })
+
+      if (!res.ok) throw new Error()
+      setSubmitted(true)
+    } catch {
+      alert('Something went wrong. Please message us directly on Instagram or Viber.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (submitted) {
@@ -73,6 +94,7 @@ export default function ContactInquiryForm({ bags }: ContactInquiryFormProps) {
                   Name
                 </label>
                 <input
+                  name="name"
                   type="text"
                   required
                   placeholder="Your name"
@@ -87,6 +109,7 @@ export default function ContactInquiryForm({ bags }: ContactInquiryFormProps) {
                   Email
                 </label>
                 <input
+                  name="email"
                   type="email"
                   required
                   placeholder="your@email.com"
@@ -105,7 +128,7 @@ export default function ContactInquiryForm({ bags }: ContactInquiryFormProps) {
               </label>
 
               <div className="relative">
-                <select className="w-full appearance-none border border-[#D6CEBE] bg-[#F5F1EC] px-4 py-2.5 text-sm text-[#8C8275] outline-none focus:border-[#8B6F47]">
+                <select name="bag" className="w-full appearance-none border border-[#D6CEBE] bg-[#F5F1EC] px-4 py-2.5 text-sm text-[#8C8275] outline-none focus:border-[#8B6F47]">
                   <option value="">Select a bag or describe below</option>
                   {bags.map((bag) => (
                     <option key={bag._id} value={bag._id}>
@@ -130,6 +153,7 @@ export default function ContactInquiryForm({ bags }: ContactInquiryFormProps) {
               </label>
 
               <textarea
+                name="message"  
                 rows={4}
                 placeholder="Questions about condition, provenance, shipping…"
                 className="w-full resize-none border border-[#D6CEBE] bg-[#F5F1EC] px-4 py-2.5 text-sm text-[#1A1A1A] placeholder-[#C8BFB2] outline-none focus:border-[#8B6F47]"
