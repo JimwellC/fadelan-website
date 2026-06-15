@@ -35,6 +35,8 @@ export const metadata = {
   description: 'Learn the story behind Fadelan — a curated pre-loved luxury bag catalog built on authenticity, trust, and a genuine love for heritage leather.',
 }
 
+export const revalidate = 0
+
 export default async function AboutPage() {
   const settings = await sanityFetch<SiteSettings>(
     SITE_SETTINGS_QUERY,

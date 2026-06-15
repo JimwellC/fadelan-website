@@ -12,6 +12,8 @@ export const metadata = {
   description: 'Get in touch with Fadelan — ask about a bag, reserve a piece, or arrange an in-person viewing.',
 }
 
+export const revalidate = 0
+
 export default async function ContactPage() {
   const [settings, bags] = await Promise.all([
     sanityFetch<SiteSettings>(SITE_SETTINGS_QUERY),

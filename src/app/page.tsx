@@ -39,6 +39,7 @@ const brands = [
   'Dior', 'Celine', 'Prada', 'Bottega Veneta',
   'Loewe', 'Balenciaga', 'Fendi', 'Givenchy',
 ]
+export const revalidate = 0
 
 export default async function HomePage() {
   const data = await sanityFetch<HomepageData>(HOMEPAGE_QUERY)
