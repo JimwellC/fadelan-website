@@ -19,6 +19,8 @@ import WishlistButton from '@/components/product/WishlistButton'
 import CtaBanner from '@/components/how-to-buy/CtaBanner'
 import ScrollReveal from '@/components/ui/ScrollReveal'
 
+export const dynamicParams = true
+
 interface PageProps {
   params: Promise<{ slug: string }>
 }
