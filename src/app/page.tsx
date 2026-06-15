@@ -76,7 +76,9 @@ export default async function HomePage() {
         display:         'flex',
         flexDirection:   'column',
         overflow:        'hidden',
-      }}>
+      }}
+        className="hero-section-mobile"
+      >
         <div style={{ position: 'absolute', left: '-20%', bottom: '-20%', width: 'clamp(500px, 90vw, 1100px)', height: 'clamp(500px, 90vw, 1100px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,111,71,0.35) 0%, rgba(139,111,71,0.12) 35%, transparent 60%)', zIndex: 0, pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', left: '5%', top: '-5%', width: 'clamp(400px, 55vw, 700px)', height: 'clamp(400px, 55vw, 700px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,111,71,0.25) 0%, rgba(101,79,46,0.08) 45%, transparent 68%)', zIndex: 0, pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', left: '25%', top: '30%', width: 'clamp(300px, 40vw, 560px)', height: 'clamp(300px, 40vw, 560px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,111,71,0.2) 0%, transparent 58%)', zIndex: 0, pointerEvents: 'none' }} />
@@ -87,7 +89,7 @@ export default async function HomePage() {
         <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '30%', background: 'linear-gradient(to left, rgba(28,23,20,0.7) 0%, transparent 100%)', zIndex: 1, pointerEvents: 'none' }} />
 
         {/* Mobile layout */}
-        <div className="hide-on-desktop" style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', minHeight: '100svh' }}>
+        <div className="hide-on-desktop" style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', minHeight: 'auto' }}>
           {heroCoverUrl && (
             <div style={{ position: 'relative' }}>
               <img src={heroCoverUrl} alt={heroBag?.name ?? 'Featured bag'} style={{ width: '100%', height: 'auto', display: 'block' }} />

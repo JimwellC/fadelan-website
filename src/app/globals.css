@@ -346,6 +346,12 @@
   }
 }
 
+@media (max-width: 1023px) {
+  .hero-section-mobile {
+    min-height: auto !important;
+  }
+}
+
 /* ── Animations ── */
 
 @keyframes marquee {
