@@ -17,6 +17,7 @@ async function getRecentBags() {
   return client.fetch(`
     *[_type == "bag"] | order(dateAdded desc)[0...5] {
       _id, name, brand, price, availability,
+      slug,
       "coverPhoto": photos[0] { asset-> { url } }
     }
   `)
@@ -111,16 +112,14 @@ export default async function DashboardPage() {
         </div>
 
         {recentBags.map((bag: any, i: number) => (
-          <a
-            key={bag._id}
-            href={`/admin/bags/${bag._id}`}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '1rem',
-              padding: '1rem 1.5rem',
-              borderBottom: i < recentBags.length - 1 ? '1px solid rgba(26,26,26,0.05)' : 'none',
-              textDecoration: 'none',
-            }}
-          >
+            <div
+              key={bag._id}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '1rem',
+                padding: '1rem 1.5rem',
+                borderBottom: i < recentBags.length - 1 ? '1px solid rgba(26,26,26,0.05)' : 'none',
+              }}
+            >
             <div style={{
               width: '40px', height: '53px', flexShrink: 0,
               backgroundColor: '#EDE8E1', overflow: 'hidden',
@@ -156,11 +155,39 @@ export default async function DashboardPage() {
             }}>
               ₱{bag.price?.toLocaleString('en-PH')}
             </p>
+            <div style={{ display: 'flex', gap: '0.75rem', flexShrink: 0 }}>
+              {bag.slug?.current && (
+                <a
+                  href={`/catalog/${bag.slug.current}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontFamily:     'Inter, system-ui, sans-serif',
+                    fontSize:       '0.6rem',
+                    color:          '#8B6F47',
+                    textDecoration: 'none',
+                  }}
+                >
+                  View →
+                </a>
+              )}
+              <a
+                href={`/admin/bags/${bag._id}`}
+                style={{
+                  fontFamily:     'Inter, system-ui, sans-serif',
+                  fontSize:       '0.6rem',
+                  color:          '#4A4A4A',
+                  textDecoration: 'none',
+                }}
+              >
+                Edit
+              </a>
+            </div>
             <div style={{
               width: '8px', height: '8px', borderRadius: '50%',
               backgroundColor: STATUS_COLOR[bag.availability] ?? '#6B7280', flexShrink: 0,
             }} />
-          </a>
+          </div>
         ))}
       </div>
     </div>

@@ -199,6 +199,24 @@ export default function BagsListPage() {
 
                 {/* Actions */}
                 <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                  {bag.slug?.current && (
+                    <a
+                      href={`/catalog/${bag.slug.current}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        padding:        '0.35rem 0.625rem',
+                        border:         '1px solid rgba(139,111,71,0.3)',
+                        color:          '#8B6F47',
+                        fontFamily:     'Inter, system-ui, sans-serif',
+                        fontSize:       '0.6rem',
+                        textDecoration: 'none',
+                        whiteSpace:     'nowrap',
+                      }}
+                    >
+                      View
+                    </a>
+                  )}
                   <Link href={`/admin/bags/${bag._id}`} style={{
                     padding: '0.35rem 0.625rem',
                     border: '1px solid rgba(26,26,26,0.2)', color: '#1A1A1A',
