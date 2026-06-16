@@ -23,7 +23,12 @@ export async function generateMetadata(): Promise<Metadata> {
       process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.fadelan.com'
     ),
     icons: {
-      icon: settings?.favicon?.url ?? '/favicon.ico',
+      icon: [
+        {
+          url:  settings?.favicon?.url ?? '/favicon.ico',
+          type: 'image/png',
+        }
+      ],
     },
     openGraph: {
       type:        'website',
