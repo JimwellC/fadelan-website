@@ -158,14 +158,11 @@ export default async function BagDetailPage({ params }: PageProps) {
       <div className="w-full min-h-[calc(100vh-4rem)] flex flex-col">
 
         <div className="grid grid-cols-1 md:grid-cols-2 flex-1 md:items-start">
-
-          {/* LEFT — Gallery */}
-          <ScrollReveal delay={0}>
-            <div>
-              <ProductGallery photos={bag.photos ?? []} name={bag.name} />
-            </div>
-          </ScrollReveal>
-
+        <ScrollReveal delay={0}>
+          <div className="px-4 pt-6 md:px-10 md:pt-8">
+            <ProductGallery photos={bag.photos ?? []} name={bag.name} />
+          </div>
+        </ScrollReveal>
           {/* RIGHT — Details */}
           <div className="flex flex-col justify-start px-4 py-8 md:px-14 md:pt-12 md:pb-16">
 
