@@ -28,7 +28,10 @@ export default function AboutStats({ stats }: AboutStatsProps) {
         }}
       />
 
-      <div className="relative mx-auto w-full md:max-w-[70%]">
+      {/* Was md:max-w-[70%] only — too narrow on tablet. Tablet (md:) now
+         gets a wider 90% cap; desktop (xl:, 1280px+) keeps the original
+         70%, matching the CtaBanner/LayawayTerms/AboutCta pattern. */}
+      <div className="relative mx-auto w-full md:max-w-[90%] xl:max-w-[70%]">
         {/* Header */}
         <ScrollReveal>
           <div className="mb-8 flex items-center gap-4 md:mb-10">

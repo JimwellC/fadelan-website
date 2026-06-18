@@ -26,7 +26,11 @@ export default async function ContactPage() {
 
       <ScrollReveal>
         <div className="bg-[#F5F1EC]">
-          <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
+          {/* Was md:max-w-[70%] only — too narrow on tablet. Tablet (md:)
+             now gets a wider 90% cap; desktop (xl:, 1280px+) keeps the
+             original 70%, matching the CtaBanner/AboutStats/about-page
+             pattern used elsewhere in the codebase. */}
+          <div className="mx-auto w-full px-6 md:max-w-[90%] md:px-0 xl:max-w-[70%]">
             <ContactChannels
               instagramHandle={settings.instagramHandle}
               viberNumber={settings.viberNumber}
@@ -38,7 +42,8 @@ export default async function ContactPage() {
 
       <ScrollReveal delay={100}>
         <div className="bg-[#EDE6DC]">
-          <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
+          {/* Same fix — was md:max-w-[70%] only. */}
+          <div className="mx-auto w-full px-6 md:max-w-[90%] md:px-0 xl:max-w-[70%]">
             <ContactInquiryForm bags={bags} />
           </div>
         </div>

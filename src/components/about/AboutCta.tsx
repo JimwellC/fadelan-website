@@ -9,7 +9,11 @@ interface AboutCtaProps {
 export default function AboutCta({ headline, body }: AboutCtaProps) {
   return (
     <section className="bg-[#EDE6DC] px-4 py-10 md:px-10 md:py-16">
-      <div className="mx-auto w-full md:max-w-[70%]">
+      {/* Was md:max-w-[70%] only — same 70% cap applied to both tablet and
+         desktop, reading too narrow on tablet widths. Tablet (md:) now
+         gets a wider 90% cap; desktop (xl:, 1280px+) keeps the original
+         70%, matching the CtaBanner / LayawayTerms fix. */}
+      <div className="mx-auto w-full md:max-w-[100%] xl:max-w-[70%]">
         <div
           className="relative overflow-hidden rounded-2xl px-6 py-8 md:px-14 md:py-12"
           style={{ background: '#2C2420' }}

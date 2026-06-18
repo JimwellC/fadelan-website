@@ -3,7 +3,11 @@ import ScrollReveal from "../ui/ScrollReveal";
 export default function LayawayTerms() {
   return (
     <section className="bg-[#EDE6DC] px-4 py-12 md:px-10 md:py-16">
-      <div className="mx-auto w-full md:max-w-[70%]">
+      {/* Was md:max-w-[70%] only — same 70% cap applied to both tablet and
+         desktop, reading too narrow on tablet widths. Tablet (md:) now
+         gets a wider 90% cap; desktop (xl:, 1280px+) keeps the original
+         70%, matching the CtaBanner / how-to-buy page fix. */}
+      <div className="mx-auto w-full md:max-w-[90%] xl:max-w-[70%]">
 
         {/* Header */}
         <ScrollReveal>

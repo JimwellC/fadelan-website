@@ -272,6 +272,42 @@ export default async function HomePage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
+          CATALOG GRID — scroll reveal per card
+      ══════════════════════════════════════════════════════════════════ */}
+      <section style={{ padding: 'clamp(3rem, 6vw, 5rem) 0 clamp(4rem, 8vw, 6rem)', backgroundColor: '#EDE6DC' }}>
+        <div className="container-site">
+
+          <ScrollReveal>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '2rem', paddingBottom: '1.25rem', borderBottom: '1px solid rgba(26,26,26,0.08)', gap: '1rem', flexWrap: 'wrap' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.75rem, 4vw, 2.75rem)', fontWeight: 300, color: 'var(--color-ink)', letterSpacing: '-0.01em' }}>Current Collection</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                {bags.length > 0 && <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.6rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--color-muted)' }}>{bags.length} Pieces</span>}
+                <Link href="/catalog" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', fontStyle: 'italic', color: 'var(--color-bronze)', textDecoration: 'none' }}>( Shop Collection )</Link>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          {bags.length > 0 ? (
+            <div className="catalog-grid">
+              {bags.slice(0, 8).map((bag, i) => (
+                <ScrollReveal key={bag._id} delay={i * 60}>
+                  <BagCard bag={bag} />
+                </ScrollReveal>
+              ))}
+            </div>
+          ) : (
+            <ScrollReveal>
+              <div style={{ textAlign: 'center', padding: '5rem 0', fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 300, color: 'var(--color-muted)' }}>
+                The catalog is being curated. Check back soon.
+              </div>
+            </ScrollReveal>
+          )}
+
+        </div>
+      </section>
+
+
+      {/* ══════════════════════════════════════════════════════════════════
           PROCESS SECTION — scroll reveal
       ══════════════════════════════════════════════════════════════════ */}
       <section style={{ backgroundColor: 'var(--color-cream)', padding: 'clamp(4rem, 8vw, 7rem) 0', position: 'relative', overflow: 'hidden' }}>
@@ -292,8 +328,8 @@ export default async function HomePage() {
 
           <div className="process-steps-layout" style={{ position: 'relative', gap: '1rem' }}>
             {steps.map((step, i) => (
-              <ScrollReveal key={step.step} delay={i * 80}>
-                <div className="process-step-item">
+              <ScrollReveal key={step.step} delay={i * 80} className="h-full">
+                <div className="process-step-item h-full">
                   <p className="step-number" style={{ fontFamily: 'var(--font-body)', fontSize: '0.6rem', fontWeight: 500, letterSpacing: '0.12em', lineHeight: 1, marginBottom: '1.25rem' }}>{step.step}.</p>
                   <p className="step-title" style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.1rem, 2.5vw, 1.35rem)', fontWeight: 400, marginBottom: '0.875rem', letterSpacing: '0.01em', lineHeight: 1.2 }}>{step.title}</p>
                   <p className="step-body" style={{ fontFamily: 'var(--font-body)', fontSize: '0.75rem', lineHeight: 1.8, maxWidth: '220px' }}>{step.body}</p>
@@ -301,7 +337,7 @@ export default async function HomePage() {
               </ScrollReveal>
             ))}
           </div>
-
+          
           <ScrollReveal delay={100}>
             <div style={{ marginTop: 'clamp(2.5rem, 5vw, 4rem)', paddingTop: 'clamp(1.5rem, 3vw, 2.5rem)', borderTop: '1px solid rgba(26,26,26,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.5rem' }}>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(0.9rem, 2vw, 1.1rem)', fontStyle: 'italic', fontWeight: 300, color: 'var(--color-muted)', letterSpacing: '0.02em' }}>Questions? We reply the same day.</p>

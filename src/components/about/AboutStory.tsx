@@ -17,9 +17,20 @@ export default function AboutStory({ headline, body, ownerPhotoUrl }: AboutStory
         {/* Left — polaroid */}
         <ScrollReveal>
           <div className="flex items-center justify-center border-b border-[#D6CEBE] px-8 py-20 md:border-b-0 md:border-r md:py-28">
+            {/* Photo size — was a single inline width:72% with no
+               breakpoint variation. This is a server component (no JS
+               state available for an isTablet boolean like ProductGallery
+               uses), so the tablet/desktop split is done via Tailwind
+               width classes instead: w-[72%] stays the mobile default,
+               md:w-[85%] makes it larger specifically on tablet
+               (768-1279px), xl:w-[72%] restores the original desktop
+               size unchanged at 1280px+. The inline style's width is
+               removed since the Tailwind classes now own it; aspectRatio
+               stays inline since Tailwind's aspect-square/aspect-[1/1]
+               utility would be redundant to swap in for the same value. */}
             <div
-              className="relative flex items-center justify-center"
-              style={{ width: "72%", aspectRatio: "1/1" }}
+              className="relative flex w-[72%] items-center justify-center md:w-[85%] xl:w-[72%]"
+              style={{ aspectRatio: "1/1" }}
             >
               {/* Outer spinning ring */}
               <div

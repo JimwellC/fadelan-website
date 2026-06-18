@@ -55,7 +55,10 @@ export default async function AboutPage() {
       <AboutHero intro={data.heroIntro} />
 
       <ScrollReveal>
-        <div className="mx-auto w-full px-0 md:max-w-[70%]">
+        {/* Was md:max-w-[70%] only — too narrow on tablet. Tablet (md:)
+           now gets a wider 90% cap; desktop (xl:, 1280px+) keeps the
+           original 70%, matching the CtaBanner/LayawayTerms pattern. */}
+        <div className="mx-auto w-full px-0 md:max-w-[90%] xl:max-w-[70%]">
           <AboutStory
             headline={data.storyHeadline}
             body={data.storyBody}
@@ -70,7 +73,8 @@ export default async function AboutPage() {
 
       <ScrollReveal delay={100}>
         <div className="bg-[#EDE6DC]">
-          <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
+          {/* Same fix — was md:max-w-[70%] only. */}
+          <div className="mx-auto w-full px-6 md:max-w-[90%] md:px-0 xl:max-w-[70%]">
             <AboutPromises promises={data.promises} />
           </div>
         </div>

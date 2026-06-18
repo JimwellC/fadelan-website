@@ -118,11 +118,19 @@ export default function ContactChannels({
         </h2>
       </ScrollReveal>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 border border-[#D6CEBE] md:grid-cols-2">
+      {/* Grid — was: outer container border PLUS each individual cell's own
+         border, so every interior edge between adjacent cells drew two
+         borders back-to-back, making those edges look twice as thick/dark
+         as the outer perimeter (which only ever had one). Fixed by
+         removing the border from each cell and adding divide-x/divide-y
+         on the grid container instead — Tailwind's divide utilities draw
+         exactly one border between each pair of adjacent children,
+         regardless of row/column count, so every edge (interior and
+         outer) now renders at the same single weight. */}
+      <div className="grid grid-cols-1 divide-y divide-[#D6CEBE] border border-[#D6CEBE] md:grid-cols-2 md:divide-x">
         {channels.map((ch, i) => {
           const inner = (
-            <div className="group relative border border-[#D6CEBE] p-8 transition-colors duration-200 hover:bg-[#EDE6DC]">
+            <div className="group relative p-8 transition-colors duration-200 hover:bg-[#EDE6DC]">
 
               <span className="absolute left-0 top-0 h-px w-6 bg-[#8B6F47] opacity-50" />
               <span className="absolute left-0 top-0 h-6 w-px bg-[#8B6F47] opacity-50" />

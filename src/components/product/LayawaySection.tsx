@@ -77,7 +77,7 @@ export default function LayawaySection({
 
   return (
     <div
-      className="hidden md:block border border-[#D6CEBE] px-5 py-5 mb-5"
+      className="border border-[#D6CEBE] px-5 py-5 mb-5"
       style={{ background: '#FAF8F5', borderTop: 'none' }}
     >
       {!open ? (

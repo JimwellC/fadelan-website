@@ -20,7 +20,11 @@ export default async function HowToBuyPage() {
     <main className="bg-[#F5F1EC] min-h-screen">
       <HowToBuyHero />
       <ScrollReveal>
-      <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
+      {/* Was md:max-w-[70%] only — same 70% cap applied to both tablet and
+         desktop, which read too narrow on tablet widths (~768-1024px).
+         Tablet (md:) now gets a wider 90% cap; desktop (xl:, 1280px+)
+         keeps the original 70%, matching the CtaBanner fix. */}
+      <div className="mx-auto w-full px-6 md:max-w-[90%] md:px-0 xl:max-w-[70%]">
         <ProcessSteps />
           <hr className="border-t border-[#EDE6DC]" />
       </div>
@@ -31,7 +35,7 @@ export default async function HowToBuyPage() {
       </ScrollReveal>
       
       <ScrollReveal delay={100}>
-      <div className="mx-auto w-full px-6 md:max-w-[70%] md:px-0">
+      <div className="mx-auto w-full px-6 md:max-w-[90%] md:px-0 xl:max-w-[70%]">
         <FaqAccordion />
       </div>
       </ScrollReveal>

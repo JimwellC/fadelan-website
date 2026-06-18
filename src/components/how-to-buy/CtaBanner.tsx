@@ -4,7 +4,12 @@ import ScrollReveal from "../ui/ScrollReveal"
 export default function CtaBanner() {
   return (
     <section className="bg-[#F5F1EC] px-4 py-10 md:px-10 md:py-16">
-      <div className="mx-auto w-full md:max-w-[70%]">
+      {/* Outer width — was a single md:max-w-[70%] applying the same 70%
+         cap to both tablet and desktop. 70% of a ~768-1024px tablet
+         viewport left too much empty side margin, so tablet now gets its
+         own wider cap (90%) while desktop (xl: 1280px+) keeps the
+         original 70%, which was tuned for wider screens. */}
+      <div className="mx-auto w-full md:max-w-[100%] xl:max-w-[70%]">
 
         <ScrollReveal delay={0}>
           <div

@@ -14,6 +14,10 @@ interface ProductGalleryProps {
 export default function ProductGallery({ photos, name }: ProductGalleryProps) {
   const [active,       setActive]       = useState(0)
   const [isDesktop,    setIsDesktop]    = useState(false)
+  // Tablet-specific flag (768–1279px), separate from isDesktop (768px+).
+  // Desktop's own sizing (maxHeight: 80vh, border-radius) stays untouched
+  // below — only tablet gets its own explicit values.
+  const [isTablet,     setIsTablet]     = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [mounted,      setMounted]      = useState(false)
   const hasMultiple = photos.length > 1
@@ -23,7 +27,11 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
   }, [])
 
   useEffect(() => {
-    const check = () => setIsDesktop(window.innerWidth >= 768)
+    const check = () => {
+      const w = window.innerWidth
+      setIsDesktop(w >= 768)
+      setIsTablet(w >= 768 && w < 1280)
+    }
     check()
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
@@ -173,7 +181,11 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
         }`}
       >
 
-        {/* Thumbnail strip — row below image on mobile, vertical column on the left on desktop */}
+        {/* Thumbnail strip — row below image on mobile, vertical column on
+           the left on desktop. Tablet (md: but not yet xl:) gets a smaller
+           thumbnail size than desktop, since the main frame is now bigger
+           on tablet specifically and the original 72px thumbnails were
+           sized for desktop's column width, not tablet's narrower one. */}
         {hasMultiple && (
           <div className="flex flex-shrink-0 flex-row justify-center gap-2 overflow-x-auto pb-1 md:flex-col md:justify-start md:overflow-x-visible md:pb-0">
             {photos.map((photo, i) => (
@@ -181,7 +193,9 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
                 key={photo._key}
                 onClick={() => setActive(i)}
                 aria-label={`View photo ${i + 1}`}
-                className={`relative h-14 w-14 flex-shrink-0 overflow-hidden border transition-all duration-200 md:h-[72px] md:w-[72px] ${
+                className={`relative h-14 w-14 flex-shrink-0 overflow-hidden border transition-all duration-200 ${
+                  isTablet ? 'md:h-[52px] md:w-[52px]' : 'md:h-[72px] md:w-[72px]'
+                } ${
                   active === i
                     ? 'border-[#8B6F47] opacity-100'
                     : 'border-[#D6CEBE] opacity-55 hover:border-[#8B6F47] hover:opacity-100'
@@ -234,7 +248,11 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
             className="group relative z-10 block w-full overflow-hidden bg-[#EDE6DC] cursor-zoom-in"
             style={{
               aspectRatio: '4/5',
-              maxHeight: isDesktop ? '80vh' : '65vh',
+              // Tablet's main frame made bigger than before (was 380px/55vh,
+              // now 460px/68vh) — desktop's single maxHeight: 80vh value
+              // stays completely unchanged, mobile's 65vh unchanged too.
+              minHeight: isTablet ? '460px' : undefined,
+              maxHeight: isTablet ? '68vh' : isDesktop ? '80vh' : '65vh',
               borderTopLeftRadius: 0,
               borderTopRightRadius: isDesktop ? 'clamp(40px, 8vw, 120px)' : 0,
               borderBottomRightRadius: 0,

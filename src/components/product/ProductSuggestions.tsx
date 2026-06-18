@@ -12,6 +12,12 @@ interface ProductSuggestionsProps {
   bags: BagListItem[]
 }
 
+const availabilityIndicator: Record<string, { label: string; className: string }> = {
+  reserved: { label: 'Reserved', className: 'text-amber-500' },
+  on_hold: { label: 'On hold', className: 'text-orange-500' },
+  sold: { label: 'Sold', className: 'text-neutral-500' },
+}
+
 export default function ProductSuggestions({ bags }: ProductSuggestionsProps) {
   if (!bags.length) return null
 
@@ -38,58 +44,91 @@ export default function ProductSuggestions({ bags }: ProductSuggestionsProps) {
           </div>
         </ScrollReveal>
 
-        {/* Cards */}
-        <div className="grid grid-cols-2 gap-3 md:mx-auto md:max-w-[60%] md:grid-cols-3">
-          {bags.map((bag, i) => (
-            <ScrollReveal key={bag._id} delay={i * 80}>
-              <Link
-                href={`/catalog/${bag.slug.current}`}
-                className="group relative block border border-[#D6CEBE] bg-[#EDE6DC]"
-              >
-                {/* Image */}
-                <div className="relative aspect-square overflow-hidden bg-[#E2DAD0]">
-                  {bag.coverPhoto ? (
-                    <Image
-                      src={urlFor(bag.coverPhoto.asset).width(400).format('webp').url()}
-                      alt={bag.coverPhoto.alt ?? bag.name}
-                      fill
-                      className="object-contain p-3 transition-transform duration-500 group-hover:scale-[1.03]"
-                      placeholder="blur"
-                      blurDataURL={bag.coverPhoto.asset.metadata.lqip}
-                      sizes="(max-width: 768px) 50vw, 20vw"
-                    />
-                  ) : (
-                    <div className="h-full w-full" />
-                  )}
+        {/* Cards — flex instead of a fixed-column grid, so that when there
+           are fewer bags than the max (3), the row centers as a unit and
+           each card grows to fill more of the available width instead of
+           leaving empty grid cells. max-w caps growth so cards don't get
+           absurdly wide with only 1 result; min-w keeps them from getting
+           too narrow before wrapping to a new line.
+           Card styling below now matches BagCard.tsx's visual language
+           (theme tokens, hover border, availability badge / sold overlay,
+           footer rule) instead of the old literal-hex/no-badge styling. */}
+        <div className="mx-auto flex max-w-[900px] flex-wrap justify-center gap-3">
+          {bags.map((bag, i) => {
+            const indicator = availabilityIndicator[bag.availability]
+            const isSold = bag.availability === 'sold'
 
-                  {/* Wishlist button (no animation wrapper to avoid layout shift) */}
-                  <WishlistCardButton slug={bag.slug.current} name={bag.name} />
-                </div>
+            return (
+              <div key={bag._id} className="flex flex-1 basis-[160px] justify-center">
+                <ScrollReveal delay={i * 80} className="w-full">
+                <Link
+                  href={`/catalog/${bag.slug.current}`}
+                  className="group mx-auto flex h-full w-full min-w-[160px] max-w-[320px] flex-col bg-cream-dark border border-bronze/20 transition-colors duration-400 ease-luxury hover:border-bronze/40"
+                >
+                  {/* Image */}
+                  <div className="relative aspect-bag w-full overflow-hidden">
+                    {bag.coverPhoto ? (
+                      <Image
+                        src={urlFor(bag.coverPhoto.asset).width(400).format('webp').url()}
+                        alt={bag.coverPhoto.alt ?? bag.name}
+                        fill
+                        className={`object-contain p-3 transition-transform duration-700 ease-luxury group-hover:scale-[1.03] ${
+                          isSold ? 'opacity-60' : ''
+                        }`}
+                        placeholder="blur"
+                        blurDataURL={bag.coverPhoto.asset.metadata.lqip}
+                        sizes="(max-width: 768px) 50vw, 20vw"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-muted/10" />
+                    )}
 
-                {/* Info */}
-                <div className="border-t border-[#D6CEBE] px-3 pb-3 pt-2.5">
-                  <p className="mb-0.5 text-[8px] uppercase tracking-[0.14em] text-[#8B6F47]">
-                    {BRAND_LABELS[bag.brand] ?? bag.brand}
-                  </p>
+                    {/* Reserved / On hold label */}
+                    {indicator && !isSold && (
+                      <span className={`absolute left-3 top-3 font-body text-[10px] font-medium uppercase tracking-[0.18em] ${indicator.className}`}>
+                        {indicator.label}
+                      </span>
+                    )}
 
-                  <p className="mb-2 font-['Cormorant_Garamond'] text-[0.9rem] italic leading-[1.2] text-[#1A1A1A] md:text-[0.95rem]">
-                    {bag.name}
-                  </p>
+                    {/* Sold overlay */}
+                    {isSold && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-ivory/20">
+                        <span className="bg-ivory/90 px-4 py-1.5 font-body text-[9px] font-medium uppercase tracking-[0.22em] text-neutral-500">
+                          Sold
+                        </span>
+                      </div>
+                    )}
 
-                  <div className="mb-2 h-px bg-[#D6CEBE]" />
-
-                  <div className="flex items-baseline justify-between gap-1">
-                    <p className="font-['Cormorant_Garamond'] text-[0.75rem] italic text-[#8C8275]">
-                      {bag.condition ? (CONDITION_LABELS[bag.condition] ?? bag.condition) : ''}
-                    </p>
-                    <p className="font-['Cormorant_Garamond'] text-[0.8rem] text-[#1A1A1A] md:text-[0.85rem]">
-                      ₱ {bag.price.toLocaleString('en-PH')}
-                    </p>
+                    {/* Wishlist button (no animation wrapper to avoid layout shift) */}
+                    <WishlistCardButton slug={bag.slug.current} name={bag.name} />
                   </div>
-                </div>
-              </Link>
-            </ScrollReveal>
-          ))}
+
+                  {/* Info */}
+                  <div className="flex flex-1 flex-col px-3 pt-2.5 pb-3">
+                    <p className="mb-0.5 font-body text-[8px] font-medium uppercase tracking-[0.14em] text-bronze">
+                      {BRAND_LABELS[bag.brand] ?? bag.brand}
+                    </p>
+
+                    <p className="line-clamp-2 font-display text-[0.9rem] italic leading-[1.2] text-ink transition-colors duration-400 ease-luxury group-hover:text-bronze-dark md:text-[0.95rem]">
+                      {bag.name}
+                    </p>
+
+                    <div className="flex-1" />
+
+                    <div className="mt-2 flex items-baseline justify-between gap-1 border-t border-bronze/10 pt-2">
+                      <span className="font-display text-[0.75rem] italic text-muted">
+                        {bag.condition ? (CONDITION_LABELS[bag.condition] ?? bag.condition) : ''}
+                      </span>
+                      <span className="flex-shrink-0 whitespace-nowrap font-display text-[0.8rem] text-ink md:text-[0.85rem]">
+                        ₱ {bag.price.toLocaleString('en-PH')}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+                </ScrollReveal>
+              </div>
+            )
+          })}
         </div>
 
       </section>

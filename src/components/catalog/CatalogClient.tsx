@@ -381,7 +381,14 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
           </div>
 
           <div className="flex items-start gap-6">
-            <aside className={`hidden flex-shrink-0 overflow-hidden transition-all duration-400 ease-luxury md:block ${sidebarOpen ? 'w-[220px] opacity-100' : 'pointer-events-none w-0 opacity-0'}`}>
+            {/* Sidebar open width — was a single w-[220px] applied at any
+               width past md (768px). On tablet, 220px takes a larger
+               proportional bite out of the available space than on
+               desktop, leaving little room for cards (per screenshot,
+               only ~2 cards' worth of space remained). Tablet now opens
+               to a narrower 180px; desktop (xl:, 1280px+) keeps the
+               original 220px. */}
+            <aside className={`hidden flex-shrink-0 overflow-hidden transition-all duration-400 ease-luxury md:block ${sidebarOpen ? 'w-[180px] xl:w-[220px] opacity-100' : 'pointer-events-none w-0 opacity-0'}`}>
               <CatalogFilters filters={filterOptions} active={active} onChange={updateActive} onClear={() => updateActive(DEFAULT_FILTERS)} />
             </aside>
 
@@ -410,7 +417,17 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-0.5 lg:grid-cols-4">
+                  {/* Grid columns — was grid-cols-2 md:grid-cols-3 lg:grid-cols-4,
+                     mixing this session's md:/xl: tablet-desktop scheme with
+                     Tailwind's default lg:1024px, which sits INSIDE the
+                     768-1279px tablet range rather than at the 1280px
+                     desktop line. That mismatch meant tablet got 3 columns
+                     starting at 768px then jumped to 4 at 1024px — still
+                     within "tablet" by this session's definition. Fixed to
+                     stay at 2 columns through the whole tablet range
+                     (matching the narrower sidebar above), only expanding
+                     to 4 at xl: (1280px+, true desktop). */}
+                  <div className="grid grid-cols-2 gap-3 md:gap-0.5 xl:grid-cols-4">
                     {displayed.map((bag) => {
                       const isExiting = exitingIds.has(bag._id)
                       const isEntering = enteringIds.has(bag._id)

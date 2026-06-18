@@ -33,14 +33,14 @@ export default function ProductInquiry({ bagName, price, settings }: ProductInqu
       <div className="flex flex-col gap-2">
 
         {/* Messaging channels */}
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex flex-wrap gap-2">
           {channels.map((c) => (
-            <ScrollReveal key={c.label} className="flex flex-1">
+            <ScrollReveal key={c.label} className="flex flex-1 basis-[7.5rem]">
               <a
                 href={c.href!}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex w-full items-center justify-center gap-2 border border-[#D6CEBE] bg-[#F5F1EC] px-3 py-3 text-[10px] uppercase tracking-[0.14em] text-[#1A1A1A] transition-colors hover:border-[#8B6F47] hover:text-[#8B6F47] md:px-4 md:py-3.5"
+                className="flex w-full items-center justify-center gap-2 whitespace-nowrap border border-[#D6CEBE] bg-[#F5F1EC] px-3 py-3 text-[10px] uppercase tracking-[0.14em] text-[#1A1A1A] transition-colors hover:border-[#8B6F47] hover:text-[#8B6F47] md:px-4 md:py-3.5"
               >
                 <svg className="h-[13px] w-[13px] flex-shrink-0 md:h-[14px] md:w-[14px]" viewBox="0 0 24 24" fill="currentColor">
                   <path d={ICONS[c.iconKey]} />

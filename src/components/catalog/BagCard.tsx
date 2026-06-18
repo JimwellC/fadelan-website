@@ -28,14 +28,16 @@ export default function BagCard({ bag }: BagCardProps) {
         href={`/catalog/${bag.slug.current}`}
         className="group flex h-full flex-col bg-cream-dark border border-bronze/20 transition-colors duration-400 ease-luxury hover:border-bronze/40"
       >
-        {/* Image */}
+        {/* Image — padding now has its own tablet tier (md:, 768-1279px)
+           distinct from desktop (xl:, 1280px+), instead of bundling both
+           under the same md: value as before. */}
         <div className="relative aspect-bag w-full overflow-hidden">
           {bag.coverPhoto ? (
             <Image
               src={urlFor(bag.coverPhoto.asset).width(800).format('webp').url()}
               alt={bag.coverPhoto.alt ?? bag.name}
               fill
-              className={`object-contain p-3 transition-transform duration-700 ease-luxury group-hover:scale-[1.03] md:p-4 ${
+              className={`object-contain p-3 transition-transform duration-700 ease-luxury group-hover:scale-[1.03] md:p-3.5 xl:p-4 ${
                 isSold ? 'opacity-60' : ''
               }`}
               placeholder={bag.coverPhoto.asset.metadata?.lqip ? 'blur' : 'empty'}
@@ -66,8 +68,11 @@ export default function BagCard({ bag }: BagCardProps) {
           <WishlistCardButton slug={bag.slug.current} name={bag.name} />
         </div>
 
-        {/* Info block */}
-        <div className="flex flex-1 flex-col px-3 pt-3 pb-4 md:px-4 md:pt-4 md:pb-5">
+        {/* Info block — padding now has its own tablet tier (md:),
+           distinct from desktop (xl:). Was px-4 pt-4 pb-5 applied to both
+           tablet and desktop together; tablet now gets a slightly smaller
+           middle value. */}
+        <div className="flex flex-1 flex-col px-3 pt-3 pb-4 md:px-3.5 md:pt-3.5 md:pb-4.5 xl:px-4 xl:pt-4 xl:pb-5">
 
           {/* Brand */}
           <ScrollReveal>
@@ -76,23 +81,28 @@ export default function BagCard({ bag }: BagCardProps) {
             </p>
           </ScrollReveal>
 
-          {/* Name */}
+          {/* Name — text size now has its own tablet tier (md:), distinct
+             from desktop (xl:). Was text-[1.1rem] md:text-[1.3rem]
+             applying the larger desktop size starting at 768px; tablet
+             now gets a smaller middle value, desktop keeps the original
+             1.3rem. */}
           <ScrollReveal>
-            <p className="line-clamp-2 font-display text-[1.1rem] font-normal italic leading-[1.2] text-ink transition-colors duration-400 ease-luxury group-hover:text-bronze-dark md:text-[1.3rem]">
+            <p className="line-clamp-2 font-display text-[1.1rem] font-normal italic leading-[1.2] text-ink transition-colors duration-400 ease-luxury group-hover:text-bronze-dark md:text-[1.2rem] xl:text-[1.3rem]">
               {bag.name}
             </p>
           </ScrollReveal>
 
           <div className="flex-1" />
 
-          {/* Footer */}
+          {/* Footer — price text size now has its own tablet tier (md:),
+             distinct from desktop (xl:). */}
           <ScrollReveal>
             <div className="mt-3 flex items-baseline justify-between gap-2 border-t border-bronze/10 pt-2.5">
               <span className="font-body text-[11px] italic text-muted">
                 {CONDITION_LABELS[bag.condition] ?? bag.condition}
               </span>
 
-              <span className="flex-shrink-0 whitespace-nowrap font-display text-[1rem] font-normal text-ink">
+              <span className="flex-shrink-0 whitespace-nowrap font-display text-[1rem] font-normal text-ink md:text-[0.95rem] xl:text-[1rem]">
                 ₱ {bag.price.toLocaleString('en-PH')}
               </span>
             </div>

@@ -106,10 +106,10 @@ export default async function BagDetailPage({ params }: PageProps) {
   ].filter((d) => d.value)
 
   return (
-    <main className="min-h-screen bg-[#F5F1EC]">
+    <main className="min-h-screen bg-[#F5F1EC] flex flex-col">
 
       {/* Dark top band */}
-      <ScrollReveal delay={0}>
+      <ScrollReveal delay={0} className="order-1">
         <div className="relative h-20 w-full bg-[#2C2118]">
           <div
             className="pointer-events-none absolute inset-0"
@@ -122,7 +122,7 @@ export default async function BagDetailPage({ params }: PageProps) {
       </ScrollReveal>
 
       {/* Breadcrumb */}
-      <div className="bg-[#F5F1EC] px-4 py-4 md:px-10 md:py-5">
+      <div className="order-2 bg-[#F5F1EC] px-4 py-4 md:px-10 md:py-5">
         <nav className="flex items-center gap-1.5 text-[10px] md:text-[11px]">
 
           <ScrollReveal delay={0}>
@@ -154,8 +154,15 @@ export default async function BagDetailPage({ params }: PageProps) {
         </nav>
       </div>
 
-      {/* Main product section */}
-      <div className="w-full min-h-[calc(100vh-4rem)] flex flex-col">
+      {/* ── GALLERY + NAME/PRICE/DESCRIPTION — order-3 on all breakpoints,
+           always third (after dark band order-1, breadcrumb order-2),
+           never reordered relative to those.
+           min-h-[calc(100vh-4rem)] is desktop-only (xl:) — on mobile/tablet
+           it forced this block to be full-viewport-tall even when its
+           actual content (gallery + name/price/description) was much
+           shorter, creating a large empty gap before Piece Details and
+           the inquiry block that now render directly underneath it. ── */}
+      <div className="order-3 w-full xl:min-h-[calc(100vh-4rem)] flex flex-col">
 
         <div className="grid grid-cols-1 md:grid-cols-2 flex-1 md:items-start">
         <ScrollReveal delay={0}>
@@ -223,35 +230,86 @@ export default async function BagDetailPage({ params }: PageProps) {
               <div className="mb-5 h-px bg-[#D6CEBE] md:mb-6" />
             </ScrollReveal>
 
-            <ScrollReveal delay={560}>
-              <div className="hidden md:block border border-[#D6CEBE] bg-[#EDE6DC] p-5 md:p-7" style={{ borderBottom: 'none' }}>
-                <h3 className="mb-1.5 font-['Cormorant_Garamond'] text-[1.2rem] font-normal text-[#1A1A1A] md:mb-2 md:text-[1.4rem]">
-                  Inquire to Reserve
-                </h3>
-                <p className="mb-4 text-[12px] leading-[1.8] text-[#8C8275] md:mb-6 md:text-[13px]">
-                  Send us a message — we'll confirm availability and walk you
-                  through next steps. Most inquiries replied to within an hour.
+            {/* Desktop-only copy (1280px+) — lives inside this column so it
+               inherits the column's width/alignment, sitting directly under
+               the divider. Hidden on mobile AND tablet (below 1280px),
+               where the standalone full-width copy below renders instead. */}
+            <div className="hidden xl:block">
+              <ScrollReveal delay={560}>
+                <div className="border border-[#D6CEBE] bg-[#EDE6DC] p-7" style={{ borderBottom: 'none' }}>
+                  <h3 className="mb-2 font-['Cormorant_Garamond'] text-[1.4rem] font-normal text-[#1A1A1A]">
+                    Inquire to Reserve
+                  </h3>
+                  <p className="mb-6 text-[13px] leading-[1.8] text-[#8C8275]">
+                    Send us a message — we'll confirm availability and walk you
+                    through next steps. Most inquiries replied to within an hour.
+                  </p>
+                  <ProductInquiry bagName={bag.name} price={bag.price} settings={settings} />
+                </div>
+              </ScrollReveal>
+
+              <ScrollReveal delay={640}>
+                <LayawaySection bagName={bag.name} price={bag.price} settings={settings} />
+              </ScrollReveal>
+
+              <ScrollReveal delay={720}>
+                <p className="mt-5 text-[11px] leading-[1.6] text-[#8C8275]">
+                  One of a kind. Confirm availability before committing.
                 </p>
-                <ProductInquiry bagName={bag.name} price={bag.price} settings={settings} />
-              </div>
-            </ScrollReveal>
-
-            <ScrollReveal delay={640}>
-              <LayawaySection bagName={bag.name} price={bag.price} settings={settings} />
-            </ScrollReveal>
-
-            <ScrollReveal delay={720}>
-              <p className="hidden md:block text-[10px] leading-[1.6] text-[#8C8275] md:text-[11px]">
-                One of a kind. Confirm availability before committing.
-              </p>
-            </ScrollReveal>
+              </ScrollReveal>
+            </div>
 
           </div>
         </div>
       </div>
 
-      {/* Piece details band */}
-      <section className="flex flex-col md:flex-row bg-[#EDE6DC]">
+      {/* ── INQUIRY + LAYAWAY (mobile + tablet, below 1280px) — standalone
+           full-width block so it can sit in a different position (after
+           Piece Details) than on desktop. Hidden at 1280px+, where the copy
+           inside the right column above renders instead.
+           Width: full on mobile, wider cap on tablet (md:) so it uses more
+           of the available width without going fully edge-to-edge.
+           order-5 places it after Piece Details (order-4). ── */}
+      <div className="order-5 xl:hidden px-4 pt-8 pb-8 md:px-10">
+        <div className="mx-auto w-full md:max-w-[90%]">
+
+          <ScrollReveal delay={560}>
+            <div className="border border-[#D6CEBE] bg-[#EDE6DC] p-5 md:p-7" style={{ borderBottom: 'none' }}>
+              <h3 className="mb-1.5 font-['Cormorant_Garamond'] text-[1.2rem] font-normal text-[#1A1A1A] md:mb-2 md:text-[1.4rem]">
+                Inquire to Reserve
+              </h3>
+              <p className="mb-4 text-[12px] leading-[1.8] text-[#8C8275] md:mb-6 md:text-[13px]">
+                Send us a message — we'll confirm availability and walk you
+                through next steps. Most inquiries replied to within an hour.
+              </p>
+              <ProductInquiry bagName={bag.name} price={bag.price} settings={settings} />
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={640}>
+            <LayawaySection bagName={bag.name} price={bag.price} settings={settings} />
+          </ScrollReveal>
+
+          <ScrollReveal delay={720}>
+            <p className="mt-5 text-[10px] leading-[1.6] text-[#8C8275] md:text-[11px]">
+              One of a kind. Confirm availability before committing.
+            </p>
+          </ScrollReveal>
+
+        </div>
+      </div>
+
+      {/* Piece details band — order-4 on mobile/tablet (between gallery
+           block order-3 and inquiry block order-5), xl:order-5 on desktop
+           (after the inquiry block xl:order-4, matching original order).
+           Must match the xl breakpoint used by the inquiry blocks' visibility
+           split below — using md here caused tablet (768-1279px) to get
+           the desktop order while still getting the mobile/tablet inquiry
+           block, colliding both at order-5.
+           mt-10/md:mt-12 adds breathing room above this section, since it
+           now sits directly after a sibling block on mobile/tablet rather
+           than having any margin of its own before. */}
+      <section className="order-4 xl:order-5 mt-10 md:mt-12 flex flex-col md:flex-row bg-[#EDE6DC]">
 
         {/* Left */}
         <div className="md:w-2/5 px-6 py-10 md:px-10 md:py-14">
@@ -272,7 +330,15 @@ export default async function BagDetailPage({ params }: PageProps) {
 
         </div>
 
-        {/* Right — spec tiles */}
+        {/* Right — spec tiles.
+             Grid stays 3 columns from md: up (768px+) on every breakpoint —
+             tablet and desktop both get 3 columns, per request to keep the
+             column count and only adjust padding/text size for tablet.
+             Padding/text size now have three tiers: mobile (no prefix),
+             tablet (md:, 768–1279px), and desktop (xl:, 1280px+) — tablet
+             gets its own slightly smaller values than desktop, since 3
+             columns in a narrower tablet column was cramming things tighter
+             than intended. */}
         <div className="md:w-3/5 grid grid-cols-2 gap-px bg-[rgba(139,111,71,0.12)] md:grid-cols-3 auto-rows-fr">
 
           {details.map((d, i) => (
@@ -280,14 +346,14 @@ export default async function BagDetailPage({ params }: PageProps) {
               key={d.label}
               delay={200 + i * 70}
             >
-              <div className="h-full min-h-full bg-[#EDE6DC] px-5 py-6 transition-colors duration-200 hover:bg-[#E8DFD3] md:px-6 flex flex-col justify-between">
-                
+              <div className="h-full min-h-full bg-[#EDE6DC] px-5 py-6 transition-colors duration-200 hover:bg-[#E8DFD3] md:px-4 md:py-5 xl:px-6 xl:py-6 flex flex-col justify-between">
+
                 <div>
-                  <p className="mb-2 text-[8px] uppercase tracking-[0.18em] text-[#8B6F47] md:text-[9px]">
+                  <p className="mb-2 text-[8px] uppercase tracking-[0.18em] text-[#8B6F47] md:text-[8.5px] xl:text-[9px]">
                     {d.label}
                   </p>
 
-                  <p className="font-['Cormorant_Garamond'] text-[1.05rem] font-light text-[#2C2118] md:text-[1.15rem]">
+                  <p className="font-['Cormorant_Garamond'] text-[1.05rem] font-light text-[#2C2118] md:text-[1rem] xl:text-[1.15rem]">
                     {d.value}
                   </p>
                 </div>
@@ -299,12 +365,12 @@ export default async function BagDetailPage({ params }: PageProps) {
         </div>
       </section>
       {/* Suggestions */}
-      <ScrollReveal delay={200}>
+      <ScrollReveal delay={200} className="order-6">
         <ProductSuggestions bags={suggestions} />
       </ScrollReveal>
 
       {/* CTA */}
-      <ScrollReveal delay={400}>
+      <ScrollReveal delay={400} className="order-7">
         <CtaBanner />
       </ScrollReveal>
 

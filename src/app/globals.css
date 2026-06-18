@@ -290,6 +290,7 @@
     text-align: left;
     padding: clamp(1.5rem, 3vw, 2rem);
     position: relative;
+     height: 100%;
     transition: transform 400ms var(--ease-luxury),
                 box-shadow 400ms var(--ease-luxury),
                 background-color 400ms var(--ease-luxury);
@@ -298,6 +299,8 @@
     border: 1px solid rgba(26,26,26,0.08);
     background-color: transparent;
   }
+
+
   .process-step-item::before {
     content: '';
     position: absolute;
