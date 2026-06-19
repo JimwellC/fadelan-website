@@ -33,13 +33,22 @@ export default function BagsListPage() {
   }, [])
 
   async function handleStatusChange(id: string, availability: string) {
-    await fetch(`/api/admin/bags/${id}`, {
+  try {
+    const res = await fetch(`/api/admin/bags/${id}`, {
       method:  'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ availability }),
     })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      alert(`Failed to update status: ${err.error ?? 'Unknown error'}`)
+      return
+    }
     setBags(prev => prev.map(b => b._id === id ? { ...b, availability } : b))
+  } catch {
+    alert('Network error — please try again.')
   }
+}
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
