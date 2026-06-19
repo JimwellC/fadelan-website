@@ -133,7 +133,9 @@ export default function BagForm({ initialData, bagId, mode }: BagFormProps) {
       _type:      'image',
       alt:        p.alt ?? '',
       caption:    p.caption ?? '',
-      asset:      p.asset,
+      asset:      p.asset?._id
+        ? { _type: 'reference', _ref: p.asset._id }
+        : p.asset,
       previewUrl: p.asset?.url ?? '',
     }))
   )
@@ -206,7 +208,7 @@ export default function BagForm({ initialData, bagId, mode }: BagFormProps) {
         setTimeout(() => router.push('/admin/bags'), 1500)
       } else {
         setSuccess('Changes saved!')
-        setTimeout(() => setSuccess(''), 3000)
+        setTimeout(() => setSuccess(''), 1000)
       }
     } catch {
       setError('Something went wrong. Please try again.')
