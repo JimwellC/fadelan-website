@@ -2,14 +2,20 @@
 // ─────────────────────────────────────────────────────────────
 // Auto-generated sitemap.xml for Google indexing.
 // Pulls all bag slugs from Sanity at build time.
-// Access at: https://yourdomain.com/sitemap.xml
+// Access at: https://www.fadelan.com/sitemap.xml
 // ─────────────────────────────────────────────────────────────
 
 import type { MetadataRoute } from 'next'
 import { sanityFetch }        from '@/lib/sanity'
-import { ALL_BAG_SLUGS_QUERY } from '@/lib/queries'
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://fadelan-website.vercel.app'
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.fadelan.com'
+
+const SITEMAP_BAGS_QUERY = /* groq */ `
+  *[_type == "bag" && (availability != "sold" || showWhenSold == true)] {
+    "slug": slug.current,
+    _updatedAt
+  }
+`
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // ── Static pages ──────────────────────────────────────────
@@ -50,17 +56,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let bagPages: MetadataRoute.Sitemap = []
 
   try {
-    const slugs = await sanityFetch<{ slug: string }[]>(
-      ALL_BAG_SLUGS_QUERY,
+    const bags = await sanityFetch<{ slug: string; _updatedAt: string }[]>(
+      SITEMAP_BAGS_QUERY,
       {},
-      { revalidate: 3600 }
+      { revalidate: 0 }
     )
 
-    bagPages = slugs
-      .filter((s) => s.slug) // skip any bags with missing slugs
-      .map((s) => ({
-        url:             `${BASE_URL}/bag/${s.slug}`,
-        lastModified:    new Date(),
+    bagPages = bags
+      .filter((b) => b.slug) // skip any bags with missing slugs
+      .map((b) => ({
+        url:             `${BASE_URL}/catalog/${b.slug}`,
+        lastModified:    new Date(b._updatedAt),
         changeFrequency: 'weekly' as const,
         priority:        0.8,
       }))

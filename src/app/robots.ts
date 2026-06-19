@@ -6,7 +6,7 @@
 
 import type { MetadataRoute } from 'next'
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://fadelan-website.vercel.app'
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.fadelan.com'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -18,6 +18,8 @@ export default function robots(): MetadataRoute.Robots {
           '/admin',
           '/admin/',
           '/api/',
+          '/studio',
+          '/studio/',
         ],
       },
     ],
