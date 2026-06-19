@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params
   if (!slug) return {}
 
-  const bag = await sanityFetch<BagDetail>(BAG_DETAIL_QUERY, { slug })
+  const bag = await sanityFetch<BagDetail>(BAG_DETAIL_QUERY, { slug }, { revalidate: 0 })
   if (!bag) return {}
 
   return {
@@ -86,9 +86,9 @@ export default async function BagDetailPage({ params }: PageProps) {
   const { slug } = await params
 
   const [bag, settings, allBags] = await Promise.all([
-    sanityFetch<BagDetail>(BAG_DETAIL_QUERY, { slug }),
-    sanityFetch<SiteSettings>(SITE_SETTINGS_QUERY),
-    sanityFetch<BagListItem[]>(CATALOG_QUERY),
+    sanityFetch<BagDetail>(BAG_DETAIL_QUERY, { slug }, { revalidate: 0 }),
+    sanityFetch<SiteSettings>(SITE_SETTINGS_QUERY, {}, { revalidate: 0 }),
+    sanityFetch<BagListItem[]>(CATALOG_QUERY, {}, { revalidate: 0 }),
   ])
 
   if (!bag) notFound()
