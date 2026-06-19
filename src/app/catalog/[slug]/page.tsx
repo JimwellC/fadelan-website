@@ -43,10 +43,10 @@ export async function generateMetadata({ params }: PageProps) {
   if (!bag) return {}
 
   return {
-    title: bag.seoTitle ?? `${bag.name} — Fadelan`,
+    title: bag.seoTitle ?? `${BRAND_LABELS[bag.brand] ?? bag.brand} ${bag.name}`,
     description:
       bag.seoDescription ??
-      `${BRAND_LABELS[bag.brand] ?? bag.brand} ${bag.name} — pre-loved luxury bag available at Fadelan.`,
+      `${BRAND_LABELS[bag.brand] ?? bag.brand} ${bag.name} — pre-loved luxury bag available at Fad Élan.`,
   }
 }
 
