@@ -23,6 +23,8 @@ export const revalidate = 0
 
 export const dynamicParams = true
 
+export const dynamic = 'force-dynamic'
+
 interface PageProps {
   params: Promise<{ slug: string }>
 }
