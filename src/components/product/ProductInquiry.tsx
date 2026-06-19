@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { buildInquiryUrls } from '@/lib/sanity'
 import type { SiteSettings } from '@/lib/queries'
@@ -18,7 +19,20 @@ const ICONS: Record<string, string> = {
 }
 
 export default function ProductInquiry({ bagName, price, settings }: ProductInquiryProps) {
-  const { instagram, viber, messenger } = buildInquiryUrls({ bagName, price, settings })
+  const { instagram, viber, messenger, instagramMessage } = buildInquiryUrls({ bagName, price, settings })
+  const [copied, setCopied] = useState(false)
+
+  const handleInstagramClick = async (_e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!instagramMessage) return
+    try {
+      await navigator.clipboard.writeText(instagramMessage)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    } catch {
+      // Clipboard can fail on non-HTTPS/in-app webviews — fail silently,
+      // Instagram still opens via the href below either way.
+    }
+  }
 
   const channels = [
     { label: 'Messenger', href: messenger, iconKey: 'Messenger' },
@@ -40,12 +54,13 @@ export default function ProductInquiry({ bagName, price, settings }: ProductInqu
                 href={c.href!}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={c.label === 'Instagram' ? handleInstagramClick : undefined}
                 className="flex w-full items-center justify-center gap-2 whitespace-nowrap border border-[#D6CEBE] bg-[#F5F1EC] px-3 py-3 text-[10px] uppercase tracking-[0.14em] text-[#1A1A1A] transition-colors hover:border-[#8B6F47] hover:text-[#8B6F47] md:px-4 md:py-3.5"
               >
                 <svg className="h-[13px] w-[13px] flex-shrink-0 md:h-[14px] md:w-[14px]" viewBox="0 0 24 24" fill="currentColor">
                   <path d={ICONS[c.iconKey]} />
                 </svg>
-                {c.label}
+                {c.label === 'Instagram' && copied ? 'Copied!' : c.label}
               </a>
             </ScrollReveal>
           ))}
