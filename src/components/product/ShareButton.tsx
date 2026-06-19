@@ -57,14 +57,14 @@ export default function ShareButton({ name, brand, price }: ShareButtonProps) {
       },
     },
     {
-      label: 'Viber',
+      label: 'Text',
       icon: (
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.12 14.71l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.696.876z"/>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
         </svg>
       ),
       action: () => {
-        window.open(`viber://forward?text=${encodeURIComponent(`${title}\n${url}`)}`, '_self')
+        window.open(`sms:?body=${encodeURIComponent(`${title}\n${url}`)}`, '_self')
         setOpen(false)
       },
     },

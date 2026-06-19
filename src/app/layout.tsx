@@ -50,15 +50,19 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const settings = await sanityFetch<SiteSettings>(
+    SITE_SETTINGS_QUERY, {}, { revalidate: 3600 }
+  )
+
   return (
     <html lang="en">
       <body>
-        <PublicShell>
+        <PublicShell settings={settings}>
           <PageTransition>
             <main>
               {children}

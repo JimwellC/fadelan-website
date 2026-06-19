@@ -33,7 +33,7 @@ export default async function ContactPage() {
           <div className="mx-auto w-full px-6 md:max-w-[90%] md:px-0 xl:max-w-[70%]">
             <ContactChannels
               instagramHandle={settings.instagramHandle}
-              viberNumber={settings.viberNumber}
+              smsNumber={settings.smsNumber}
               locationDescription={settings.locationDescription}
             />
           </div>

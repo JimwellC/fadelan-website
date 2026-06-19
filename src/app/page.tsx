@@ -9,7 +9,7 @@ import ScrollReveal from '@/components/ui/ScrollReveal'
 import { BRAND_LABELS } from '@/lib/sanity'
 
 interface HomepageData {
-  settings: Pick<SiteSettings, 'heroHeadline' | 'heroSubline' | 'tagline'> & {
+  settings: Pick<SiteSettings, 'heroHeadline' | 'heroSubline' | 'tagline' | 'instagramHandle' | 'facebookPageUrl' | 'smsNumber'> & {
     featuredBags?: BagListItem[]
     heroImage?: {
       asset: {
@@ -29,7 +29,7 @@ const stats = [
 
 const steps = [
   { step: '01', title: 'Browse',  body: 'Find a bag you love. Read the condition notes — we photograph every flaw honestly.' },
-  { step: '02', title: 'Inquire', body: 'Message us on Instagram or Viber. We reply within the day.' },
+  { step: '02', title: 'Inquire', body: 'Message us on Instagram or by text. We reply within the day.' },
   { step: '03', title: 'Reserve', body: 'Send a down payment to hold your bag. It comes off the market immediately.' },
   { step: '04', title: 'Receive', body: 'Pay the balance, choose pickup in Pampanga or nationwide shipping.' },
 ]
@@ -160,7 +160,11 @@ export default async function HomePage() {
           <div style={{ position: 'absolute', top: '22%', right: '14%', color: 'var(--color-bronze)', opacity: 0.35, zIndex: 2 }}>
             <svg width="48" height="48" viewBox="0 0 40 40" fill="currentColor"><path d="M20 0 L22 18 L40 20 L22 22 L20 40 L18 22 L0 20 L18 18 Z"/><path d="M32 4 L33 11 L40 12 L33 13 L32 20 L31 13 L24 12 L31 11 Z" opacity="0.5"/></svg>
           </div>
-          <HeroSocials />
+          <HeroSocials
+            instagramHandle={data?.settings?.instagramHandle}
+            facebookPageUrl={data?.settings?.facebookPageUrl}
+            smsNumber={data?.settings?.smsNumber}
+          />
         </div>
 
         {/* ── BRAND MARQUEE — pinned to the bottom of the hero so it's

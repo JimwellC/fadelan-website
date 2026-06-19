@@ -116,18 +116,18 @@ export const siteSettingsSchema = defineType({
     }),
 
     defineField({
-      name:        'viberNumber',
-      title:       'Viber Number',
+      name:        'smsNumber',
+      title:       'Text / SMS Number',
       type:        'string',
       group:       'contact',
-      // ✓ Strict international format with helpful error — rejects 09171234567,
-      // accepts +639171234567. Required for Viber deep links to work correctly.
-      description: 'International format only. E.g. +639171234567 — NOT 09171234567.',
+      // International format, same rule as before — sms: URI scheme
+      // needs an unambiguous number for both iOS and Android.
+      description: 'International format only. E.g. +639496206010 — NOT 09496206010.',
       validation:  (Rule) =>
         Rule.regex(/^\+\d{10,15}$/, {
           name:    'international phone format',
           invert:  false,
-        }).warning('Use international format: +639171234567, not 09171234567'),
+        }).warning('Use international format: +639496206010, not 09496206010'),
     }),
 
     defineField({
@@ -171,8 +171,8 @@ export const siteSettingsSchema = defineType({
     }),
 
     defineField({
-      name:         'viberInquiryTemplate',
-      title:        'Viber Message',
+      name:         'smsInquiryTemplate',
+      title:        'Text / SMS Message',
       type:         'string',
       group:        'inquiry',
       initialValue: "Hi Fadelan! I'm interested in the {bagName} (₱{price}). Is it still available?",

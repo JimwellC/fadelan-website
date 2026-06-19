@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import type { SiteSettings } from '@/lib/queries'
 
 const navLinks = [
   { href: '/catalog',    label: 'Catalog'    },
@@ -9,7 +10,11 @@ const navLinks = [
   { href: '/contact',    label: 'Contact'    },
 ]
 
-export default function Footer() {
+interface FooterProps {
+  settings?: SiteSettings
+}
+
+export default function Footer({ settings }: FooterProps) {
   const year = new Date().getFullYear()
 
   return (
@@ -184,8 +189,10 @@ export default function Footer() {
               {[
                 {
                   label: 'Instagram',
-                  href:  'https://instagram.com/fadelan.26',
-                  handle: '@fadelan.26',
+                  href:  settings?.instagramHandle
+                    ? `https://instagram.com/${settings.instagramHandle}`
+                    : 'https://instagram.com/fadelan.26',
+                  handle: settings?.instagramHandle ? `@${settings.instagramHandle}` : '@fadelan.26',
                   icon: (
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="2" y="2" width="20" height="20" rx="5"/>
@@ -196,7 +203,7 @@ export default function Footer() {
                 },
                 {
                   label: 'Facebook',
-                  href:  '#',
+                  href:  settings?.facebookPageUrl ?? '#',
                   handle: 'Fad Élan',
                   icon: (
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -205,8 +212,10 @@ export default function Footer() {
                   ),
                 },
                 {
-                  label: 'Viber',
-                  href:  '#',
+                  label: 'Text',
+                  href: settings?.smsNumber
+                    ? `sms:${settings.smsNumber.replace(/\s+/g, '')}`
+                    : '#',
                   handle: 'Message us',
                   icon: (
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -218,7 +227,7 @@ export default function Footer() {
                 <a
                   key={label}
                   href={href}
-                  target="_blank"
+                  target={href.startsWith('sms') ? '_self' : '_blank'}
                   rel="noopener noreferrer"
                   style={{
                     display:        'flex',

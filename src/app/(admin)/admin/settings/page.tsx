@@ -67,13 +67,13 @@ export default function SettingsPage() {
     messengerUrl:    '',
     facebookPageUrl: '',
     instagramHandle: '',
-    viberNumber:     '',
+    smsNumber:       '',
     contactEmail:    '',
     locationDescription: '',
     // Inquiry templates
     messengerInquiryTemplate: '',
     instagramInquiryTemplate: '',
-    viberInquiryTemplate:     '',
+    smsInquiryTemplate:       '',
     // Shipping
     defaultShippingNote: '',
     paymentMethods:      [] as string[],
@@ -94,12 +94,12 @@ export default function SettingsPage() {
           messengerUrl:             data.messengerUrl             ?? '',
           facebookPageUrl:          data.facebookPageUrl          ?? '',
           instagramHandle:          data.instagramHandle          ?? '',
-          viberNumber:              data.viberNumber              ?? '',
+          smsNumber:                data.smsNumber                ?? '',
           contactEmail:             data.contactEmail             ?? '',
           locationDescription:      data.locationDescription      ?? '',
           messengerInquiryTemplate: data.messengerInquiryTemplate ?? '',
           instagramInquiryTemplate: data.instagramInquiryTemplate ?? '',
-          viberInquiryTemplate:     data.viberInquiryTemplate     ?? '',
+          smsInquiryTemplate:       data.smsInquiryTemplate       ?? '',
           defaultShippingNote:      data.defaultShippingNote      ?? '',
           paymentMethods:           data.paymentMethods           ?? [],
         })
@@ -281,12 +281,12 @@ export default function SettingsPage() {
                 placeholder="fadelan.26" />
             </div>
             <div>
-              <label style={labelStyle}>Viber Number</label>
-              <input style={inputStyle} type="text" value={form.viberNumber}
-                onChange={e => set('viberNumber', e.target.value)}
-                placeholder="+639171234567" />
+              <label style={labelStyle}>Text / SMS Number</label>
+              <input style={inputStyle} type="text" value={form.smsNumber}
+                onChange={e => set('smsNumber', e.target.value)}
+                placeholder="+639496206010" />
               <p style={{ fontFamily: 'Inter', fontSize: '0.6rem', color: '#8C8275', marginTop: '0.25rem' }}>
-                International format only — e.g. +639171234567
+                International format only — e.g. +639496206010
               </p>
             </div>
             <div>
@@ -353,9 +353,9 @@ export default function SettingsPage() {
               </p>
             </div>
             <div>
-              <label style={labelStyle}>Viber Message</label>
-              <input style={inputStyle} type="text" value={form.viberInquiryTemplate}
-                onChange={e => set('viberInquiryTemplate', e.target.value)} />
+              <label style={labelStyle}>Text / SMS Message</label>
+              <input style={inputStyle} type="text" value={form.smsInquiryTemplate}
+                onChange={e => set('smsInquiryTemplate', e.target.value)} />
             </div>
           </div>
         </section>

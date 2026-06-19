@@ -84,12 +84,12 @@ export interface SiteSettings {
   messengerUrl?:              string
   facebookPageUrl?:           string
   instagramHandle?:           string
-  viberNumber?:               string
+  smsNumber?:                 string
   contactEmail?:              string
   locationDescription?:       string
   messengerInquiryTemplate:   string
   instagramInquiryTemplate:   string
-  viberInquiryTemplate:       string
+  smsInquiryTemplate:         string
   featuredBags?:              BagListItem[]
   heroHeadline:               string
   heroSubline:                string
@@ -228,6 +228,9 @@ export const HOMEPAGE_QUERY = /* groq */ `
       heroHeadline,
       heroSubline,
       tagline,
+      instagramHandle,
+      facebookPageUrl,
+      smsNumber,
       "heroImage": heroImage {
         asset-> {
           _id,
@@ -263,12 +266,12 @@ export const SITE_SETTINGS_QUERY = /* groq */ `
     messengerUrl,
     facebookPageUrl,
     instagramHandle,
-    viberNumber,
+    smsNumber,
     contactEmail,
     locationDescription,
     messengerInquiryTemplate,
     instagramInquiryTemplate,
-    viberInquiryTemplate,
+    smsInquiryTemplate,
     heroHeadline,
     heroSubline,
     defaultShippingNote,

@@ -6,7 +6,7 @@ import ScrollReveal from '../ui/ScrollReveal'
 interface ContactChannelsProps {
   instagramHandle?: string
   messengerUrl?: string
-  viberNumber?: string
+  smsNumber?: string
   locationDescription?: string
   contactEmail?: string
 }
@@ -32,9 +32,9 @@ const IconMessenger = () => (
   </svg>
 )
 
-const IconViber = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.12 14.71l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.696.876z"/>
+const IconText = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
   </svg>
 )
 
@@ -54,10 +54,11 @@ const IconEmail = () => (
 export default function ContactChannels({
   instagramHandle,
   messengerUrl,
-  viberNumber,
+  smsNumber,
   locationDescription,
   contactEmail,
 }: ContactChannelsProps) {
+  const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent)
   const channels: ChannelCard[] = [
     {
       label: 'Instagram',
@@ -76,13 +77,13 @@ export default function ContactChannels({
       icon: <IconMessenger />,
     },
     {
-      label: 'Viber',
-      value: viberNumber ?? '+63 XXX XXX XXXX',
+      label: 'Text',
+      value: smsNumber ?? '+63 XXX XXX XXXX',
       sub: 'Available 9am – 8pm PHT',
-      href: viberNumber
-        ? `viber://chat?number=${viberNumber.replace(/\s+/g, '')}`
+      href: smsNumber
+        ? `sms:${smsNumber.replace(/\s+/g, '')}`
         : null,
-      icon: <IconViber />,
+      icon: <IconText />,
     },
     // {
     //   label: 'Email',
@@ -168,7 +169,7 @@ export default function ContactChannels({
                 <a
                   href={ch.href}
                   target={
-                    ch.href.startsWith('viber') || ch.href.startsWith('mailto')
+                    ch.href.startsWith('sms') || ch.href.startsWith('mailto')
                       ? '_self'
                       : '_blank'
                   }

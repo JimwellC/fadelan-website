@@ -28,11 +28,11 @@ export async function GET() {
     siteName, tagline,
     heroHeadline, heroSubline,
     messengerUrl, facebookPageUrl,
-    instagramHandle, viberNumber,
+    instagramHandle, smsNumber,
     contactEmail, locationDescription,
     messengerInquiryTemplate,
     instagramInquiryTemplate,
-    viberInquiryTemplate,
+    smsInquiryTemplate,
     defaultShippingNote,
     paymentMethods
   }

@@ -35,7 +35,7 @@ export default function ContactInquiryForm({ bags }: ContactInquiryFormProps) {
       if (!res.ok) throw new Error()
       setSubmitted(true)
     } catch {
-      alert('Something went wrong. Please message us directly on Instagram or Viber.')
+      alert('Something went wrong. Please message us directly on Instagram or by text.')
     } finally {
       setLoading(false)
     }

@@ -3,8 +3,14 @@
 import { usePathname } from 'next/navigation'
 import Header from './Header'
 import Footer from './Footer'
+import type { SiteSettings } from '@/lib/queries'
 
-export default function PublicShell({ children }: { children: React.ReactNode }) {
+interface PublicShellProps {
+  children: React.ReactNode
+  settings?: SiteSettings
+}
+
+export default function PublicShell({ children, settings }: PublicShellProps) {
   const pathname = usePathname()
   const isHidden = pathname.startsWith('/admin') || pathname.startsWith('/studio')
 
@@ -12,7 +18,7 @@ export default function PublicShell({ children }: { children: React.ReactNode })
     <>
       {!isHidden && <Header heroIsDark={true} />}
       {children}
-      {!isHidden && <Footer />}
+      {!isHidden && <Footer settings={settings} />}
     </>
   )
 }

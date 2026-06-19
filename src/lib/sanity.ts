@@ -55,10 +55,10 @@ interface InquiryParams {
   settings: {
     messengerUrl?:             string
     instagramHandle?:          string
-    viberNumber?:              string
+    smsNumber?:                string
     messengerInquiryTemplate:  string
     instagramInquiryTemplate:  string
-    viberInquiryTemplate:      string
+    smsInquiryTemplate:        string
   }
 }
 
@@ -72,7 +72,7 @@ export function buildInquiryUrls({ bagName, price, settings }: InquiryParams) {
   const msg = {
     messenger: buildMessage(settings.messengerInquiryTemplate, bagName, price),
     instagram: buildMessage(settings.instagramInquiryTemplate, bagName, price),
-    viber:     buildMessage(settings.viberInquiryTemplate,     bagName, price),
+    sms:       buildMessage(settings.smsInquiryTemplate,       bagName, price),
   }
 
   const messenger = settings.messengerUrl
@@ -85,11 +85,13 @@ export function buildInquiryUrls({ bagName, price, settings }: InquiryParams) {
 
   const instagramMessage = settings.instagramHandle ? msg.instagram : null
 
-  const viber = settings.viberNumber
-    ? `viber://chat?number=${settings.viberNumber}&text=${encodeURIComponent(msg.viber)}`
-    : null
+  // iOS and Android use different separators for the sms: URI body param.
+  // OS detection happens client-side in ProductInquiry — this returns the
+  // base number + message; the component builds the final href per-OS.
+  const smsNumber  = settings.smsNumber ?? null
+  const smsMessage = settings.smsNumber ? msg.sms : null
 
-  return { messenger, instagram, instagramMessage, viber }
+  return { messenger, instagram, instagramMessage, smsNumber, smsMessage }
 }
 
 export const CONDITION_LABELS: Record<string, string> = {
