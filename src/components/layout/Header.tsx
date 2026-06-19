@@ -16,6 +16,11 @@ const navLinksRight = [
 
 const allNavLinks = [...navLinksLeft, ...navLinksRight]
 
+const mobileNavLinks = [
+  { href: '/', label: 'Home' },
+  ...allNavLinks,
+]
+
 interface HeaderProps {
   heroIsDark?: boolean
 }
@@ -264,7 +269,7 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
               fontWeight:     400,
               letterSpacing:  '0.2em',
               textTransform:  'uppercase',
-              color:          getColors().logo,
+              color:          menuOpen ? 'var(--color-ink)' : getColors().logo,
               textDecoration: 'none',
               position:       'absolute',
               left:           '50%',
@@ -285,7 +290,7 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
         style={{
           position:        'fixed',
           inset:           0,
-          zIndex:          40,
+          zIndex:          60,
           backgroundColor: 'var(--color-cream)',
           display:         'flex',
           flexDirection:   'column',
@@ -296,19 +301,70 @@ export default function Header({ heroIsDark = false }: HeaderProps) {
           transition:      'opacity 400ms cubic-bezier(0.4,0,0.2,1)',
         }}
       >
-        <div style={{
-          position:        'absolute',
-          top:             0,
-          left:            '50%',
-          transform:       'translateX(-50%)',
-          width:           '1px',
-          height:          '4rem',
-          backgroundColor: 'var(--color-bronze)',
-          opacity:         menuOpen ? 0.25 : 0,
-          transition:      'opacity 600ms ease 200ms',
-        }} />
 
-        {allNavLinks.map((link, i) => (
+        {/* Overlay's own header bar — wordmark + close, always ink, independent of scrolled/heroIsDark */}
+        <div style={{
+          position:       'absolute',
+          top:            0,
+          left:           0,
+          right:          0,
+          height:         '4.5rem',
+          display:        'flex',
+          alignItems:     'center',
+          justifyContent: 'center',
+          padding:        '0 2.5rem',
+        }}>
+          <Link
+            href="/"
+            onClick={() => setMenuOpen(false)}
+            style={{
+              fontFamily:     'var(--font-hero)',
+              fontSize:       '1rem',
+              fontWeight:     400,
+              letterSpacing:  '0.2em',
+              textTransform:  'uppercase',
+              color:          'var(--color-ink)',
+              textDecoration: 'none',
+              whiteSpace:     'nowrap',
+            }}
+          >
+            Fad Élan
+          </Link>
+
+          <button
+            onClick={() => setMenuOpen(false)}
+            aria-label="Close menu"
+            style={{
+              position:       'absolute',
+              left:           '1rem',
+              display:        'flex',
+              justifyContent: 'center',
+              alignItems:     'center',
+              width:          '38px',
+              height:         '38px',
+              background:     'none',
+              border:         'none',
+              cursor:         'pointer',
+            }}
+          >
+            <span style={{
+              position:        'absolute',
+              width:           '18px',
+              height:          '1px',
+              backgroundColor: 'var(--color-ink)',
+              transform:       'rotate(45deg)',
+            }} />
+            <span style={{
+              position:        'absolute',
+              width:           '18px',
+              height:          '1px',
+              backgroundColor: 'var(--color-ink)',
+              transform:       'rotate(-45deg)',
+            }} />
+          </button>
+        </div>
+
+        {mobileNavLinks.map((link, i) => (
           <Link
             key={link.href}
             href={link.href}
