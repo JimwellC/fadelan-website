@@ -47,7 +47,7 @@ export default function WishlistCardButton({ slug, name }: WishlistCardButtonPro
       <button
         onClick={handleClick}
         aria-label={saved ? `Remove ${name} from wishlist` : `Save ${name} to wishlist`}
-        className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center"
+        className="absolute right-0 top-0 z-10 flex h-11 w-11 items-center justify-center"
         style={{ background: 'none', border: 'none', padding: 0 }}
       >
         {/* Ripple ring — plays on save */}
