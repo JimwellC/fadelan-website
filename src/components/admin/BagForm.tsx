@@ -208,7 +208,7 @@ export default function BagForm({ initialData, bagId, mode }: BagFormProps) {
         setTimeout(() => router.push('/admin/bags'), 1500)
       } else {
         setSuccess('Changes saved!')
-        setTimeout(() => setSuccess(''), 1000)
+        setTimeout(() => router.push('/admin/bags'), 1000)
       }
     } catch {
       setError('Something went wrong. Please try again.')
