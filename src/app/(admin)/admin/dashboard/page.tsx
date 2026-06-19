@@ -39,6 +39,8 @@ const STATUS_COLOR: Record<string, string> = {
   sold:      '#6B7280',
 }
 
+export const revalidate = 0
+
 export default async function DashboardPage() {
   const session = await getIronSession<SessionData>(await cookies(), sessionOptions)
   const [stats, recentBags] = await Promise.all([getStats(), getRecentBags()])
