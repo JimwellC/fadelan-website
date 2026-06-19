@@ -18,6 +18,7 @@ import ShareButton from '@/components/product/ShareButton'
 import WishlistButton from '@/components/product/WishlistButton'
 import CtaBanner from '@/components/how-to-buy/CtaBanner'
 import ScrollReveal from '@/components/ui/ScrollReveal'
+import { buildBagProductSchema } from '@/lib/structuredData'
 
 export const revalidate = 0
 
@@ -93,6 +94,8 @@ export default async function BagDetailPage({ params }: PageProps) {
 
   if (!bag) notFound()
 
+  const productSchema = buildBagProductSchema(bag)
+
   const suggestions = allBags
     .filter((b) => b._id !== bag._id && b.availability !== 'sold')
     .sort((a, b) => (a.brand === bag.brand ? -1 : b.brand === bag.brand ? 1 : 0))
@@ -111,6 +114,11 @@ export default async function BagDetailPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-[#F5F1EC] flex flex-col">
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
 
       {/* Dark top band */}
       <ScrollReveal delay={0} className="order-1">
