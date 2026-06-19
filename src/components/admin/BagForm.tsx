@@ -152,7 +152,7 @@ export default function BagForm({ initialData, bagId, mode }: BagFormProps) {
     hardware:         initialData?.hardware         ?? '',
     dimensions:       initialData?.dimensions       ?? '',
     year:             initialData?.year             ?? '',
-    includes:         initialData?.includes         ?? [] as string[],
+    includes:         Array.isArray(initialData?.includes) ? initialData.includes : [],
     description:      initialData?.description      ?? '',
     authenticityNote: initialData?.authenticityNote ?? '',
     shippingNote:     initialData?.shippingNote     ?? '',
