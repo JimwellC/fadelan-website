@@ -140,13 +140,13 @@ export default async function BagDetailPage({ params }: PageProps) {
           </ScrollReveal>
 
           <ScrollReveal delay={160}>
-            <span className="hidden text-[#8C8275] sm:inline">
+            <span className="text-[#8C8275]">
               {BRAND_LABELS[bag.brand] ?? bag.brand}
             </span>
           </ScrollReveal>
 
           <ScrollReveal delay={240}>
-            <span className="hidden text-[#C8BFB2] sm:inline">›</span>
+            <span className="text-[#C8BFB2]">›</span>
           </ScrollReveal>
 
           <ScrollReveal delay={320}>
