@@ -11,6 +11,7 @@ interface ContactInquiryFormProps {
 export default function ContactInquiryForm({ bags }: ContactInquiryFormProps) {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [mountedAt] = useState(() => Date.now())
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -29,6 +30,8 @@ export default function ContactInquiryForm({ bags }: ContactInquiryFormProps) {
           email:   formData.get('email'),
           bag:     selectedBag?.name ?? formData.get('bag') ?? '',
           message: formData.get('message'),
+          _gotcha: formData.get('_gotcha'),
+          _ts:     mountedAt,
         }),
       })
 
@@ -85,6 +88,25 @@ export default function ContactInquiryForm({ bags }: ContactInquiryFormProps) {
           onSubmit={handleSubmit}
           className="border border-[#D6CEBE] bg-[#F5F1EC] p-8 md:p-10"
         >
+          {/* Honeypot — invisible to humans, often filled in by basic bots.
+             Positioned off-screen rather than display:none, since some
+             bots specifically skip display:none fields. tabIndex -1 and
+             autoComplete off keep it out of keyboard nav and autofill. */}
+          <input
+            type="text"
+            name="_gotcha"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              left:     '-9999px',
+              width:    '1px',
+              height:   '1px',
+              opacity:  0,
+            }}
+          />
+
           {/* Name + Email */}
           <div className="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2">
 

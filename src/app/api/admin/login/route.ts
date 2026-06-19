@@ -4,9 +4,31 @@ import { cookies }         from 'next/headers'
 import { NextResponse }    from 'next/server'
 import { sessionOptions, SessionData } from '@/lib/session'
 
+// In-memory lockout state. Resets on every cold start / deploy — acceptable
+// tradeoff for a single-admin site with no database beyond Sanity. This is
+// NOT for distributed/multi-instance rate limiting, just a basic brute-force
+// speed bump for a low-traffic admin login.
+const MAX_ATTEMPTS    = 5
+const LOCKOUT_MS       = 15 * 60 * 1000 // 15 minutes
+
+let failedAttempts = 0
+let lockedUntil: number | null = null
+
 export async function POST(request: Request) {
-  console.log('ENV CHECK:', process.env.ADMIN_USERNAME, process.env.ADMIN_PASSWORD?.slice(0, 5))
   try {
+    if (lockedUntil && Date.now() < lockedUntil) {
+      const minutesLeft = Math.ceil((lockedUntil - Date.now()) / 60000)
+      return NextResponse.json(
+        { error: `Too many failed attempts. Try again in ${minutesLeft} minute${minutesLeft === 1 ? '' : 's'}.` },
+        { status: 429 }
+      )
+    }
+
+    if (lockedUntil && Date.now() >= lockedUntil) {
+      failedAttempts = 0
+      lockedUntil = null
+    }
+
     const { username, password } = await request.json()
 
     const validUsername = process.env.ADMIN_USERNAME
@@ -20,11 +42,18 @@ export async function POST(request: Request) {
     }
 
     if (username !== validUsername || password !== validPassword) {
+      failedAttempts += 1
+      if (failedAttempts >= MAX_ATTEMPTS) {
+        lockedUntil = Date.now() + LOCKOUT_MS
+      }
       return NextResponse.json(
         { error: 'Invalid username or password' },
         { status: 401 }
       )
     }
+
+    failedAttempts = 0
+    lockedUntil = null
 
     const session = await getIronSession<SessionData>(
       await cookies(),

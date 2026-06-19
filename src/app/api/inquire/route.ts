@@ -15,12 +15,27 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
 
-  const { name, email, bag, message } = body as {
+  const { name, email, bag, message, _gotcha, _ts } = body as {
     name: string;
     email: string;
     bag: string;
     message: string;
+    _gotcha?: string;
+    _ts?: number;
   };
+
+  // Honeypot tripped — a bot filled in a field real users never see.
+  // Return a fake success so the bot doesn't learn the field is being
+  // checked; never actually send the email.
+  if (_gotcha) {
+    return NextResponse.json({ success: true });
+  }
+
+  // Submitted faster than any human could realistically fill the form —
+  // likely a scripted bot. Same fake-success response.
+  if (typeof _ts === "number" && Date.now() - _ts < 2000) {
+    return NextResponse.json({ success: true });
+  }
 
   if (!name || !email || !message) {
     return NextResponse.json(
