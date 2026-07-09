@@ -123,35 +123,15 @@ export default async function BagDetailPage({ params }: PageProps) {
 
       {/* Breadcrumb */}
       <div className="order-2 bg-[#F5F1EC] px-4 py-4 md:px-10 md:py-5">
-        <nav className="flex items-center gap-1.5 text-[10px] md:text-[11px]">
-
-          <ScrollReveal delay={0}>
-            <Link href="/catalog" className="text-[#8C8275] transition-colors hover:text-[#1A1A1A]">
-              Catalog
-            </Link>
-          </ScrollReveal>
-
-          <ScrollReveal delay={80}>
-            <span className="text-[#C8BFB2]">›</span>
-          </ScrollReveal>
-
-          <ScrollReveal delay={160}>
-            <span className="hidden text-[#8C8275] sm:inline">
-              {BRAND_LABELS[bag.brand] ?? bag.brand}
-            </span>
-          </ScrollReveal>
-
-          <ScrollReveal delay={240}>
-            <span className="hidden text-[#C8BFB2] sm:inline">›</span>
-          </ScrollReveal>
-
-          <ScrollReveal delay={320}>
-            <span className="max-w-[180px] truncate font-medium text-[#1A1A1A] sm:max-w-none">
-              {bag.name}
-            </span>
-          </ScrollReveal>
-
-        </nav>
+        <nav className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap text-[11px] sm:text-[12px] lg:text-[13px]">
+          <Link href="/catalog" className="text-[#8C8275] transition-colors hover:text-[#1A1A1A]" > 
+          Catalog 
+          </Link> 
+          <span className="text-[#C8BFB2]">›</span> 
+          <span className="text-[#8C8275]"> {BRAND_LABELS[bag.brand] ?? bag.brand} </span> 
+          <span className="text-[#C8BFB2] text-[10px] sm:text-[11px] lg:text-[12px]"> › </span> 
+          <span className="font-medium text-[#1A1A1A] text-[11px] sm:text-[12px] lg:text-[13px]"> {bag.name} </span> 
+        </nav> 
       </div>
 
       {/* ── GALLERY + NAME/PRICE/DESCRIPTION — order-3 on all breakpoints,
