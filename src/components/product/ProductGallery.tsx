@@ -11,20 +11,56 @@ interface ProductGalleryProps {
   name: string
 }
 
+function preloadImages(urls: string[]) {
+  urls.forEach((src) => {
+    const img = new window.Image()
+    img.src = src
+  })
+}
+
+// Shimmer skeleton — bronze-tinted pulse matching the site palette
+function ImageSkeleton({ radius }: { radius?: string }) {
+  return (
+    <div
+      className="absolute inset-0 z-20"
+      style={{ borderTopRightRadius: radius ?? 0 }}
+    >
+      {/* Base cream */}
+      <div className="absolute inset-0 bg-[#EDE6DC]" style={{ borderTopRightRadius: radius ?? 0 }} />
+      {/* Shimmer sweep */}
+      <div
+        className="absolute inset-0 animate-shimmer"
+        style={{
+          borderTopRightRadius: radius ?? 0,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(139,111,71,0.08) 50%, transparent 100%)',
+          backgroundSize: '200% 100%',
+        }}
+      />
+      {/* Centered bronze diamond icon */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <rect x="12" y="2" width="14" height="14" rx="1" transform="rotate(45 12 12)" fill="rgba(139,111,71,0.15)" />
+          <rect x="12" y="5" width="10" height="10" rx="0.5" transform="rotate(45 12 12)" fill="rgba(139,111,71,0.08)" />
+        </svg>
+      </div>
+    </div>
+  )
+}
+
 export default function ProductGallery({ photos, name }: ProductGalleryProps) {
   const [active,       setActive]       = useState(0)
   const [isDesktop,    setIsDesktop]    = useState(false)
-  // Tablet-specific flag (768–1279px), separate from isDesktop (768px+).
-  // Desktop's own sizing (maxHeight: 80vh, border-radius) stays untouched
-  // below — only tablet gets its own explicit values.
   const [isTablet,     setIsTablet]     = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [mounted,      setMounted]      = useState(false)
+  // Track which main-frame images have finished loading
+  const [loadedSet,    setLoadedSet]    = useState<Set<number>>(new Set())
   const hasMultiple = photos.length > 1
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const markLoaded = (i: number) =>
+    setLoadedSet((prev) => { const s = new Set(prev); s.add(i); return s })
+
+  useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
     const check = () => {
@@ -37,12 +73,27 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
     return () => window.removeEventListener('resize', check)
   }, [])
 
+  // On mount: preload all thumbnails + first main image
+  useEffect(() => {
+    if (!photos.length) return
+    preloadImages(photos.map((p) => urlFor(p.asset).width(160).format('webp').url()))
+    preloadImages([urlFor(photos[0].asset).width(900).format('webp').url()])
+  }, [photos])
+
+  // On active change: preload neighbours at 900px + active at 1400px for lightbox
+  useEffect(() => {
+    if (!photos.length) return
+    const n = photos.length
+    const neighbors = [(active + 1) % n, (active - 1 + n) % n].filter((i) => i !== active)
+    preloadImages(neighbors.map((i) => urlFor(photos[i].asset).width(900).format('webp').url()))
+    preloadImages([urlFor(photos[active].asset).width(1400).format('webp').url()])
+  }, [active, photos])
+
   const prev = useCallback(() =>
     setActive((i) => (i - 1 + photos.length) % photos.length), [photos.length])
   const next = useCallback(() =>
     setActive((i) => (i + 1) % photos.length), [photos.length])
 
-  // Keyboard navigation + lock scroll
   useEffect(() => {
     if (!lightboxOpen) return
     const onKey = (e: KeyboardEvent) => {
@@ -64,15 +115,16 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
         className="relative w-full bg-[#EDE6DC]"
         style={{
           aspectRatio: '4/5',
-          borderTopLeftRadius: 0,
           borderTopRightRadius: isDesktop ? '80px' : 0,
-          borderBottomRightRadius: 0,
-          borderBottomLeftRadius: 0,
           border: '1px solid #D6CEBE',
         }}
       />
     )
   }
+
+  const mainRadius = isDesktop ? 'clamp(40px, 8vw, 120px)' : '0px'
+
+  // ── Lightbox ────────────────────────────────────────────────────────────
 
   const lightbox = lightboxOpen && (
     <div
@@ -108,9 +160,7 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
           src={urlFor(photos[active].asset).width(1400).format('webp').url()}
           alt={photos[active].alt ?? name}
           fill
-          className="object-contain"
-          placeholder="blur"
-          blurDataURL={photos[active].asset.metadata.lqip}
+          className="object-cover"
           sizes="90vw"
           priority
         />
@@ -158,7 +208,7 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
                 src={urlFor(photo.asset).width(120).format('webp').url()}
                 alt={`${name} ${i + 1}`}
                 fill
-                className="object-contain bg-[#2C2118]"
+                className="object-cover"
                 sizes="48px"
               />
             </button>
@@ -173,19 +223,27 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
     </div>
   )
 
+  // ── Main gallery ────────────────────────────────────────────────────────
+
   return (
     <>
+      {/* Shimmer keyframe — injected once, scoped to this component */}
+      <style>{`
+        @keyframes shimmer {
+          0%   { background-position: -200% 0; }
+          100% { background-position:  200% 0; }
+        }
+        .animate-shimmer {
+          animation: shimmer 1.6s ease-in-out infinite;
+        }
+      `}</style>
+
       <div
         className={`flex h-full gap-3 ${
           hasMultiple ? 'flex-col-reverse md:flex-row md:items-stretch' : 'w-full flex-col'
         }`}
       >
-
-        {/* Thumbnail strip — row below image on mobile, vertical column on
-           the left on desktop. Tablet (md: but not yet xl:) gets a smaller
-           thumbnail size than desktop, since the main frame is now bigger
-           on tablet specifically and the original 72px thumbnails were
-           sized for desktop's column width, not tablet's narrower one. */}
+        {/* Thumbnail strip */}
         {hasMultiple && (
           <div className="flex flex-shrink-0 flex-row justify-center gap-2 overflow-x-auto pb-1 md:flex-col md:justify-start md:overflow-x-visible md:pb-0">
             {photos.map((photo, i) => (
@@ -193,27 +251,20 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
                 key={photo._key}
                 onClick={() => setActive(i)}
                 aria-label={`View photo ${i + 1}`}
-                className={`relative h-14 w-14 flex-shrink-0 overflow-hidden border transition-all duration-200 ${
-                  isTablet ? 'md:h-[52px] md:w-[52px]' : 'md:h-[72px] md:w-[72px]'
+                className={`relative flex-shrink-0 overflow-hidden border bg-[#EDE6DC] transition-all duration-200 ${
+                  isTablet ? 'h-[52px] w-[52px]' : isDesktop ? 'h-[72px] w-[72px]' : 'h-14 w-14'
                 } ${
                   active === i
                     ? 'border-[#8B6F47] opacity-100'
                     : 'border-[#D6CEBE] opacity-55 hover:border-[#8B6F47] hover:opacity-100'
                 }`}
-                style={{
-                  borderTopLeftRadius: 0,
-                  borderTopRightRadius: '10px',
-                  borderBottomRightRadius: 0,
-                  borderBottomLeftRadius: 0,
-                }}
+                style={{ borderTopRightRadius: '10px' }}
               >
                 <Image
                   src={urlFor(photo.asset).width(160).format('webp').url()}
                   alt={photo.alt ?? `${name} ${i + 1}`}
                   fill
-                  className="bg-[#EDE6DC] object-contain"
-                  placeholder="blur"
-                  blurDataURL={photo.asset.metadata.lqip}
+                  className="object-cover"
                   sizes="72px"
                 />
               </button>
@@ -221,57 +272,63 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
           </div>
         )}
 
-        {/* Main image — clickable to open lightbox. Width fills the
-           available space; height follows from the 4/5 aspect ratio so the
-           card never grows past the photo's natural proportions, avoiding
-           empty space inside the border. */}
+        {/* Main image */}
         <div className="relative min-w-0 w-full flex-1 flex items-start">
-          {/* Decorative offset bronze border — hidden on mobile */}
+          {/* Decorative offset bronze border */}
           <div
             className="pointer-events-none absolute hidden md:block"
             style={{
-              top: '14px',
-              right: '-14px',
-              bottom: '-14px',
-              left: '0',
+              top: '14px', right: '-14px', bottom: '-14px', left: '0',
               border: '1px solid rgba(139,111,71,0.28)',
-              borderTopLeftRadius: 0,
               borderTopRightRadius: '134px',
-              borderBottomRightRadius: 0,
-              borderBottomLeftRadius: 0,
               zIndex: 0,
             }}
           />
+
           <button
             onClick={() => setLightboxOpen(true)}
             aria-label="Open image fullscreen"
             className="group relative z-10 block w-full overflow-hidden bg-[#EDE6DC] cursor-zoom-in"
             style={{
               aspectRatio: '4/5',
-              // Tablet's main frame made bigger than before (was 380px/55vh,
-              // now 460px/68vh) — desktop's single maxHeight: 80vh value
-              // stays completely unchanged, mobile's 65vh unchanged too.
               minHeight: isTablet ? '460px' : undefined,
               maxHeight: isTablet ? '68vh' : isDesktop ? '80vh' : '65vh',
-              borderTopLeftRadius: 0,
-              borderTopRightRadius: isDesktop ? 'clamp(40px, 8vw, 120px)' : 0,
-              borderBottomRightRadius: 0,
-              borderBottomLeftRadius: 0,
+              borderTopRightRadius: mainRadius,
               border: '1px solid #D6CEBE',
             }}
           >
-            <Image
-              src={urlFor(photos[active].asset).width(900).format('webp').url()}
-              alt={photos[active].alt ?? name}
-              fill
-              className="object-contain transition-transform duration-500 group-hover:scale-[1.02]"
-              placeholder="blur"
-              blurDataURL={photos[active].asset.metadata.lqip}
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
+            {/* Shimmer skeleton — shown until the active image finishes loading */}
+            {!loadedSet.has(active) && (
+              <ImageSkeleton radius={mainRadius} />
+            )}
+
+            {/* All images stacked — active visible, rest opacity-0.
+                onLoad fires when the browser has decoded the image, at which
+                point we dismiss the skeleton for that index. */}
+            {photos.map((photo, i) => (
+              <Image
+                key={photo._key}
+                src={urlFor(photo.asset).width(900).format('webp').url()}
+                alt={photo.alt ?? name}
+                fill
+                onLoad={() => markLoaded(i)}
+                className={`object-cover transition-opacity duration-200 ${
+                  i === active && loadedSet.has(i)
+                    ? 'opacity-100'
+                    : 'opacity-0 pointer-events-none'
+                }`}
+                priority={i === 0}
+                // blurDataURL from Sanity lqip — gives a colour-matched
+                // blur while the full image downloads, before our skeleton
+                // takes over if it's still not ready.
+                placeholder="blur"
+                blurDataURL={photo.asset.metadata.lqip}
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            ))}
+
             {/* Zoom hint */}
-            <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-[rgba(28,23,20,0.55)] px-2.5 py-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            <div className="absolute bottom-3 right-3 z-30 flex items-center gap-1.5 bg-[rgba(28,23,20,0.55)] px-2.5 py-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                 <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35M11 8v6M8 11h6"/>
               </svg>
@@ -281,10 +338,6 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
         </div>
       </div>
 
-      {/* Lightbox rendered via portal to escape any transformed ancestor
-         (e.g. ScrollReveal's translateY wrapper), which would otherwise
-         break position: fixed and make the lightbox render boxed-in
-         instead of covering the real viewport. */}
       {mounted && lightbox && createPortal(lightbox, document.body)}
     </>
   )
