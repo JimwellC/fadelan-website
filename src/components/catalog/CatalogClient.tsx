@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import type { BagListItem, FilterOptions } from '@/lib/queries'
 import { BRAND_LABELS, CONDITION_LABELS } from '@/lib/sanity'
 import { useWishlist } from '@/hooks/useWishlist'
@@ -34,6 +35,35 @@ const ITEMS_PER_PAGE = 12
 interface CatalogClientProps {
   bags: BagListItem[]
   filterOptions: FilterOptions
+}
+
+/**
+ * Pure filter predicate — no sorting, no pagination.
+ * Shared by both the committed `filtered` list and the staged `draftCount`
+ * preview so the two can never drift out of sync.
+ */
+function filterBags(
+  bags: BagListItem[],
+  f: ActiveFilters,
+  savedSlugs: string[],
+  wishlistMounted: boolean,
+): BagListItem[] {
+  let result = bags
+  if (f.savedOnly && wishlistMounted)
+    result = result.filter((b) => savedSlugs.includes(b.slug.current))
+  if (f.availability.length)
+    result = result.filter((b) => f.availability.includes(b.availability))
+  if (f.brands.length)
+    result = result.filter((b) => f.brands.includes(b.brand))
+  if (f.conditions.length)
+    result = result.filter((b) => f.conditions.includes(b.condition))
+  if (f.sizes.length)
+    result = result.filter((b) => f.sizes.includes(b.size))
+  if (f.minPrice)
+    result = result.filter((b) => b.price >= Number(f.minPrice))
+  if (f.maxPrice)
+    result = result.filter((b) => b.price <= Number(f.maxPrice))
+  return result
 }
 
 function useIsDesktop() {
@@ -122,40 +152,78 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
   const [sidebarOpen,       setSidebarOpen]       = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
   const [active,            setActive]            = useState<ActiveFilters>(DEFAULT_FILTERS)
+  const [draft,             setDraft]             = useState<ActiveFilters>(DEFAULT_FILTERS)
   const [sort,              setSort]              = useState<SortKey>('newest')
   const [page,              setPage]              = useState(1)
   const [loadedCount,       setLoadedCount]       = useState(ITEMS_PER_PAGE)
   const isDesktop = useIsDesktop()
   const { items: savedSlugs, mounted: wishlistMounted } = useWishlist()
 
+  // The sheet is portaled to <body>, which needs the DOM — so only render it
+  // after mount to stay SSR-safe.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  // Lock background scroll while the mobile sheet is open.
+  useEffect(() => {
+    if (!mobileFiltersOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [mobileFiltersOpen])
+
   function updateActive(next: ActiveFilters) {
-    setActive(next); setPage(1); setLoadedCount(ITEMS_PER_PAGE)
+    setActive(next)
+    setPage(1)
+    setLoadedCount(ITEMS_PER_PAGE)
   }
   function updateSort(next: SortKey) {
     setSort(next); setPage(1); setLoadedCount(ITEMS_PER_PAGE)
   }
 
+  // ── Mobile draft-filter controls (staged; commit on Apply) ──
+  function openMobileFilters() {
+    setDraft(active) // seed the draft from what's currently committed
+    setMobileFiltersOpen(true)
+  }
+  function closeMobileFilters() {
+    setMobileFiltersOpen(false) // dismiss = discard draft
+  }
+  function applyMobileFilters() {
+    updateActive(draft)
+    setMobileFiltersOpen(false)
+  }
+  function toggleDraft(
+    key: 'availability' | 'brands' | 'conditions' | 'sizes',
+    value: string,
+  ) {
+    setDraft((d) => {
+      const arr = d[key]
+      const next = arr.includes(value) ? arr.filter((x) => x !== value) : [...arr, value]
+      return { ...d, [key]: next }
+    })
+  }
+
+  const draftDirty = useMemo(
+    () => JSON.stringify(draft) !== JSON.stringify(DEFAULT_FILTERS),
+    [draft],
+  )
+
   const filtered = useMemo(() => {
-    let result = [...bags]
-    if (active.savedOnly && wishlistMounted)
-      result = result.filter((b) => savedSlugs.includes(b.slug.current))
-    if (active.availability.length)
-      result = result.filter((b) => active.availability.includes(b.availability))
-    if (active.brands.length)
-      result = result.filter((b) => active.brands.includes(b.brand))
-    if (active.conditions.length)
-      result = result.filter((b) => active.conditions.includes(b.condition))
-    if (active.sizes.length)
-      result = result.filter((b) => active.sizes.includes(b.size))
-    if (active.minPrice)
-      result = result.filter((b) => b.price >= Number(active.minPrice))
-    if (active.maxPrice)
-      result = result.filter((b) => b.price <= Number(active.maxPrice))
-    if (sort === 'price_asc')       result.sort((a, b) => a.price - b.price)
-    else if (sort === 'price_desc') result.sort((a, b) => b.price - a.price)
-    else result.sort((a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime())
-    return result
+    const result = filterBags(bags, active, savedSlugs, wishlistMounted)
+    const sorted = [...result]
+    if (sort === 'price_asc')       sorted.sort((a, b) => a.price - b.price)
+    else if (sort === 'price_desc') sorted.sort((a, b) => b.price - a.price)
+    else sorted.sort((a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime())
+    return sorted
   }, [bags, active, sort, savedSlugs, wishlistMounted])
+
+  // Live preview count for the Apply button — reflects the staged draft,
+  // NOT the committed filters.
+  const draftCount = useMemo(
+    () => filterBags(bags, draft, savedSlugs, wishlistMounted).length,
+    [bags, draft, savedSlugs, wishlistMounted],
+  )
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
   const paginatedItems = useMemo(() => {
@@ -173,9 +241,10 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
   const scrollToCatalog = () =>
     document.getElementById('catalog-toolbar')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
+  // Desktop tag chips still apply immediately (they operate on `active`).
   const activeTags: { label: string; onRemove: () => void }[] = [
     ...active.availability.map((v) => ({
-      label: v.charAt(0).toUpperCase() + v.slice(1),
+      label: v === 'on_hold' ? 'On hold' : v.charAt(0).toUpperCase() + v.slice(1),
       onRemove: () => updateActive({ ...active, availability: active.availability.filter((x) => x !== v) }),
     })),
     ...active.brands.map((v) => ({
@@ -183,7 +252,7 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
       onRemove: () => updateActive({ ...active, brands: active.brands.filter((x) => x !== v) }),
     })),
     ...active.conditions.map((v) => ({
-      label: v.charAt(0).toUpperCase() + v.slice(1),
+      label: CONDITION_LABELS[v] ?? v.charAt(0).toUpperCase() + v.slice(1),
       onRemove: () => updateActive({ ...active, conditions: active.conditions.filter((x) => x !== v) }),
     })),
     ...active.sizes.map((v) => ({
@@ -201,46 +270,86 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
   return (
     <div className="border-t border-bronze/20">
 
-      {/* ── Mobile bottom sheet filter ── */}
-      <div className="md:hidden">
-        <div className={`fixed inset-0 z-40 bg-ink/50 transition-opacity duration-400 ease-luxury ${mobileFiltersOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-          onClick={() => setMobileFiltersOpen(false)} aria-hidden />
-        <div className={`fixed bottom-0 left-0 right-0 z-50 flex max-h-[88vh] flex-col bg-ivory transition-transform duration-400 ease-luxury ${mobileFiltersOpen ? 'translate-y-0' : 'translate-y-full'}`}>
-          <div className="flex flex-shrink-0 justify-center pb-2 pt-3">
-            <div className="h-1 w-10 rounded-full bg-bronze/30" />
-          </div>
-          <div className="flex flex-shrink-0 items-center justify-between border-b border-bronze/20 px-5 py-3.5">
-            <p className="font-body text-[11px] font-medium uppercase tracking-[0.18em] text-ink">Refine</p>
-            <button onClick={() => updateActive(DEFAULT_FILTERS)} className="font-body text-[10px] text-bronze transition-colors duration-400 ease-luxury hover:text-bronze-dark">Clear all</button>
-          </div>
-          <div className="flex-1 overflow-y-auto overscroll-contain">
+      {/* ── Mobile filter sheet (staged: commit on Apply) ──
+          Portaled to <body> so `position: fixed` is viewport-relative and
+          can't be trapped by a transformed ancestor. A transform / filter /
+          will-change / contain on ANY parent creates a containing block, which
+          was pinning the sheet to the bottom of the page content (below the
+          products) instead of the viewport. */}
+      {mounted && createPortal(
+        <div className="md:hidden">
+        {/* Backdrop — now genuinely tappable since the sheet no longer covers it */}
+        <div
+          onClick={closeMobileFilters}
+          aria-hidden
+          className={`fixed inset-0 z-40 bg-ink/50 transition-opacity duration-400 ease-luxury ${
+            mobileFiltersOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
+        />
 
-            {/* Mobile saved toggle */}
+        {/* Sheet — always mounted so the slide-up actually animates.
+            `inert` when closed keeps its buttons out of the tab order. */}
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Filter pieces"
+          aria-hidden={!mobileFiltersOpen}
+          {...(!mobileFiltersOpen && { inert: true })}
+          className={`fixed inset-x-0 bottom-0 z-50 flex max-h-[85dvh] flex-col overflow-hidden bg-ivory shadow-[0_-8px_40px_rgba(26,26,26,0.14)] transition-transform duration-500 ease-luxury ${
+            mobileFiltersOpen ? 'translate-y-0' : 'translate-y-full'
+          }`}
+        >
+          {/* Drag handle — also closes on tap */}
+          <div className="flex flex-shrink-0 justify-center pb-2 pt-3">
+            <button
+              onClick={closeMobileFilters}
+              aria-label="Close filters"
+              className="h-1 w-10 rounded-full bg-bronze/30"
+            />
+          </div>
+
+          {/* Header */}
+          <div className="flex flex-shrink-0 items-center justify-between border-b border-bronze/20 bg-ivory px-5 py-3.5">
+            <p className="font-body text-[11px] font-medium uppercase tracking-[0.18em] text-ink">Refine</p>
+            <button
+              onClick={() => setDraft(DEFAULT_FILTERS)}
+              disabled={!draftDirty}
+              className="font-body text-[10px] uppercase tracking-[0.1em] text-bronze transition-colors duration-400 ease-luxury hover:text-bronze-dark disabled:cursor-not-allowed disabled:opacity-30"
+            >
+              Reset
+            </button>
+          </div>
+
+          {/* Scrollable groups */}
+          <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y">
+
+            {/* Saved toggle */}
             {wishlistMounted && savedSlugs.length > 0 && (
               <div className="border-b border-bronze/20 px-5 py-4">
                 <button
-                  onClick={() => updateActive({ ...active, savedOnly: !active.savedOnly })}
-                  className={`flex w-full items-center gap-2.5 py-1 transition-colors duration-200 ${active.savedOnly ? 'text-[#8B6F47]' : 'text-muted'}`}
+                  onClick={() => setDraft((d) => ({ ...d, savedOnly: !d.savedOnly }))}
+                  className={`flex w-full items-center gap-2.5 py-1 transition-colors duration-200 ${draft.savedOnly ? 'text-[#8B6F47]' : 'text-muted'}`}
                 >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill={active.savedOnly ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill={draft.savedOnly ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                   </svg>
                   <span className="font-body text-[11px] uppercase tracking-[0.14em]">Show saved only</span>
-                  <span className={`ml-auto flex h-5 w-5 items-center justify-center font-body text-[10px] ${active.savedOnly ? 'bg-[#8B6F47] text-[#F5F1EC]' : 'bg-bronze/10 text-bronze'}`}>
+                  <span className={`ml-auto flex h-5 w-5 items-center justify-center font-body text-[10px] ${draft.savedOnly ? 'bg-[#8B6F47] text-[#F5F1EC]' : 'bg-bronze/10 text-bronze'}`}>
                     {savedSlugs.length}
                   </span>
                 </button>
               </div>
             )}
 
+            {/* Availability */}
             <div className="border-b border-bronze/20 px-5 py-4">
               <p className="mb-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted">Availability</p>
               <div className="flex flex-wrap gap-2">
                 {(['available', 'reserved', 'on_hold', 'sold'] as const).map((v) => {
                   const label = v === 'on_hold' ? 'On hold' : v.charAt(0).toUpperCase() + v.slice(1)
-                  const checked = active.availability.includes(v)
+                  const checked = draft.availability.includes(v)
                   return (
-                    <button key={v} onClick={() => { const next = checked ? active.availability.filter((x) => x !== v) : [...active.availability, v]; updateActive({ ...active, availability: next }) }}
+                    <button key={v} onClick={() => toggleDraft('availability', v)}
                       className={`px-3.5 py-2 font-body text-[11px] tracking-[0.1em] border transition-colors duration-400 ease-luxury ${checked ? 'border-ink bg-ink text-ivory' : 'border-bronze/30 text-muted'}`}>
                       {label}
                     </button>
@@ -248,14 +357,16 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
                 })}
               </div>
             </div>
+
+            {/* Brand */}
             {filterOptions.brands.length > 0 && (
               <div className="border-b border-bronze/20 px-5 py-4">
                 <p className="mb-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted">Brand</p>
                 <div className="flex flex-wrap gap-2">
                   {filterOptions.brands.map((brand) => {
-                    const checked = active.brands.includes(brand)
+                    const checked = draft.brands.includes(brand)
                     return (
-                      <button key={brand} onClick={() => { const next = checked ? active.brands.filter((x) => x !== brand) : [...active.brands, brand]; updateActive({ ...active, brands: next }) }}
+                      <button key={brand} onClick={() => toggleDraft('brands', brand)}
                         className={`px-3.5 py-2 font-body text-[11px] tracking-[0.1em] border transition-colors duration-400 ease-luxury ${checked ? 'border-ink bg-ink text-ivory' : 'border-bronze/30 text-muted'}`}>
                         {BRAND_LABELS[brand] ?? brand}
                       </button>
@@ -264,14 +375,16 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
                 </div>
               </div>
             )}
+
+            {/* Condition */}
             {filterOptions.conditions.length > 0 && (
               <div className="border-b border-bronze/20 px-5 py-4">
                 <p className="mb-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted">Condition</p>
                 <div className="flex flex-wrap gap-2">
                   {filterOptions.conditions.map((cond) => {
-                    const checked = active.conditions.includes(cond)
+                    const checked = draft.conditions.includes(cond)
                     return (
-                      <button key={cond} onClick={() => { const next = checked ? active.conditions.filter((x) => x !== cond) : [...active.conditions, cond]; updateActive({ ...active, conditions: next }) }}
+                      <button key={cond} onClick={() => toggleDraft('conditions', cond)}
                         className={`px-3.5 py-2 font-body text-[11px] tracking-[0.1em] border transition-colors duration-400 ease-luxury ${checked ? 'border-ink bg-ink text-ivory' : 'border-bronze/30 text-muted'}`}>
                         {CONDITION_LABELS[cond] ?? cond}
                       </button>
@@ -280,24 +393,30 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
                 </div>
               </div>
             )}
+
+            {/* Price range */}
             <div className="border-b border-bronze/20 px-5 py-4">
               <p className="mb-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted">Price range</p>
               <div className="flex items-center gap-3">
-                <input type="number" placeholder="Min" value={active.minPrice} onChange={(e) => updateActive({ ...active, minPrice: e.target.value })}
+                <input type="number" inputMode="numeric" placeholder="Min" value={draft.minPrice}
+                  onChange={(e) => setDraft((d) => ({ ...d, minPrice: e.target.value }))}
                   className="w-full border border-bronze/20 bg-transparent px-3 py-2.5 font-body text-[13px] text-ink outline-none focus:border-bronze" />
                 <span className="flex-shrink-0 font-body text-[12px] text-bronze/40">—</span>
-                <input type="number" placeholder="Max" value={active.maxPrice} onChange={(e) => updateActive({ ...active, maxPrice: e.target.value })}
+                <input type="number" inputMode="numeric" placeholder="Max" value={draft.maxPrice}
+                  onChange={(e) => setDraft((d) => ({ ...d, maxPrice: e.target.value }))}
                   className="w-full border border-bronze/20 bg-transparent px-3 py-2.5 font-body text-[13px] text-ink outline-none focus:border-bronze" />
               </div>
             </div>
+
+            {/* Size */}
             {filterOptions.sizes.length > 0 && (
               <div className="px-5 py-4">
                 <p className="mb-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted">Size</p>
                 <div className="flex flex-wrap gap-2">
                   {filterOptions.sizes.map((size) => {
-                    const checked = active.sizes.includes(size)
+                    const checked = draft.sizes.includes(size)
                     return (
-                      <button key={size} onClick={() => { const next = checked ? active.sizes.filter((x) => x !== size) : [...active.sizes, size]; updateActive({ ...active, sizes: next }) }}
+                      <button key={size} onClick={() => toggleDraft('sizes', size)}
                         className={`px-3.5 py-2 font-body text-[11px] tracking-[0.1em] border transition-colors duration-400 ease-luxury ${checked ? 'border-ink bg-ink text-ivory' : 'border-bronze/30 text-muted'}`}>
                         {size.charAt(0).toUpperCase() + size.slice(1)}
                       </button>
@@ -307,20 +426,30 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
               </div>
             )}
           </div>
+
+          {/* Footer — Apply. Previews the staged count; disabled at 0 matches. */}
           <div className="flex-shrink-0 border-t border-bronze/20 bg-ivory p-4">
-            <button onClick={() => setMobileFiltersOpen(false)}
-              className="w-full bg-ink py-3.5 font-body text-[11px] font-medium uppercase tracking-[0.22em] text-ivory transition-colors duration-400 ease-luxury active:bg-bronze">
-              View {filtered.length} {filtered.length === 1 ? 'piece' : 'pieces'}
+            <button
+              onClick={applyMobileFilters}
+              disabled={draftCount === 0}
+              className="w-full bg-ink py-3.5 font-body text-[11px] font-medium uppercase tracking-[0.22em] text-ivory transition-colors duration-400 ease-luxury active:bg-bronze disabled:cursor-not-allowed disabled:bg-bronze/30 disabled:text-ivory/70"
+            >
+              {draftCount === 0
+                ? 'No matching pieces'
+                : `View ${draftCount} ${draftCount === 1 ? 'piece' : 'pieces'}`}
             </button>
           </div>
         </div>
-      </div>
+        </div>,
+        document.body,
+      )}
 
       {/* ── Toolbar ── */}
       <div id="catalog-toolbar" className="border-b border-bronze/20 px-4 py-3 md:px-[10%]">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <button onClick={() => setMobileFiltersOpen(true)} aria-label="Open filters"
+            <button
+               onClick={openMobileFilters} aria-label="Open filters"
               className="flex h-9 w-9 items-center justify-center border border-bronze/20 text-ink transition-colors duration-400 ease-luxury hover:border-bronze md:hidden">
               <FilterIcon />
             </button>

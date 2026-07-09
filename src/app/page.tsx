@@ -109,7 +109,7 @@ export default async function HomePage() {
             </h1>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', lineHeight: 1.8, color: 'rgba(245,241,236,0.5)', marginBottom: '2rem', maxWidth: '280px' }}>{subline}</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem' }}>
-              <Link href="/catalog" className="btn-hero">Shop Collection</Link>
+              <Link href="/catalog" className="btn-hero">View Collection</Link>
               {!heroImageAsset && heroBag && (
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', backgroundColor: 'rgba(28,23,20,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(139,111,71,0.2)', padding: '0.5rem 0.875rem' }}>
                   <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.5rem', fontWeight: 500, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--color-bronze)' }}>{BRAND_LABELS[heroBag.brand] ?? heroBag.brand}</span>
@@ -147,7 +147,7 @@ export default async function HomePage() {
             </h1>
             <div style={{ marginLeft: 'clamp(320px, 50vw, 700px)', maxWidth: '380px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '1rem', lineHeight: 1.85, color: 'rgba(245,241,236,0.65)', marginBottom: '2.25rem' }}>{subline}</p>
-              <Link href="/catalog" className="btn-hero">Shop Collection</Link>
+              <Link href="/catalog" className="btn-hero">View Collection</Link>
               {!heroImageAsset && heroBag && (
                 <div style={{ marginTop: '2.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.75rem', backgroundColor: 'rgba(28,23,20,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(139,111,71,0.2)', padding: '0.625rem 1rem' }}>
                   <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.55rem', fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--color-bronze)' }}>{BRAND_LABELS[heroBag.brand] ?? heroBag.brand}</span>
@@ -230,7 +230,7 @@ export default async function HomePage() {
                 <ScrollReveal delay={150} className="lg:hidden">
                   <div style={{ width: '100%', maxWidth: '360px', margin: '1rem auto 0', overflow: 'hidden' }}>
                     <Image
-                      src="/images/homepage-1.png"
+                      src="/images/homepage.jpg"
                       alt="Fadelan curated piece"
                       width={800}
                       height={800}
@@ -253,7 +253,7 @@ export default async function HomePage() {
             <ScrollReveal delay={200} className="hidden lg:block relative z-10">
               <div style={{ width: '100%', maxWidth: '480px', overflow: 'hidden' }}>
                 <Image
-                  src="/images/homepage-1.png"
+                  src="/images/homepage.jpg"
                   alt="Fadelan curated piece"
                   width={1000}
                   height={1000}
@@ -286,9 +286,18 @@ export default async function HomePage() {
           <ScrollReveal>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '2rem', paddingBottom: '1.25rem', borderBottom: '1px solid rgba(26,26,26,0.08)', gap: '1rem', flexWrap: 'wrap' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.75rem, 4vw, 2.75rem)', fontWeight: 300, color: 'var(--color-ink)', letterSpacing: '-0.01em' }}>Current Collection</h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                {bags.length > 0 && <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.6rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--color-muted)' }}>{bags.length} Pieces</span>}
-                <Link href="/catalog" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', fontStyle: 'italic', color: 'var(--color-bronze)', textDecoration: 'none' }}>( Shop Collection )</Link>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                {bags.length > 0 && (
+                  <>
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.6rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--color-muted)' }}>
+                      {bags.length} Pieces
+                    </span>
+                    <span style={{ width: '1px', height: '0.75rem', backgroundColor: 'rgba(139,111,71,0.3)', display: 'inline-block' }} aria-hidden />
+                  </>
+                )}
+                <Link href="/catalog" style={{ fontFamily: 'var(--font-display)', fontSize: '0.875rem', fontStyle: 'italic', color: 'var(--color-bronze)', textDecoration: 'none' }}>
+                  ( View Collection )
+                </Link>
               </div>
             </div>
           </ScrollReveal>
