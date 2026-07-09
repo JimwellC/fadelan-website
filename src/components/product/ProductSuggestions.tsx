@@ -53,18 +53,20 @@ export default function ProductSuggestions({ bags }: ProductSuggestionsProps) {
            Card styling below now matches BagCard.tsx's visual language
            (theme tokens, hover border, availability badge / sold overlay,
            footer rule) instead of the old literal-hex/no-badge styling. */}
-        <div className="mx-auto flex max-w-[900px] flex-wrap justify-center gap-3">
+        <div className="mx-auto flex max-w-[900px] flex-wrap justify-start gap-3">
           {bags.map((bag, i) => {
             const indicator = availabilityIndicator[bag.availability]
             const isSold = bag.availability === 'sold'
 
             return (
-              <div key={bag._id} className="flex flex-1 basis-[160px] justify-center">
+              <div
+                  key={bag._id}
+                  className="w-[calc(50%-6px)] md:w-[calc(33.333%-8px)]"
+                >
                 <ScrollReveal delay={i * 80} className="w-full">
                 <Link
                   href={`/catalog/${bag.slug.current}`}
-                  className="group mx-auto flex h-full w-full min-w-[160px] max-w-[320px] flex-col bg-cream-dark border border-bronze/20 transition-colors duration-400 ease-luxury hover:border-bronze/40"
-                >
+                  className="group flex h-full w-full flex-col bg-cream-dark border border-bronze/20 transition-colors duration-400 ease-luxury hover:border-bronze/40"                >
                   {/* Image */}
                   <div className="relative aspect-bag w-full overflow-hidden">
                     {bag.coverPhoto ? (

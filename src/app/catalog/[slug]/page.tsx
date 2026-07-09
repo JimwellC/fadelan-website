@@ -18,13 +18,8 @@ import ShareButton from '@/components/product/ShareButton'
 import WishlistButton from '@/components/product/WishlistButton'
 import CtaBanner from '@/components/how-to-buy/CtaBanner'
 import ScrollReveal from '@/components/ui/ScrollReveal'
-import { buildBagProductSchema } from '@/lib/structuredData'
-
-export const revalidate = 0
 
 export const dynamicParams = true
-
-export const dynamic = 'force-dynamic'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -39,14 +34,14 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params
   if (!slug) return {}
 
-  const bag = await sanityFetch<BagDetail>(BAG_DETAIL_QUERY, { slug }, { revalidate: 0 })
+  const bag = await sanityFetch<BagDetail>(BAG_DETAIL_QUERY, { slug })
   if (!bag) return {}
 
   return {
-    title: bag.seoTitle ?? `${BRAND_LABELS[bag.brand] ?? bag.brand} ${bag.name}`,
+    title: bag.seoTitle ?? `${bag.name} — Fadelan`,
     description:
       bag.seoDescription ??
-      `${BRAND_LABELS[bag.brand] ?? bag.brand} ${bag.name} — pre-loved luxury bag available at Fad Élan.`,
+      `${BRAND_LABELS[bag.brand] ?? bag.brand} ${bag.name} — pre-loved luxury bag available at Fadelan.`,
   }
 }
 
@@ -87,14 +82,12 @@ export default async function BagDetailPage({ params }: PageProps) {
   const { slug } = await params
 
   const [bag, settings, allBags] = await Promise.all([
-    sanityFetch<BagDetail>(BAG_DETAIL_QUERY, { slug }, { revalidate: 0 }),
-    sanityFetch<SiteSettings>(SITE_SETTINGS_QUERY, {}, { revalidate: 0 }),
-    sanityFetch<BagListItem[]>(CATALOG_QUERY, {}, { revalidate: 0 }),
+    sanityFetch<BagDetail>(BAG_DETAIL_QUERY, { slug }),
+    sanityFetch<SiteSettings>(SITE_SETTINGS_QUERY),
+    sanityFetch<BagListItem[]>(CATALOG_QUERY),
   ])
 
   if (!bag) notFound()
-
-  const productSchema = buildBagProductSchema(bag)
 
   const suggestions = allBags
     .filter((b) => b._id !== bag._id && b.availability !== 'sold')
@@ -114,11 +107,6 @@ export default async function BagDetailPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-[#F5F1EC] flex flex-col">
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
-      />
 
       {/* Dark top band */}
       <ScrollReveal delay={0} className="order-1">
@@ -148,13 +136,13 @@ export default async function BagDetailPage({ params }: PageProps) {
           </ScrollReveal>
 
           <ScrollReveal delay={160}>
-            <span className="text-[#8C8275]">
+            <span className="hidden text-[#8C8275] sm:inline">
               {BRAND_LABELS[bag.brand] ?? bag.brand}
             </span>
           </ScrollReveal>
 
           <ScrollReveal delay={240}>
-            <span className="text-[#C8BFB2]">›</span>
+            <span className="hidden text-[#C8BFB2] sm:inline">›</span>
           </ScrollReveal>
 
           <ScrollReveal delay={320}>
