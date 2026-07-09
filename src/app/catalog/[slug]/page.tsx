@@ -92,7 +92,7 @@ export default async function BagDetailPage({ params }: PageProps) {
   const suggestions = allBags
     .filter((b) => b._id !== bag._id && b.availability !== 'sold')
     .sort((a, b) => (a.brand === bag.brand ? -1 : b.brand === bag.brand ? 1 : 0))
-    .slice(0, 3)
+    .slice(0, 4)
 
   const details: { label: string; value: string | undefined }[] = [
     { label: 'Material', value: bag.material },

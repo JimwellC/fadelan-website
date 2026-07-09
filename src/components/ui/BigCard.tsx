@@ -49,7 +49,7 @@ export default function BagCard({ bag }: BagCardProps) {
                 fill
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 style={{
-                  objectFit:      'contain',
+                  objectFit:      'cover',
                   objectPosition: 'center center',
                   filter:         isSold ? 'grayscale(40%)' : 'none',
                   transition:     'transform 700ms cubic-bezier(0.4, 0, 0.2, 1)',
@@ -142,12 +142,17 @@ export default function BagCard({ bag }: BagCardProps) {
             {BRAND_LABELS[bag.brand] ?? bag.brand}
           </p>
           <p style={{
-            fontFamily:   'var(--font-display)',
-            fontSize:     '1rem',
-            fontWeight:   400,
-            lineHeight:   1.25,
-            color:        'var(--color-ink)',
-            marginBottom: '0.5rem',
+            fontFamily:      'var(--font-display)',
+            fontSize:        '1rem',
+            fontWeight:      400,
+            lineHeight:      1.25,
+            color:           'var(--color-ink)',
+            marginBottom:    '0.5rem',
+            minHeight:       '2.5em',
+            display:         '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical' as const,
+            overflow:        'hidden',
           }}>
             {bag.name}
           </p>

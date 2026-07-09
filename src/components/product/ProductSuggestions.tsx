@@ -44,89 +44,95 @@ export default function ProductSuggestions({ bags }: ProductSuggestionsProps) {
           </div>
         </ScrollReveal>
 
-        {/* Cards — flex instead of a fixed-column grid, so that when there
-           are fewer bags than the max (3), the row centers as a unit and
-           each card grows to fill more of the available width instead of
-           leaving empty grid cells. max-w caps growth so cards don't get
-           absurdly wide with only 1 result; min-w keeps them from getting
-           too narrow before wrapping to a new line.
-           Card styling below now matches BagCard.tsx's visual language
-           (theme tokens, hover border, availability badge / sold overlay,
-           footer rule) instead of the old literal-hex/no-badge styling. */}
-        <div className="mx-auto flex max-w-[900px] flex-wrap justify-start gap-3">
+        {/* Cards — different counts per breakpoint:
+             Mobile  = 2 per row, 2 rows  (all 4 bags shown)
+             Desktop = 3 per row, 1 row   (4th card hidden via md:hidden)
+           The detail page passes 4 bags; the 4th (index 3) is hidden at
+           md+ so desktop stays a clean single row of 3 while mobile fills
+           a tidy 2x2. justify-center keeps rows centered; items-stretch
+           keeps cards in a row the same height. */}
+        <div className="mx-auto flex max-w-[900px] flex-wrap items-stretch justify-center gap-3">
           {bags.map((bag, i) => {
             const indicator = availabilityIndicator[bag.availability]
             const isSold = bag.availability === 'sold'
+            // Hide the 4th card on desktop (3-up row); mobile shows all 4.
+            const hideOnDesktop = i === 3
 
             return (
               <div
-                  key={bag._id}
-                  className="w-[calc(50%-6px)] md:w-[calc(33.333%-8px)]"
-                >
-                <ScrollReveal delay={i * 80} className="w-full">
-                <Link
-                  href={`/catalog/${bag.slug.current}`}
-                  className="group flex h-full w-full flex-col bg-cream-dark border border-bronze/20 transition-colors duration-400 ease-luxury hover:border-bronze/40"                >
-                  {/* Image */}
-                  <div className="relative aspect-bag w-full overflow-hidden">
-                    {bag.coverPhoto ? (
-                      <Image
-                        src={urlFor(bag.coverPhoto.asset).width(400).format('webp').url()}
-                        alt={bag.coverPhoto.alt ?? bag.name}
-                        fill
-                        className={`object-contain p-3 transition-transform duration-700 ease-luxury group-hover:scale-[1.03] ${
-                          isSold ? 'opacity-60' : ''
-                        }`}
-                        placeholder="blur"
-                        blurDataURL={bag.coverPhoto.asset.metadata.lqip}
-                        sizes="(max-width: 768px) 50vw, 20vw"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-muted/10" />
-                    )}
+                key={bag._id}
+                className={`w-[calc(50%-6px)] md:w-[calc(33.333%-8px)] ${
+                  hideOnDesktop ? 'md:hidden' : ''
+                }`}
+              >
+                {/* h-full threaded through so cards in a row match height */}
+                <ScrollReveal delay={i * 80} className="h-full w-full">
+                  <Link
+                    href={`/catalog/${bag.slug.current}`}
+                    className="group flex h-full w-full flex-col bg-cream-dark border border-bronze/20 transition-colors duration-400 ease-luxury hover:border-bronze/40"
+                  >
+                    {/* Image — object-cover fills the frame identically on
+                       every card regardless of the photo's native ratio */}
+                    <div className="relative aspect-bag w-full overflow-hidden">
+                      {bag.coverPhoto ? (
+                        <Image
+                          src={urlFor(bag.coverPhoto.asset).width(400).format('webp').url()}
+                          alt={bag.coverPhoto.alt ?? bag.name}
+                          fill
+                          className={`object-cover transition-transform duration-700 ease-luxury group-hover:scale-[1.03] ${
+                            isSold ? 'opacity-60' : ''
+                          }`}
+                          placeholder="blur"
+                          blurDataURL={bag.coverPhoto.asset.metadata.lqip}
+                          sizes="(max-width: 768px) 50vw, 33vw"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-muted/10" />
+                      )}
 
-                    {/* Reserved / On hold label */}
-                    {indicator && !isSold && (
-                      <span className={`absolute left-3 top-3 font-body text-[10px] font-medium uppercase tracking-[0.18em] ${indicator.className}`}>
-                        {indicator.label}
-                      </span>
-                    )}
+                      {/* Reserved / On hold label */}
+                      {indicator && !isSold && (
+                        <span className={`absolute left-3 top-3 font-body text-[10px] font-medium uppercase tracking-[0.18em] ${indicator.className}`}>
+                          {indicator.label}
+                        </span>
+                      )}
 
-                    {/* Sold overlay */}
-                    {isSold && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-ivory/20">
-                        <span className="bg-ivory/90 px-4 py-1.5 font-body text-[9px] font-medium uppercase tracking-[0.22em] text-neutral-500">
-                          Sold
+                      {/* Sold overlay */}
+                      {isSold && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-ivory/20">
+                          <span className="bg-ivory/90 px-4 py-1.5 font-body text-[9px] font-medium uppercase tracking-[0.22em] text-neutral-500">
+                            Sold
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Wishlist button */}
+                      <WishlistCardButton slug={bag.slug.current} name={bag.name} />
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex flex-1 flex-col px-3 pt-2.5 pb-3">
+                      <p className="mb-0.5 font-body text-[8px] font-medium uppercase tracking-[0.14em] text-bronze">
+                        {BRAND_LABELS[bag.brand] ?? bag.brand}
+                      </p>
+
+                      {/* min-h reserves 2 lines so footer aligns across cards */}
+                      <p className="line-clamp-2 min-h-[2.4em] font-display text-[0.9rem] italic leading-[1.2] text-ink transition-colors duration-400 ease-luxury group-hover:text-bronze-dark md:text-[0.95rem]">
+                        {bag.name}
+                      </p>
+
+                      <div className="flex-1" />
+
+                      <div className="mt-2 flex items-baseline justify-between gap-1 border-t border-bronze/10 pt-2">
+                        <span className="font-display text-[0.75rem] italic text-muted">
+                          {bag.condition ? (CONDITION_LABELS[bag.condition] ?? bag.condition) : ''}
+                        </span>
+                        <span className="flex-shrink-0 whitespace-nowrap font-display text-[0.8rem] text-ink md:text-[0.85rem]">
+                          ₱ {bag.price.toLocaleString('en-PH')}
                         </span>
                       </div>
-                    )}
-
-                    {/* Wishlist button (no animation wrapper to avoid layout shift) */}
-                    <WishlistCardButton slug={bag.slug.current} name={bag.name} />
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex flex-1 flex-col px-3 pt-2.5 pb-3">
-                    <p className="mb-0.5 font-body text-[8px] font-medium uppercase tracking-[0.14em] text-bronze">
-                      {BRAND_LABELS[bag.brand] ?? bag.brand}
-                    </p>
-
-                    <p className="line-clamp-2 font-display text-[0.9rem] italic leading-[1.2] text-ink transition-colors duration-400 ease-luxury group-hover:text-bronze-dark md:text-[0.95rem]">
-                      {bag.name}
-                    </p>
-
-                    <div className="flex-1" />
-
-                    <div className="mt-2 flex items-baseline justify-between gap-1 border-t border-bronze/10 pt-2">
-                      <span className="font-display text-[0.75rem] italic text-muted">
-                        {bag.condition ? (CONDITION_LABELS[bag.condition] ?? bag.condition) : ''}
-                      </span>
-                      <span className="flex-shrink-0 whitespace-nowrap font-display text-[0.8rem] text-ink md:text-[0.85rem]">
-                        ₱ {bag.price.toLocaleString('en-PH')}
-                      </span>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
                 </ScrollReveal>
               </div>
             )
