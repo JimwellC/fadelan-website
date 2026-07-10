@@ -11,6 +11,11 @@ interface ProductGalleryProps {
   name: string
 }
 
+// Lightbox resolution. 1200 is visually identical to 1400 on screen but
+// ~25% smaller to download, so swaps land faster. Bump back to 1400 if you
+// want maximum sharpness on very large monitors.
+const LIGHTBOX_WIDTH = 1200
+
 function preloadImages(urls: string[]) {
   urls.forEach((src) => {
     const img = new window.Image()
@@ -21,13 +26,8 @@ function preloadImages(urls: string[]) {
 // Shimmer skeleton — bronze-tinted pulse matching the site palette
 function ImageSkeleton({ radius }: { radius?: string }) {
   return (
-    <div
-      className="absolute inset-0 z-20"
-      style={{ borderTopRightRadius: radius ?? 0 }}
-    >
-      {/* Base cream */}
+    <div className="absolute inset-0 z-20" style={{ borderTopRightRadius: radius ?? 0 }}>
       <div className="absolute inset-0 bg-[#EDE6DC]" style={{ borderTopRightRadius: radius ?? 0 }} />
-      {/* Shimmer sweep */}
       <div
         className="absolute inset-0 animate-shimmer"
         style={{
@@ -36,7 +36,6 @@ function ImageSkeleton({ radius }: { radius?: string }) {
           backgroundSize: '200% 100%',
         }}
       />
-      {/* Centered bronze diamond icon */}
       <div className="absolute inset-0 flex items-center justify-center">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <rect x="12" y="2" width="14" height="14" rx="1" transform="rotate(45 12 12)" fill="rgba(139,111,71,0.15)" />
@@ -47,18 +46,31 @@ function ImageSkeleton({ radius }: { radius?: string }) {
   )
 }
 
+// Spinner for the dark lightbox — a bronze ring on the near-black backdrop
+function LightboxSpinner() {
+  return (
+    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+      <div className="animate-spin-slow h-8 w-8 rounded-full border-2 border-[rgba(245,241,236,0.15)] border-t-[#8B6F47]" />
+    </div>
+  )
+}
+
 export default function ProductGallery({ photos, name }: ProductGalleryProps) {
   const [active,       setActive]       = useState(0)
   const [isDesktop,    setIsDesktop]    = useState(false)
   const [isTablet,     setIsTablet]     = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [mounted,      setMounted]      = useState(false)
-  // Track which main-frame images have finished loading
+  // Which main-frame images have loaded
   const [loadedSet,    setLoadedSet]    = useState<Set<number>>(new Set())
+  // Which lightbox (full-res) images have loaded
+  const [lbLoadedSet,  setLbLoadedSet]  = useState<Set<number>>(new Set())
   const hasMultiple = photos.length > 1
 
   const markLoaded = (i: number) =>
     setLoadedSet((prev) => { const s = new Set(prev); s.add(i); return s })
+  const markLbLoaded = (i: number) =>
+    setLbLoadedSet((prev) => { const s = new Set(prev); s.add(i); return s })
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -80,14 +92,26 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
     preloadImages([urlFor(photos[0].asset).width(900).format('webp').url()])
   }, [photos])
 
-  // On active change: preload neighbours at 900px + active at 1400px for lightbox
+  // On active change: preload a WIDER window (±2) so fast clicking through a
+  // long gallery doesn't outrun the buffer. Neighbours at 900px for the main
+  // frame, and — once the lightbox is open — at LIGHTBOX_WIDTH too.
   useEffect(() => {
     if (!photos.length) return
     const n = photos.length
-    const neighbors = [(active + 1) % n, (active - 1 + n) % n].filter((i) => i !== active)
-    preloadImages(neighbors.map((i) => urlFor(photos[i].asset).width(900).format('webp').url()))
-    preloadImages([urlFor(photos[active].asset).width(1400).format('webp').url()])
-  }, [active, photos])
+    const window2 = [
+      (active + 1) % n, (active + 2) % n,
+      (active - 1 + n) % n, (active - 2 + n) % n,
+    ].filter((i) => i !== active)
+
+    preloadImages(window2.map((i) => urlFor(photos[i].asset).width(900).format('webp').url()))
+
+    // Active always; neighbours only while lightbox is open (avoids fetching
+    // heavy full-res images nobody has opened yet).
+    preloadImages([urlFor(photos[active].asset).width(LIGHTBOX_WIDTH).format('webp').url()])
+    if (lightboxOpen) {
+      preloadImages(window2.map((i) => urlFor(photos[i].asset).width(LIGHTBOX_WIDTH).format('webp').url()))
+    }
+  }, [active, photos, lightboxOpen])
 
   const prev = useCallback(() =>
     setActive((i) => (i - 1 + photos.length) % photos.length), [photos.length])
@@ -114,7 +138,7 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
       <div
         className="relative w-full bg-[#EDE6DC]"
         style={{
-          aspectRatio: '4/5',
+          height: isTablet ? '68vh' : isDesktop ? '80vh' : '65vh',
           borderTopRightRadius: isDesktop ? '80px' : 0,
           border: '1px solid #D6CEBE',
         }}
@@ -136,7 +160,7 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
       <button
         onClick={() => setLightboxOpen(false)}
         aria-label="Close"
-        className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center border border-[rgba(245,241,236,0.15)] text-[rgba(245,241,236,0.6)] transition-colors hover:border-[#8B6F47] hover:text-[#8B6F47]"
+        className="absolute right-5 top-5 z-10 flex h-9 w-9 items-center justify-center border border-[rgba(245,241,236,0.15)] text-[rgba(245,241,236,0.6)] transition-colors hover:border-[#8B6F47] hover:text-[#8B6F47]"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path strokeLinecap="round" d="M18 6 6 18M6 6l12 12"/>
@@ -145,25 +169,48 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
 
       {/* Counter */}
       {hasMultiple && (
-        <div className="absolute left-5 top-5 text-[10px] uppercase tracking-[0.18em] text-[rgba(245,241,236,0.4)]">
+        <div className="absolute left-5 top-5 z-10 text-[10px] uppercase tracking-[0.18em] text-[rgba(245,241,236,0.4)]">
           {active + 1} / {photos.length}
         </div>
       )}
 
-      {/* Image */}
+      {/* Image stack — all full-res images mounted, active shown via opacity.
+          Navigating is an opacity swap (instant if cached) instead of a
+          src change that remounts + re-decodes. A spinner shows while the
+          active image hasn't loaded yet. */}
       <div
         className="relative mx-auto"
         style={{ width: 'min(90vw, 80vh)', height: 'min(90vw, 80vh)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <Image
-          src={urlFor(photos[active].asset).width(1400).format('webp').url()}
-          alt={photos[active].alt ?? name}
-          fill
-          className="object-cover"
-          sizes="90vw"
-          priority
-        />
+        {/* Spinner while active image isn't ready */}
+        {!lbLoadedSet.has(active) && <LightboxSpinner />}
+
+        {photos.map((photo, i) => {
+          // Only render the active image and its ±2 neighbours to avoid
+          // mounting 14 full-res <Image>s at once; enough to keep swaps instant.
+          const n = photos.length
+          const near =
+            i === active ||
+            i === (active + 1) % n || i === (active + 2) % n ||
+            i === (active - 1 + n) % n || i === (active - 2 + n) % n
+          if (!near) return null
+
+          return (
+            <Image
+              key={photo._key}
+              src={urlFor(photo.asset).width(LIGHTBOX_WIDTH).format('webp').url()}
+              alt={photo.alt ?? name}
+              fill
+              onLoad={() => markLbLoaded(i)}
+              className={`object-contain transition-opacity duration-200 ${
+                i === active && lbLoadedSet.has(i) ? 'opacity-100' : 'opacity-0'
+              }`}
+              sizes="90vw"
+              priority={i === active}
+            />
+          )
+        })}
       </div>
 
       {/* Prev / Next */}
@@ -172,7 +219,7 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
           <button
             onClick={(e) => { e.stopPropagation(); prev() }}
             aria-label="Previous image"
-            className="absolute left-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center border border-[rgba(245,241,236,0.15)] text-[rgba(245,241,236,0.6)] transition-colors hover:border-[#8B6F47] hover:text-[#8B6F47] md:left-8"
+            className="absolute left-4 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center border border-[rgba(245,241,236,0.15)] text-[rgba(245,241,236,0.6)] transition-colors hover:border-[#8B6F47] hover:text-[#8B6F47] md:left-8"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
@@ -181,7 +228,7 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
           <button
             onClick={(e) => { e.stopPropagation(); next() }}
             aria-label="Next image"
-            className="absolute right-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center border border-[rgba(245,241,236,0.15)] text-[rgba(245,241,236,0.6)] transition-colors hover:border-[#8B6F47] hover:text-[#8B6F47] md:right-8"
+            className="absolute right-4 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center border border-[rgba(245,241,236,0.15)] text-[rgba(245,241,236,0.6)] transition-colors hover:border-[#8B6F47] hover:text-[#8B6F47] md:right-8"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
@@ -192,13 +239,13 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
 
       {/* Thumbnail strip */}
       {hasMultiple && (
-        <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 gap-2">
+        <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 gap-2 max-w-[92vw] overflow-x-auto px-2">
           {photos.map((photo, i) => (
             <button
               key={photo._key}
               onClick={(e) => { e.stopPropagation(); setActive(i) }}
               aria-label={`Photo ${i + 1}`}
-              className={`relative h-12 w-12 overflow-hidden border transition-all duration-200 ${
+              className={`relative h-12 w-12 flex-shrink-0 overflow-hidden border transition-all duration-200 ${
                 active === i
                   ? 'border-[#8B6F47] opacity-100'
                   : 'border-[rgba(245,241,236,0.15)] opacity-40 hover:opacity-80'
@@ -227,15 +274,15 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
 
   return (
     <>
-      {/* Shimmer keyframe — injected once, scoped to this component */}
+      {/* Keyframes — injected once, scoped to this component */}
       <style>{`
         @keyframes shimmer {
           0%   { background-position: -200% 0; }
           100% { background-position:  200% 0; }
         }
-        .animate-shimmer {
-          animation: shimmer 1.6s ease-in-out infinite;
-        }
+        .animate-shimmer { animation: shimmer 1.6s ease-in-out infinite; }
+        @keyframes spin-slow { to { transform: rotate(360deg); } }
+        .animate-spin-slow { animation: spin-slow 0.8s linear infinite; }
       `}</style>
 
       <div
@@ -272,8 +319,9 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
           </div>
         )}
 
-        {/* Main image */}
-        <div className="relative min-w-0 w-full flex-1 flex items-start">
+        {/* Main image — items-start keeps the frame at its own fixed height
+           rather than stretching to match a taller sibling column */}
+        <div className="relative min-w-0 w-full flex-1 flex items-start self-start">
           {/* Decorative offset bronze border */}
           <div
             className="pointer-events-none absolute hidden md:block"
@@ -290,21 +338,19 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
             aria-label="Open image fullscreen"
             className="group relative z-10 block w-full overflow-hidden bg-[#EDE6DC] cursor-zoom-in"
             style={{
-              aspectRatio: '4/5',
-              minHeight: isTablet ? '460px' : undefined,
-              maxHeight: isTablet ? '68vh' : isDesktop ? '80vh' : '65vh',
+              // Explicit height instead of aspectRatio + maxHeight. The old
+              // combo fought each other: aspectRatio sets height from width,
+              // maxHeight then clamps it, and the box stops being 4/5 — which
+              // left an empty gap below the photo inside the frame. A fixed
+              // height per breakpoint is unambiguous, and object-cover fills
+              // it edge-to-edge on any photo ratio (portrait or landscape).
+              height: isTablet ? '68vh' : isDesktop ? '80vh' : '65vh',
               borderTopRightRadius: mainRadius,
               border: '1px solid #D6CEBE',
             }}
           >
-            {/* Shimmer skeleton — shown until the active image finishes loading */}
-            {!loadedSet.has(active) && (
-              <ImageSkeleton radius={mainRadius} />
-            )}
+            {!loadedSet.has(active) && <ImageSkeleton radius={mainRadius} />}
 
-            {/* All images stacked — active visible, rest opacity-0.
-                onLoad fires when the browser has decoded the image, at which
-                point we dismiss the skeleton for that index. */}
             {photos.map((photo, i) => (
               <Image
                 key={photo._key}
@@ -313,14 +359,9 @@ export default function ProductGallery({ photos, name }: ProductGalleryProps) {
                 fill
                 onLoad={() => markLoaded(i)}
                 className={`object-cover transition-opacity duration-200 ${
-                  i === active && loadedSet.has(i)
-                    ? 'opacity-100'
-                    : 'opacity-0 pointer-events-none'
+                  i === active && loadedSet.has(i) ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
                 priority={i === 0}
-                // blurDataURL from Sanity lqip — gives a colour-matched
-                // blur while the full image downloads, before our skeleton
-                // takes over if it's still not ready.
                 placeholder="blur"
                 blurDataURL={photo.asset.metadata.lqip}
                 sizes="(max-width: 768px) 100vw, 50vw"
