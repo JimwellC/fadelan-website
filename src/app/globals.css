@@ -42,7 +42,7 @@
 }
 
 @layer base {
-  html {
+  html, body {
     background-color: var(--color-cream);
     color: var(--color-ink);
     font-family: var(--font-body);
