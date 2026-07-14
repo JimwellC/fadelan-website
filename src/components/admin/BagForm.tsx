@@ -160,7 +160,7 @@ export default function BagForm({ initialData, bagId, mode }: BagFormProps) {
   })
 
   const slugPreview = generateSlug(form.brand, form.name)
-  const slugUrl     = slugPreview ? `/bag/${slugPreview}` : ''
+  const slugUrl     = slugPreview ? `/catalog/${slugPreview}` : ''
 
   function set(field: string, value: any) {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -257,8 +257,8 @@ export default function BagForm({ initialData, bagId, mode }: BagFormProps) {
             <div className="admin-form-full">
               <label style={labelStyle}>Page URL (auto-generated)</label>
               <div className="admin-slug-preview">
-                {slugUrl
-                  ? <>fadelan-website.vercel.app<strong>{slugUrl}</strong></>
+                  {slugUrl
+                  ? <>{(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.fadelan.com').replace(/^https?:\/\//, '')}<strong>{slugUrl}</strong></>
                   : <span style={{ opacity: 0.4 }}>Enter a brand and bag name to preview the URL</span>
                 }
               </div>

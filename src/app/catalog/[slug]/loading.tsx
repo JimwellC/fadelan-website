@@ -1,4 +1,4 @@
-// src/app/bag/[slug]/loading.tsx
+// src/app/catalog/[slug]/loading.tsx
 // Shown instantly while bag detail page fetches from Sanity.
 
 export default function BagDetailLoading() {
