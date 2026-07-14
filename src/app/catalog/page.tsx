@@ -10,7 +10,7 @@ export const metadata = {
   description:
     'Browse our curated selection of authenticated pre-loved luxury bags — each one verified, one of a kind.',
 }
-export const revalidate = 0
+export const revalidate = 60
 
 export default async function CatalogPage() {
   const [bags, filterOptions] = await Promise.all([

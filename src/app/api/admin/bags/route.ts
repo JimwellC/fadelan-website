@@ -4,7 +4,8 @@ import { cookies }         from 'next/headers'
 import { NextResponse }    from 'next/server'
 import { createClient }    from '@sanity/client'
 import { sessionOptions, SessionData } from '@/lib/session'
-import { toPortableText } from '@/lib/portableText'
+import { toPortableText }  from '@/lib/portableText'
+import { revalidateBag }   from '@/lib/revalidate'
 
 const writeClient = createClient({
   projectId:  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
@@ -73,6 +74,12 @@ export async function POST(request: Request) {
       // undefined", and renders nothing on the live detail page.
       description:  toPortableText(body.description),
     })
+
+    // The admin writes to Sanity directly, bypassing Studio and therefore the
+    // Studio webhook. Revalidate here so the new bag appears on the public
+    // site immediately rather than waiting out the ISR window.
+    revalidateBag(bag.slug?.current)
+
     return NextResponse.json(bag, { status: 201 })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create bag' }, { status: 500 })

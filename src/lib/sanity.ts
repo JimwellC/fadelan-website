@@ -43,7 +43,7 @@ export async function sanityFetch<T>(
 ): Promise<T> {
   return client.fetch<T>(query, params, {
     next: {
-      revalidate: options?.revalidate ?? 3600,
+      revalidate: options?.revalidate,
       tags:       options?.tags,
     },
   })

@@ -1,3 +1,12 @@
+// src/app/api/revalidate/route.ts
+//
+// Called by the Sanity webhook when content is published in Studio, so the
+// public site refreshes immediately instead of waiting for the ISR timer.
+//
+// NOTE: the custom admin panel writes to Sanity directly via `writeClient`
+// and does NOT go through Studio — so it never triggers this webhook. The
+// admin API routes call `revalidatePath` themselves for that reason.
+
 import { revalidatePath } from 'next/cache'
 import { type NextRequest, NextResponse } from 'next/server'
 
@@ -19,7 +28,10 @@ export async function POST(request: NextRequest) {
       revalidatePath('/catalog')
       revalidatePath('/')
       if (slug?.current) {
-        revalidatePath(`/bag/${slug.current}`)
+        // FIXED: the bag detail route is /catalog/[slug], not /bag/[slug].
+        // The old path revalidated a route that doesn't exist, so publishing
+        // a bag never actually refreshed its detail page.
+        revalidatePath(`/catalog/${slug.current}`)
       }
     }
 

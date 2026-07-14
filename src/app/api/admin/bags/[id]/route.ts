@@ -5,6 +5,7 @@ import { NextResponse }    from 'next/server'
 import { createClient }    from '@sanity/client'
 import { sessionOptions, SessionData } from '@/lib/session'
 import { toPortableText, fromPortableText } from '@/lib/portableText'
+import { revalidateBag }   from '@/lib/revalidate'
 
 const writeClient = createClient({
   projectId:  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
@@ -92,6 +93,12 @@ export async function PATCH(
       .patch(id)
       .set(updates)
       .commit()
+
+    // Push the change live immediately — the admin bypasses the Studio
+    // webhook, so without this an edit (e.g. marking a bag sold) would sit
+    // behind the ISR cache.
+    revalidateBag(updated.slug?.current)
+
     return NextResponse.json(updated)
   } catch {
     return NextResponse.json({ error: 'Failed to update bag' }, { status: 500 })
@@ -111,7 +118,17 @@ export async function DELETE(
   const { id } = await params
 
   try {
+    // Grab the slug BEFORE deleting so we can revalidate the detail page —
+    // once the document is gone we can't look it up.
+    const existing = await writeClient.fetch<{ slug?: { current?: string } } | null>(
+      `*[_type == "bag" && _id == $id][0]{ slug }`,
+      { id }
+    )
+
     await writeClient.delete(id)
+
+    revalidateBag(existing?.slug?.current)
+
     return NextResponse.json({ success: true })
   } catch {
     return NextResponse.json({ error: 'Failed to delete bag' }, { status: 500 })
