@@ -24,6 +24,7 @@ export default function BagsListPage() {
   const [loading,  setLoading]  = useState(true)
   const [filter,   setFilter]   = useState<'all' | 'available' | 'reserved' | 'sold'>('all')
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [search,   setSearch]   = useState('')
 
   useEffect(() => {
     fetch('/api/admin/bags')
@@ -58,7 +59,34 @@ export default function BagsListPage() {
     setDeleting(null)
   }
 
-  const filtered = filter === 'all' ? bags : bags.filter(b => b.availability === filter)
+  // Search + status filter compose: "reserved" + "chanel" narrows to reserved
+  // Chanels, rather than the two fighting each other.
+  //
+  // Client-side, like the storefront search — the full list is already in
+  // memory from the /api/admin/bags fetch, so there's no endpoint to hit and
+  // nothing to rate-limit.
+  const q = search.trim().toLowerCase()
+
+  const filtered = bags
+    .filter(b => filter === 'all' || b.availability === filter)
+    .filter(b => {
+      if (!q) return true
+      // Every term must match — "chanel black" finds black Chanels, not
+      // everything black OR Chanel.
+      const hay = [
+        b.name,
+        b.brand,
+        BRAND_LABELS[b.brand] ?? '',
+        b.color,
+        b.size,
+        b.condition,
+        b.availability,
+        b.slug?.current ?? '',
+        String(b.price ?? ''),
+      ].join(' ').toLowerCase().replace(/_/g, ' ')
+
+      return q.split(/\s+/).every(term => hay.includes(term))
+    })
 
   return (
     <div>
@@ -115,6 +143,58 @@ export default function BagsListPage() {
           </button>
         ))}
       </div>
+
+      {/* Search */}
+      <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
+        <input
+          type="search"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search by name, brand, colour, size, slug…"
+          style={{
+            width:           '100%',
+            padding:         '0.65rem 2.25rem 0.65rem 0.875rem',
+            backgroundColor: '#FFFFFF',
+            border:          '1px solid rgba(139,111,71,0.25)',
+            fontFamily:      'Inter, system-ui, sans-serif',
+            fontSize:        '0.8rem',
+            color:           '#1A1A1A',
+            outline:         'none',
+          }}
+        />
+        {search && (
+          <button
+            onClick={() => setSearch('')}
+            aria-label="Clear search"
+            style={{
+              position:   'absolute',
+              right:      '0.75rem',
+              top:        '50%',
+              transform:  'translateY(-50%)',
+              background: 'none',
+              border:     'none',
+              cursor:     'pointer',
+              fontSize:   '0.9rem',
+              color:      '#8C8275',
+              lineHeight: 1,
+            }}
+          >
+            ×
+          </button>
+        )}
+      </div>
+
+      {!loading && (search || filter !== 'all') && (
+        <p style={{
+          fontFamily:   'Inter, system-ui, sans-serif',
+          fontSize:     '0.7rem',
+          color:        '#8C8275',
+          marginBottom: '1rem',
+        }}>
+          Showing {filtered.length} of {bags.length}
+          {search && <> for “{search}”</>}
+        </p>
+      )}
 
       {/* List */}
       {loading ? (
