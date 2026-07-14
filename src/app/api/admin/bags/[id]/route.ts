@@ -4,6 +4,7 @@ import { cookies }         from 'next/headers'
 import { NextResponse }    from 'next/server'
 import { createClient }    from '@sanity/client'
 import { sessionOptions, SessionData } from '@/lib/session'
+import { toPortableText, fromPortableText } from '@/lib/portableText'
 
 const writeClient = createClient({
   projectId:  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
@@ -52,7 +53,14 @@ export async function GET(
     return NextResponse.json({ error: 'Bag not found' }, { status: 404 })
   }
 
-  return NextResponse.json(bag)
+  // Flatten Portable Text -> plain text for the admin panel's <textarea>.
+  // A description written in Sanity Studio is an array of blocks; handing that
+  // straight to a textarea renders "[object Object]" and destroys the content
+  // on save. Flattening lets the client edit Studio-authored copy safely.
+  return NextResponse.json({
+    ...bag,
+    description: fromPortableText(bag.description),
+  })
 }
 
 // PATCH — update bag
@@ -67,6 +75,17 @@ export async function PATCH(
 
   const { id }  = await params
   const updates = await request.json()
+
+  // Normalise the plain-text description from the admin textarea back into
+  // Portable Text before writing. Without this the field is saved as a raw
+  // string, <PortableText> logs "Unknown block type undefined", and the
+  // description renders as NOTHING on the live detail page.
+  //
+  // Guarded by an `in` check so a partial patch (e.g. only availability)
+  // doesn't blank out an existing description.
+  if ('description' in updates) {
+    updates.description = toPortableText(updates.description)
+  }
 
   try {
     const updated = await writeClient

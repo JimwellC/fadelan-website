@@ -188,7 +188,7 @@ export default async function BagDetailPage({ params }: PageProps) {
             </ScrollReveal>
 
             <ScrollReveal delay={320}>
-              {bag.description && (
+              {Array.isArray(bag.description) && bag.description.length > 0 && (
                 <div className="mb-5 font-['Cormorant_Garamond'] text-[1rem] leading-[1.8] text-[#8C8275] md:mb-6 md:text-[1.05rem]">
                   <PortableText value={bag.description} />
                 </div>

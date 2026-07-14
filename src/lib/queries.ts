@@ -48,12 +48,12 @@ export interface BagListItem {
   condition:    BagCondition
   color:        string
   size:         BagSize
+  material?:    string
   dateAdded:    string
   coverPhoto:   BagPhoto | null
 }
 
 export interface BagDetail extends BagListItem {
-  material?:         string
   hardware?:         string
   dimensions?:       string
   year?:             string
@@ -142,6 +142,7 @@ const BAG_LIST_FIELDS = /* groq */ `
   condition,
   color,
   size,
+  material,
   dateAdded,
   "coverPhoto": photos[0] {
     ${IMAGE_FIELDS}
@@ -332,4 +333,14 @@ export type BagDropdownItem = {
   name:         string
   slug:         string
   availability: BagAvailability
+}
+export interface ActiveFilters {
+  query:        string
+  availability: string[]
+  brands:       string[]
+  conditions:   string[]
+  sizes:        string[]
+  minPrice:     string
+  maxPrice:     string
+  savedOnly:    boolean
 }

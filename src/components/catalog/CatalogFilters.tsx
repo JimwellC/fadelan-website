@@ -1,20 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import type { FilterOptions } from '@/lib/queries'
+import type { FilterOptions, ActiveFilters } from '@/lib/queries'
 import { CONDITION_LABELS, BRAND_LABELS } from '@/lib/sanity'
 import { useWishlist } from '@/hooks/useWishlist'
 import ScrollReveal from '../ui/ScrollReveal'
 
-interface ActiveFilters {
-  availability: string[]
-  brands: string[]
-  conditions: string[]
-  sizes: string[]
-  minPrice: string
-  maxPrice: string
-  savedOnly: boolean
-}
 
 interface CatalogFiltersProps {
   filters: FilterOptions

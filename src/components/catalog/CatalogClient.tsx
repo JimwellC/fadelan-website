@@ -2,23 +2,14 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import type { BagListItem, FilterOptions } from '@/lib/queries'
+import type { BagListItem, FilterOptions, ActiveFilters } from '@/lib/queries'
 import { BRAND_LABELS, CONDITION_LABELS } from '@/lib/sanity'
 import { useWishlist } from '@/hooks/useWishlist'
 import CatalogFilters from './CatalogFilters'
 import BagCard from './BagCard'
 
-interface ActiveFilters {
-  availability: string[]
-  brands: string[]
-  conditions: string[]
-  sizes: string[]
-  minPrice: string
-  maxPrice: string
-  savedOnly: boolean
-}
-
 const DEFAULT_FILTERS: ActiveFilters = {
+  query: '',
   availability: [],
   brands: [],
   conditions: [],
@@ -38,9 +29,41 @@ interface CatalogClientProps {
 }
 
 /**
+ * Build the searchable text for a bag: every field a shopper might type.
+ * Includes BOTH the raw stored value and the human label, so searching
+ * "Louis Vuitton" matches a bag whose brand is stored as "louis_vuitton",
+ * and "very good" matches condition "very_good".
+ */
+function searchableText(b: BagListItem): string {
+  return [
+    b.name,
+    b.brand,
+    BRAND_LABELS[b.brand] ?? '',
+    b.color,
+    b.material ?? '',
+    b.condition,
+    CONDITION_LABELS[b.condition] ?? '',
+    b.size,
+    b.availability,
+    String(b.price),
+  ]
+    .join(' ')
+    .toLowerCase()
+    // underscores -> spaces so "very_good" is findable as "very good"
+    .replace(/_/g, ' ')
+}
+
+/**
  * Pure filter predicate — no sorting, no pagination.
- * Shared by both the committed `filtered` list and the staged `draftCount`
- * preview so the two can never drift out of sync.
+ * Search composes with the other filters (it narrows WITHIN them) and runs
+ * through this same helper, so the committed list and the staged draft
+ * preview can never drift apart.
+ *
+ * All client-side: the full catalog is already in memory (that's how the
+ * brand/price/condition filters work), so there is no API call and nothing
+ * to rate-limit. If the catalog ever grows past a few hundred bags this
+ * would move server-side, but at current scale that would be slower and
+ * strictly more complex.
  */
 function filterBags(
   bags: BagListItem[],
@@ -49,6 +72,19 @@ function filterBags(
   wishlistMounted: boolean,
 ): BagListItem[] {
   let result = bags
+
+  // Search: every whitespace-separated term must appear somewhere in the
+  // bag's searchable text (AND semantics — "chanel black" finds black Chanels,
+  // not everything black OR Chanel).
+  const q = f.query.trim().toLowerCase()
+  if (q) {
+    const terms = q.split(/\s+/)
+    result = result.filter((b) => {
+      const hay = searchableText(b)
+      return terms.every((t) => hay.includes(t))
+    })
+  }
+
   if (f.savedOnly && wishlistMounted)
     result = result.filter((b) => savedSlugs.includes(b.slug.current))
   if (f.availability.length)
@@ -148,6 +184,54 @@ function useFilterTransition(filtered: BagListItem[]) {
 
 const DIAMOND_TEXTURE = `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='13' y='13' width='6' height='6' fill='none' stroke='%238B6F47' stroke-width='0.5' stroke-opacity='0.14' transform='rotate(45 16 16)'/%3E%3C/svg%3E")`
 
+/**
+ * Search field — one component, rendered in two places (inline in the
+ * toolbar on desktop, on its own row on mobile). Only ever one is visible
+ * at a time via responsive classes, and both drive the same state, so there
+ * is no duplicate-input or sync problem.
+ */
+function SearchField({
+  value,
+  onChange,
+  onClear,
+}: {
+  value: string
+  onChange: (v: string) => void
+  onClear: () => void
+}) {
+  return (
+    <div className="relative flex items-center">
+      <svg
+        className="pointer-events-none absolute left-3 text-bronze/50"
+        width="14" height="14" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" strokeWidth="1.6" aria-hidden
+      >
+        <circle cx="11" cy="11" r="7" />
+        <path strokeLinecap="round" d="m20 20-3.5-3.5" />
+      </svg>
+
+      <input
+        type="search"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Search by name, brand, colour, material…"
+        aria-label="Search the collection"
+        className="w-full border border-bronze/20 bg-transparent py-2 pl-9 pr-9 font-body text-[13px] text-ink outline-none transition-colors duration-400 ease-luxury placeholder:text-muted/50 hover:border-bronze/40 focus:border-bronze [&::-webkit-search-cancel-button]:appearance-none"
+      />
+
+      {value && (
+        <button
+          onClick={onClear}
+          aria-label="Clear search"
+          className="absolute right-3 flex h-5 w-5 items-center justify-center font-body text-[13px] text-muted transition-colors duration-200 hover:text-ink"
+        >
+          ×
+        </button>
+      )}
+    </div>
+  )
+}
+
 export default function CatalogClient({ bags, filterOptions }: CatalogClientProps) {
   const [sidebarOpen,       setSidebarOpen]       = useState(false)
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
@@ -159,12 +243,13 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
   const isDesktop = useIsDesktop()
   const { items: savedSlugs, mounted: wishlistMounted } = useWishlist()
 
-  // The sheet is portaled to <body>, which needs the DOM — so only render it
-  // after mount to stay SSR-safe.
+  // Raw input value, kept separate from `active.query` so typing stays
+  // responsive while the actual filtering is debounced.
+  const [searchInput, setSearchInput] = useState('')
+
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
-  // Lock background scroll while the mobile sheet is open.
   useEffect(() => {
     if (!mobileFiltersOpen) return
     const prev = document.body.style.overflow
@@ -181,17 +266,42 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
     setSort(next); setPage(1); setLoadedCount(ITEMS_PER_PAGE)
   }
 
+  // Debounce the search input into the committed filters. At this catalog
+  // size filtering is instant, but the debounce avoids re-render churn on
+  // every keystroke and keeps things smooth as the catalog grows.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setActive((a) => (a.query === searchInput ? a : { ...a, query: searchInput }))
+      setPage(1)
+      setLoadedCount(ITEMS_PER_PAGE)
+    }, 150)
+    return () => clearTimeout(t)
+  }, [searchInput])
+
+  function clearSearch() {
+    setSearchInput('')
+  }
+
   // ── Mobile draft-filter controls (staged; commit on Apply) ──
+  // NOTE: search is deliberately NOT staged — it lives in the toolbar and
+  // applies live. Only the sheet's filters are staged. So when the sheet
+  // opens we seed the draft from `active` (which carries the live query),
+  // and applying keeps whatever the current query is.
   function openMobileFilters() {
-    setDraft(active) // seed the draft from what's currently committed
+    setDraft(active)
     setMobileFiltersOpen(true)
   }
   function closeMobileFilters() {
-    setMobileFiltersOpen(false) // dismiss = discard draft
+    setMobileFiltersOpen(false)
   }
   function applyMobileFilters() {
-    updateActive(draft)
+    // Preserve the live search query when committing the staged filters.
+    updateActive({ ...draft, query: active.query })
     setMobileFiltersOpen(false)
+  }
+  function resetDraft() {
+    // Reset the sheet's filters but keep the live search query intact.
+    setDraft({ ...DEFAULT_FILTERS, query: active.query })
   }
   function toggleDraft(
     key: 'availability' | 'brands' | 'conditions' | 'sizes',
@@ -204,10 +314,12 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
     })
   }
 
-  const draftDirty = useMemo(
-    () => JSON.stringify(draft) !== JSON.stringify(DEFAULT_FILTERS),
-    [draft],
-  )
+  // "Dirty" ignores the query, since the query isn't part of the sheet.
+  const draftDirty = useMemo(() => {
+    const { query: _q, ...rest } = draft
+    const { query: _dq, ...defaults } = DEFAULT_FILTERS
+    return JSON.stringify(rest) !== JSON.stringify(defaults)
+  }, [draft])
 
   const filtered = useMemo(() => {
     const result = filterBags(bags, active, savedSlugs, wishlistMounted)
@@ -218,11 +330,10 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
     return sorted
   }, [bags, active, sort, savedSlugs, wishlistMounted])
 
-  // Live preview count for the Apply button — reflects the staged draft,
-  // NOT the committed filters.
+  // Apply-button preview: staged filters + the LIVE query.
   const draftCount = useMemo(
-    () => filterBags(bags, draft, savedSlugs, wishlistMounted).length,
-    [bags, draft, savedSlugs, wishlistMounted],
+    () => filterBags(bags, { ...draft, query: active.query }, savedSlugs, wishlistMounted).length,
+    [bags, draft, active.query, savedSlugs, wishlistMounted],
   )
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
@@ -241,10 +352,11 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
   const scrollToCatalog = () =>
     document.getElementById('catalog-toolbar')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
-  // Desktop tag chips still apply immediately (they operate on `active`).
+  const hasQuery = active.query.trim().length > 0
+
   const activeTags: { label: string; onRemove: () => void }[] = [
     ...active.availability.map((v) => ({
-      label: v === 'on_hold' ? 'On hold' : v.charAt(0).toUpperCase() + v.slice(1),
+      label: v.charAt(0).toUpperCase() + v.slice(1),
       onRemove: () => updateActive({ ...active, availability: active.availability.filter((x) => x !== v) }),
     })),
     ...active.brands.map((v) => ({
@@ -270,15 +382,9 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
   return (
     <div className="border-t border-bronze/20">
 
-      {/* ── Mobile filter sheet (staged: commit on Apply) ──
-          Portaled to <body> so `position: fixed` is viewport-relative and
-          can't be trapped by a transformed ancestor. A transform / filter /
-          will-change / contain on ANY parent creates a containing block, which
-          was pinning the sheet to the bottom of the page content (below the
-          products) instead of the viewport. */}
+      {/* ── Mobile filter sheet (staged: commit on Apply) ── */}
       {mounted && createPortal(
         <div className="md:hidden">
-        {/* Backdrop — now genuinely tappable since the sheet no longer covers it */}
         <div
           onClick={closeMobileFilters}
           aria-hidden
@@ -287,8 +393,6 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
           }`}
         />
 
-        {/* Sheet — always mounted so the slide-up actually animates.
-            `inert` when closed keeps its buttons out of the tab order. */}
         <div
           role="dialog"
           aria-modal="true"
@@ -299,7 +403,6 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
             mobileFiltersOpen ? 'translate-y-0' : 'translate-y-full'
           }`}
         >
-          {/* Drag handle — also closes on tap */}
           <div className="flex flex-shrink-0 justify-center pb-2 pt-3">
             <button
               onClick={closeMobileFilters}
@@ -308,11 +411,10 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
             />
           </div>
 
-          {/* Header */}
           <div className="flex flex-shrink-0 items-center justify-between border-b border-bronze/20 bg-ivory px-5 py-3.5">
             <p className="font-body text-[11px] font-medium uppercase tracking-[0.18em] text-ink">Refine</p>
             <button
-              onClick={() => setDraft(DEFAULT_FILTERS)}
+              onClick={resetDraft}
               disabled={!draftDirty}
               className="font-body text-[10px] uppercase tracking-[0.1em] text-bronze transition-colors duration-400 ease-luxury hover:text-bronze-dark disabled:cursor-not-allowed disabled:opacity-30"
             >
@@ -320,10 +422,8 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
             </button>
           </div>
 
-          {/* Scrollable groups */}
           <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y">
 
-            {/* Saved toggle */}
             {wishlistMounted && savedSlugs.length > 0 && (
               <div className="border-b border-bronze/20 px-5 py-4">
                 <button
@@ -341,12 +441,14 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
               </div>
             )}
 
-            {/* Availability */}
+            {/* Availability — `on_hold` removed: the BagAvailability type is
+               now available | reserved | sold, so an "On hold" chip could
+               never match anything. */}
             <div className="border-b border-bronze/20 px-5 py-4">
               <p className="mb-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted">Availability</p>
               <div className="flex flex-wrap gap-2">
-                {(['available', 'reserved', 'on_hold', 'sold'] as const).map((v) => {
-                  const label = v === 'on_hold' ? 'On hold' : v.charAt(0).toUpperCase() + v.slice(1)
+                {(['available', 'reserved', 'sold'] as const).map((v) => {
+                  const label = v.charAt(0).toUpperCase() + v.slice(1)
                   const checked = draft.availability.includes(v)
                   return (
                     <button key={v} onClick={() => toggleDraft('availability', v)}
@@ -358,7 +460,6 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
               </div>
             </div>
 
-            {/* Brand */}
             {filterOptions.brands.length > 0 && (
               <div className="border-b border-bronze/20 px-5 py-4">
                 <p className="mb-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted">Brand</p>
@@ -376,7 +477,6 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
               </div>
             )}
 
-            {/* Condition */}
             {filterOptions.conditions.length > 0 && (
               <div className="border-b border-bronze/20 px-5 py-4">
                 <p className="mb-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted">Condition</p>
@@ -394,7 +494,6 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
               </div>
             )}
 
-            {/* Price range */}
             <div className="border-b border-bronze/20 px-5 py-4">
               <p className="mb-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted">Price range</p>
               <div className="flex items-center gap-3">
@@ -408,7 +507,6 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
               </div>
             </div>
 
-            {/* Size */}
             {filterOptions.sizes.length > 0 && (
               <div className="px-5 py-4">
                 <p className="mb-3 font-body text-[10px] uppercase tracking-[0.18em] text-muted">Size</p>
@@ -427,7 +525,6 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
             )}
           </div>
 
-          {/* Footer — Apply. Previews the staged count; disabled at 0 matches. */}
           <div className="flex-shrink-0 border-t border-bronze/20 bg-ivory p-4">
             <button
               onClick={applyMobileFilters}
@@ -446,6 +543,8 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
 
       {/* ── Toolbar ── */}
       <div id="catalog-toolbar" className="border-b border-bronze/20 px-4 py-3 md:px-[10%]">
+
+        {/* Row 1 — filters, [inline search on desktop], count, sort */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <button
@@ -471,7 +570,21 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
               <span className="flex h-5 w-5 items-center justify-center bg-ink font-body text-[10px] text-ivory md:hidden">{activeTags.length}</span>
             )}
           </div>
-          <div className="flex items-center gap-4">
+
+          {/* Search — INLINE on desktop, filling the dead space in the middle
+             of the toolbar. Hidden here on mobile, where it gets its own row
+             below (the mobile toolbar is already tight with the filter button,
+             count and sort). Same state either way — only one is visible at a
+             time, so there's no duplicate-input problem. */}
+          <div className="hidden min-w-0 flex-1 md:block">
+            <SearchField
+              value={searchInput}
+              onChange={setSearchInput}
+              onClear={clearSearch}
+            />
+          </div>
+
+          <div className="flex flex-shrink-0 items-center gap-4">
             <div className="flex items-baseline gap-1.5">
               <span className="font-display italic text-[1.3rem] leading-none text-muted">{filtered.length}</span>
               <span className="font-body text-[9px] uppercase tracking-[0.22em] text-muted/60">pieces</span>
@@ -484,6 +597,16 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
               <option value="price_desc">Price ↓</option>
             </select>
           </div>
+        </div>
+
+        {/* Row 2 — search on MOBILE only. Desktop renders it inline in row 1
+           above; the mobile toolbar is too tight to absorb it. */}
+        <div className="mt-3 md:hidden">
+          <SearchField
+            value={searchInput}
+            onChange={setSearchInput}
+            onClear={clearSearch}
+          />
         </div>
       </div>
 
@@ -502,7 +625,11 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
             <div className="flex items-center gap-3">
               <span className="text-[9px] text-bronze/40">◆</span>
               <p className="font-body text-[9px] uppercase tracking-[0.34em] text-muted/70">
-                {active.savedOnly ? 'Saved Pieces' : 'The Collection'}
+                {hasQuery
+                  ? 'Search Results'
+                  : active.savedOnly
+                    ? 'Saved Pieces'
+                    : 'The Collection'}
               </p>
               <span className="text-[9px] text-bronze/40">◆</span>
             </div>
@@ -510,21 +637,35 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
           </div>
 
           <div className="flex items-start gap-6">
-            {/* Sidebar open width — was a single w-[220px] applied at any
-               width past md (768px). On tablet, 220px takes a larger
-               proportional bite out of the available space than on
-               desktop, leaving little room for cards (per screenshot,
-               only ~2 cards' worth of space remained). Tablet now opens
-               to a narrower 180px; desktop (xl:, 1280px+) keeps the
-               original 220px. */}
             <aside className={`hidden flex-shrink-0 overflow-hidden transition-all duration-400 ease-luxury md:block ${sidebarOpen ? 'w-[180px] xl:w-[220px] opacity-100' : 'pointer-events-none w-0 opacity-0'}`}>
-              <CatalogFilters filters={filterOptions} active={active} onChange={updateActive} onClear={() => updateActive(DEFAULT_FILTERS)} />
+              <CatalogFilters filters={filterOptions} active={active} onChange={updateActive} onClear={() => updateActive({ ...DEFAULT_FILTERS, query: active.query })} />
             </aside>
 
             <div className="min-w-0 flex-1">
               {filtered.length === 0 ? (
                 <div className="py-16 text-center">
-                  {active.savedOnly ? (
+                  {hasQuery ? (
+                    /* Search-specific empty state — distinct from the
+                       no-filters-match case, with a clear-search action. */
+                    <>
+                      <svg className="mx-auto mb-4 text-bronze/30" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                        <circle cx="11" cy="11" r="7" />
+                        <path strokeLinecap="round" d="m20 20-3.5-3.5" />
+                      </svg>
+                      <p className="font-display text-2xl font-normal italic text-muted">
+                        No pieces match “{active.query}”
+                      </p>
+                      <p className="mt-2 font-body text-[12px] text-muted/60">
+                        Try a brand, colour, or piece name
+                      </p>
+                      <button
+                        onClick={clearSearch}
+                        className="mt-4 font-body text-[11px] uppercase tracking-[0.1em] text-bronze transition-colors duration-400 ease-luxury hover:text-bronze-dark hover:underline"
+                      >
+                        Clear search
+                      </button>
+                    </>
+                  ) : active.savedOnly ? (
                     <>
                       <svg className="mx-auto mb-4 text-bronze/30" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
@@ -538,7 +679,7 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
                   ) : (
                     <>
                       <p className="font-display text-2xl font-normal italic text-muted">No pieces match your filters</p>
-                      <button onClick={() => updateActive(DEFAULT_FILTERS)} className="mt-4 font-body text-[11px] uppercase tracking-[0.1em] text-bronze transition-colors duration-400 ease-luxury hover:text-bronze-dark hover:underline">
+                      <button onClick={() => updateActive({ ...DEFAULT_FILTERS, query: active.query })} className="mt-4 font-body text-[11px] uppercase tracking-[0.1em] text-bronze transition-colors duration-400 ease-luxury hover:text-bronze-dark hover:underline">
                         Clear filters
                       </button>
                     </>
@@ -546,21 +687,10 @@ export default function CatalogClient({ bags, filterOptions }: CatalogClientProp
                 </div>
               ) : (
                 <>
-                  {/* Grid columns — was grid-cols-2 md:grid-cols-3 lg:grid-cols-4,
-                     mixing this session's md:/xl: tablet-desktop scheme with
-                     Tailwind's default lg:1024px, which sits INSIDE the
-                     768-1279px tablet range rather than at the 1280px
-                     desktop line. That mismatch meant tablet got 3 columns
-                     starting at 768px then jumped to 4 at 1024px — still
-                     within "tablet" by this session's definition. Fixed to
-                     stay at 2 columns through the whole tablet range
-                     (matching the narrower sidebar above), only expanding
-                     to 4 at xl: (1280px+, true desktop). */}
                   <div className="grid grid-cols-2 gap-3 md:gap-0.5 xl:grid-cols-4">
                     {displayed.map((bag) => {
                       const isExiting = exitingIds.has(bag._id)
                       const isEntering = enteringIds.has(bag._id)
-
                       const enterIndex = enterIndexMap.get(bag._id) ?? 0
 
                       return (

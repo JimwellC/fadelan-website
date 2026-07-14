@@ -4,6 +4,7 @@ import { cookies }         from 'next/headers'
 import { NextResponse }    from 'next/server'
 import { createClient }    from '@sanity/client'
 import { sessionOptions, SessionData } from '@/lib/session'
+import { toPortableText } from '@/lib/portableText'
 
 const writeClient = createClient({
   projectId:  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
@@ -66,6 +67,11 @@ export async function POST(request: Request) {
       dateAdded:    new Date().toISOString(),
       availability: 'available',
       ...body,
+      // Normalise the admin panel's plain-text description into Portable Text.
+      // Must come AFTER the spread so it overrides the raw string in `body` —
+      // otherwise <PortableText> receives a string, logs "Unknown block type
+      // undefined", and renders nothing on the live detail page.
+      description:  toPortableText(body.description),
     })
     return NextResponse.json(bag, { status: 201 })
   } catch (error) {
